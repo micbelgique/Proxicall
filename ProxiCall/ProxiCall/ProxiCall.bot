@@ -1,15 +1,36 @@
-﻿{
-  "name": "ProxiCall",
-  "services": [
-    {
-      "type": "endpoint",
-      "name": "development",
-      "endpoint": "http://localhost:3978/api/messages",
-      "appId": "",
-      "appPassword": "",
-      "id": "1"
-    }
-  ],
-  "padlock": "",
-  "version": "2.0"
+{
+    "name": "ProxiCall",
+    "description": "",
+    "services": [
+        {
+            "type": "endpoint",
+            "appId": "",
+            "appPassword": "",
+            "endpoint": "http://localhost:3978/api/messages",
+            "id": "1",
+            "name": "development"
+        },
+        {
+            "type": "abs",
+            "appId": "055b7097-5147-4c0f-8340-9b075b90d113",
+            "id": "91",
+            "subscriptionId": "eeae0393-3618-46f5-acb7-8cac3f1e57e8",
+            "resourceGroup": "proxicall",
+            "serviceName": "ProxiCallBot",
+            "tenantId": "71260448-f1a9-4729-b630-4882e4dc58f5"
+        },
+        {
+            "type": "endpoint",
+            "appId": "055b7097-5147-4c0f-8340-9b075b90d113",
+            "appPassword": "auujtVTY2337@[udUREG6^*",
+            "channelService": "https://botframework.azure.us",
+            "endpoint": "https://proxicallbot.azurewebsites.net/api/messages",
+            "id": "193",
+            "name": "production"
+        }
+    ],
+    "padlock": "",
+    "version": "2.0",
+    "path": "C:\\Users\\vercr\\Documents\\GitRepos\\ProxiCall\\ProxiCall\\ProxiCall\\ProxiCall.bot",
+    "overrides": null
 }
