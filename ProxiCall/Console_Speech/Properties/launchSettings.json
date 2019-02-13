@@ -1,0 +1,11 @@
+{
+  "profiles": {
+    "Console_Speech": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "SpeechApiKey": "8b3affa678a740c28cfc410d1117ad38",
+        "SpeechApiRegion": "westeurope"
+      }
+    }
+  }
+}
