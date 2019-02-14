@@ -5,12 +5,12 @@ using System.Threading.Tasks;
 
 namespace Console_Speech.Services.Speech
 {
-    class AuthentificationSpeechApi
+    class AuthentificationApi
     {
         private readonly string _subscriptionKey;
         private readonly string _token;
 
-        public AuthentificationSpeechApi(string subscriptionKey, string region = "westeurope")
+        public AuthentificationApi(string subscriptionKey, string region = "westeurope")
         {
             StringBuilder apiURIBuilder = new StringBuilder("https://");
             apiURIBuilder.Append(region).Append(".api.cognitive.microsoft.com/sts/v1.0/issuetoken");

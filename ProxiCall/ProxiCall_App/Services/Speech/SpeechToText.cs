@@ -9,6 +9,7 @@ namespace Console_Speech.Services.Speech
 {
     class SpeechToText
     {
+
         public static async Task<string> RecognizeSpeechFromBytesAsync(byte[] bytes)
         {
             Console.WriteLine("Processing .wav file to text");
@@ -20,7 +21,7 @@ namespace Console_Speech.Services.Speech
             var speechConfig = SpeechConfig.FromSubscription(speechApiKey, speechApiRegion);
 
             var audioFormat = AudioStreamFormat.GetWaveFormatPCM(16000, 16, 1);
-            var audioStream = new VoiceAudioStream(stream);
+            var audioStream = new VoiceAudioInputStream(stream);
             var audioConfig = AudioConfig.FromStreamInput(audioStream, audioFormat);
 
             var recognizer = new SpeechRecognizer(speechConfig, audioConfig);
@@ -34,13 +35,13 @@ namespace Console_Speech.Services.Speech
             var speechApiRegion = Environment.GetEnvironmentVariable("SpeechApiRegion");
 
             var speechConfig = SpeechConfig.FromSubscription(speechApiKey, speechApiRegion);
-
+            
             using (var recognizer = new SpeechRecognizer(speechConfig))
             {
                 StringBuilder builder = new StringBuilder(string.Empty);
                 Console.WriteLine("Say something...");
                 var result = await recognizer.RecognizeOnceAsync();
-
+                
                 if (result.Reason == ResultReason.RecognizedSpeech)
                 {
                     //Append the result when the "speechtotext" conversion succeed
