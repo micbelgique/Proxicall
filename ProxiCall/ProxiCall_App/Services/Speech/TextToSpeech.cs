@@ -15,7 +15,7 @@ namespace Console_Speech.Services.Speech
         {
             string accessToken;
             // If your resource isn't in WEST EUROPE, change the endpoint (ex: "westus")
-            AuthentificationSpeechApi auth = new AuthentificationSpeechApi(Environment.GetEnvironmentVariable("SpeechApiKey"));
+            AuthentificationApi auth = new AuthentificationApi(Environment.GetEnvironmentVariable("SpeechApiKey"));
             accessToken = auth.GetAccessToken();
 
             // Set request body
