@@ -12,7 +12,7 @@ namespace Console_Speech.Services.Speech
     {
         private static readonly string host = "https://westeurope.tts.speech.microsoft.com/cognitiveservices/v1";
 
-        public static async Task<Stream> TransformTextToSpeechAsync(string texttotransform, string locale)
+        public static async Task<byte[]> TransformTextToSpeechAsync(string texttotransform, string locale)
         {
             // Gets an access token
             string accessToken;
@@ -50,7 +50,7 @@ namespace Console_Speech.Services.Speech
                     using (var response = await httpClient.SendAsync(request))
                     {
                         response.EnsureSuccessStatusCode();
-                        var audioResponse = await response.Content.ReadAsStreamAsync();
+                        var audioResponse = await response.Content.ReadAsByteArrayAsync();
                         return audioResponse;
                     }
                 }
