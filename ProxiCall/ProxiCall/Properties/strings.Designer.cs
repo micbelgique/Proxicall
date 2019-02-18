@@ -61,11 +61,47 @@ namespace ProxiCall.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to We are transfering your call to.
+        /// </summary>
+        public static string callForwardingConfirmed {
+            get {
+                return ResourceManager.GetString("callForwardingConfirmed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Do you want to call this number?.
+        /// </summary>
+        public static string forwardCallPrompt {
+            get {
+                return ResourceManager.GetString("forwardCallPrompt", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Thank you for using ProxiCall. Have a nice day..
         /// </summary>
         public static string goodbye {
             get {
                 return ResourceManager.GetString("goodbye", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The phone number of.
+        /// </summary>
+        public static string phoneNumberOf_1 {
+            get {
+                return ResourceManager.GetString("phoneNumberOf_1", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to is.
+        /// </summary>
+        public static string phoneNumberOf_2 {
+            get {
+                return ResourceManager.GetString("phoneNumberOf_2", resourceCulture);
             }
         }
         
@@ -79,7 +115,16 @@ namespace ProxiCall.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Welcome to ProxiCall.
+        ///   Looks up a localized string similar to Please say &apos;Yes&apos; or  &apos;No&apos; to confirm..
+        /// </summary>
+        public static string retryPrompt {
+            get {
+                return ResourceManager.GetString("retryPrompt", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Welcome to ProxiCall..
         /// </summary>
         public static string welcome {
             get {

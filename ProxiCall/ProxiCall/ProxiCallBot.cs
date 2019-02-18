@@ -68,8 +68,8 @@ namespace ProxiCall
             };
             _dialogs.Add(new WaterfallDialog(DetailsWaterfall, waterfallSteps));
             _dialogs.Add(new TextPrompt(QuerySearchPrompt));
-            _dialogs.Add(new TextPrompt("phonenumber"));
-            _dialogs.Add(new ConfirmPrompt("confirm"));
+            _dialogs.Add(new TextPrompt(PhoneNumberPrompt));
+            _dialogs.Add(new ConfirmPrompt(ConfirmCallPrompt));
         }
 
         /// <summary>
@@ -121,7 +121,7 @@ namespace ProxiCall
             await _accessors.UserState.SaveChangesAsync(turnContext, false, cancellationToken);
         }
 
-        private static async Task<DialogTurnResult> QuerySearchStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
+        private async Task<DialogTurnResult> QuerySearchStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
         {
             return await stepContext.PromptAsync(QuerySearchPrompt, new PromptOptions { Prompt = MessageFactory.Text(Properties.strings.querySearchPerson) }, cancellationToken);
         }
@@ -129,30 +129,30 @@ namespace ProxiCall
         private async Task<DialogTurnResult> ResponseToQueryStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
         {
             // Get the current profile object from user state.
-            var userProfile = await _accessors.UserProfile.GetAsync(stepContext.Context, () => new UserProfile(), cancellationToken);
+            var searchedUser = await _accessors.UserProfile.GetAsync(stepContext.Context, () => new UserProfile(), cancellationToken);
 
             // Update the profile.
-            userProfile.Name = (string)stepContext.Result;
+            searchedUser.Name = (string)stepContext.Result;
 
-            var phoneNumber = "0000";
+            var phoneNumber = "0000"; //TODO remove hardcoded number
 
             // INSERT QUERY TO DATABASE HERE
 
-            userProfile.PhoneNumber = phoneNumber;
+            searchedUser.PhoneNumber = phoneNumber;
             await stepContext.Context
                 .SendActivityAsync(MessageFactory
-                .Text($"The phone number of {stepContext.Result} is : " + phoneNumber + "."), cancellationToken);
+                .Text($"{Properties.strings.phoneNumberOf_1} {stepContext.Result} {Properties.strings.phoneNumberOf_2} : " + phoneNumber + "."), cancellationToken);
 
             return await stepContext.ContinueDialogAsync();
         }
 
         private async Task<DialogTurnResult> ConfirmCallStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
         {
-            var userProfile = await _accessors.UserProfile.GetAsync(stepContext.Context, () => new UserProfile(), cancellationToken);
+            var searchedUser = await _accessors.UserProfile.GetAsync(stepContext.Context, () => new UserProfile(), cancellationToken);
 
             var response = new PromptOptions
             {
-                Prompt = MessageFactory.Text(Properties.strings.forwardCallPrompt + $" - ({userProfile.PhoneNumber})"),
+                Prompt = MessageFactory.Text(Properties.strings.forwardCallPrompt + $" - ({searchedUser.PhoneNumber})"),
                 RetryPrompt = MessageFactory.Text(Properties.strings.retryPrompt),
             };
             return await stepContext.PromptAsync(ConfirmCallPrompt, response, cancellationToken);
@@ -160,6 +160,16 @@ namespace ProxiCall
 
         private async Task<DialogTurnResult> EndDialogStepsAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
         {
+            var searchedUser = await _accessors.UserProfile.GetAsync(stepContext.Context, () => new UserProfile(), cancellationToken);
+            var confirmation = (bool)stepContext.Result;
+            string msg = null;
+            if (confirmation)
+            {
+                msg = $"{Properties.strings.callForwardingConfirmed} {searchedUser.Name} (demo).";
+                await stepContext.Context.SendActivityAsync(MessageFactory.Text(msg), cancellationToken);
+                //TODO ask for call forwarding
+            }
+
             await stepContext.Context.SendActivityAsync(MessageFactory.Text(Properties.strings.goodbye), cancellationToken);
             return await stepContext.EndDialogAsync(cancellationToken: cancellationToken);
         }
