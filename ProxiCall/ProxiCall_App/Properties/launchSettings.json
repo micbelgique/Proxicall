@@ -12,6 +12,7 @@
       "commandName": "IISExpress",
       "launchBrowser": true,
       "environmentVariables": {
+        "SRApiKey": "6539785e945b4a2e866845c327682490",
         "SpeechApiKey": "8b3affa678a740c28cfc410d1117ad38",
         "ASPNETCORE_ENVIRONMENT": "Development",
         "SpeechApiRegion": "westeurope"
