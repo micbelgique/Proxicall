@@ -31,6 +31,12 @@ namespace ProxiCall
         private DialogSet _dialogs;
         public WaterfallStep[] waterfallSteps { get; set; }
 
+        //Conversation steps
+        private const string DetailsWaterfall = "details";
+        private const string QuerySearchPrompt = "querysearch";
+        private const string PhoneNumberPrompt = "phonenumber";
+        private const string ConfirmCallPrompt = "confirm";
+
         /// <summary>
         /// Initializes a new instance of the class.
         /// </summary>
@@ -60,8 +66,8 @@ namespace ProxiCall
                 ConfirmCallStepAsync,//Make a phone call if confirmed
                 EndDialogStepsAsync,
             };
-            _dialogs.Add(new WaterfallDialog("details", waterfallSteps));
-            _dialogs.Add(new TextPrompt("querysearch"));
+            _dialogs.Add(new WaterfallDialog(DetailsWaterfall, waterfallSteps));
+            _dialogs.Add(new TextPrompt(QuerySearchPrompt));
             _dialogs.Add(new TextPrompt("phonenumber"));
             _dialogs.Add(new ConfirmPrompt("confirm"));
         }
@@ -94,7 +100,7 @@ namespace ProxiCall
                 // If the DialogTurnStatus is Empty we should start a new dialog.
                 if (results.Status == DialogTurnStatus.Empty)
                 {
-                    await dialogContext.BeginDialogAsync("details", null, cancellationToken);
+                    await dialogContext.BeginDialogAsync(DetailsWaterfall, null, cancellationToken);
                 }
             }
             else
@@ -115,24 +121,9 @@ namespace ProxiCall
             await _accessors.UserState.SaveChangesAsync(turnContext, false, cancellationToken);
         }
 
-        private static async Task SendWelcomeMessageAsync(ITurnContext turnContext, CancellationToken cancellationToken)
-        {
-            foreach (var member in turnContext.Activity.MembersAdded)
-            {
-                if (member.Id != turnContext.Activity.Recipient.Id)
-                {
-                    var reply = MessageFactory.Text(
-                    Properties.strings.welcome,
-                    Properties.strings.welcome,
-                    InputHints.IgnoringInput);
-                    await turnContext.SendActivityAsync(reply, cancellationToken).ConfigureAwait(false);
-                }
-            }
-        }
-
         private static async Task<DialogTurnResult> QuerySearchStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
         {
-            return await stepContext.PromptAsync("querysearch", new PromptOptions { Prompt = MessageFactory.Text(Properties.strings.querySearchPerson) }, cancellationToken);
+            return await stepContext.PromptAsync(QuerySearchPrompt, new PromptOptions { Prompt = MessageFactory.Text(Properties.strings.querySearchPerson) }, cancellationToken);
         }
 
         private async Task<DialogTurnResult> ResponseToQueryStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
@@ -159,8 +150,12 @@ namespace ProxiCall
         {
             var userProfile = await _accessors.UserProfile.GetAsync(stepContext.Context, () => new UserProfile(), cancellationToken);
 
-            return await stepContext.PromptAsync("confirm",
-                                                   new PromptOptions { Prompt = MessageFactory.Text("Do you want to call this number (" + userProfile.PhoneNumber + ")?") }, cancellationToken);
+            var response = new PromptOptions
+            {
+                Prompt = MessageFactory.Text(Properties.strings.forwardCallPrompt + $" - ({userProfile.PhoneNumber})"),
+                RetryPrompt = MessageFactory.Text(Properties.strings.retryPrompt),
+            };
+            return await stepContext.PromptAsync(ConfirmCallPrompt, response, cancellationToken);
         }
 
         private async Task<DialogTurnResult> EndDialogStepsAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
