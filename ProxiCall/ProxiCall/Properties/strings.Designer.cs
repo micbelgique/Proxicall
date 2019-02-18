@@ -61,7 +61,7 @@ namespace ProxiCall.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Aurevoir.
+        ///   Looks up a localized string similar to Thank you for using ProxiCall. Have a nice day..
         /// </summary>
         public static string goodbye {
             get {
@@ -70,7 +70,7 @@ namespace ProxiCall.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Quelle est la personne que vous recherchez ?.
+        ///   Looks up a localized string similar to Who are trying to reach?.
         /// </summary>
         public static string querySearchPerson {
             get {
@@ -79,7 +79,7 @@ namespace ProxiCall.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Bienvenue sur ProxiCall!.
+        ///   Looks up a localized string similar to Welcome to ProxiCall.
         /// </summary>
         public static string welcome {
             get {

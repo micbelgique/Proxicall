@@ -118,12 +118,12 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="goodbye" xml:space="preserve">
-    <value>Aurevoir</value>
+    <value>Thank you for using ProxiCall. Have a nice day.</value>
   </data>
   <data name="querySearchPerson" xml:space="preserve">
-    <value>Quelle est la personne que vous recherchez ?</value>
+    <value>Who are trying to reach?</value>
   </data>
   <data name="welcome" xml:space="preserve">
-    <value>Bienvenue sur ProxiCall!</value>
+    <value>Welcome to ProxiCall</value>
   </data>
 </root>
