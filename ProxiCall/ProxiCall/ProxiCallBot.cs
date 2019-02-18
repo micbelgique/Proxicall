@@ -151,7 +151,7 @@ namespace ProxiCall
             userProfile.PhoneNumber = phoneNumber;
             await stepContext.Context
                 .SendActivityAsync(MessageFactory
-                .Text($"Le numéro de {stepContext.Result} est le " + phoneNumber + "."), cancellationToken);
+                .Text($"The phone number of {stepContext.Result} is : " + phoneNumber + "."), cancellationToken);
 
             return await stepContext.ContinueDialogAsync();
         }
@@ -162,7 +162,7 @@ namespace ProxiCall
 
             return await stepContext
                 .PromptAsync("confirm",
-                new PromptOptions { Prompt = MessageFactory.Text("Voulez-vous appeler ce numéro (" + userProfile.PhoneNumber + ")") }, cancellationToken);
+                new PromptOptions { Prompt = MessageFactory.Text("Do you want to call this number (" + userProfile.PhoneNumber + ")?") }, cancellationToken);
         }
 
         private async Task<DialogTurnResult> EndDialogStepsAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
