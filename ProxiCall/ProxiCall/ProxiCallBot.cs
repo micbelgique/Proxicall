@@ -9,6 +9,7 @@ using Microsoft.Bot.Schema;
 using Microsoft.Bot.Builder.Dialogs;
 using Microsoft.Extensions.Logging;
 using ProxiCall.Models;
+using System.Linq;
 
 namespace ProxiCall
 {
@@ -29,6 +30,12 @@ namespace ProxiCall
         private readonly ILogger _logger;
         private DialogSet _dialogs;
         public WaterfallStep[] waterfallSteps { get; set; }
+
+        //Conversation steps
+        private const string DetailsWaterfall = "details";
+        private const string QuerySearchPrompt = "querysearch";
+        private const string PhoneNumberPrompt = "phonenumber";
+        private const string ConfirmCallPrompt = "confirm";
 
         /// <summary>
         /// Initializes a new instance of the class.
@@ -59,10 +66,10 @@ namespace ProxiCall
                 ConfirmCallStepAsync,//Make a phone call if confirmed
                 EndDialogStepsAsync,
             };
-            _dialogs.Add(new WaterfallDialog("details", waterfallSteps));
-            _dialogs.Add(new TextPrompt("querysearch"));
-            _dialogs.Add(new TextPrompt("phonenumber"));
-            _dialogs.Add(new ConfirmPrompt("confirm"));
+            _dialogs.Add(new WaterfallDialog(DetailsWaterfall, waterfallSteps));
+            _dialogs.Add(new TextPrompt(QuerySearchPrompt));
+            _dialogs.Add(new TextPrompt(PhoneNumberPrompt));
+            _dialogs.Add(new ConfirmPrompt(ConfirmCallPrompt));
         }
 
         /// <summary>
@@ -93,20 +100,18 @@ namespace ProxiCall
                 // If the DialogTurnStatus is Empty we should start a new dialog.
                 if (results.Status == DialogTurnStatus.Empty)
                 {
-                    await dialogContext.BeginDialogAsync("details", null, cancellationToken);
-                }
-            }
-            // Processes ConversationUpdate Activities to welcome the user.
-            else if (turnContext.Activity.Type == ActivityTypes.ConversationUpdate)
-            {
-                if (turnContext.Activity.MembersAdded != null)
-                {
-                    await SendWelcomeMessageAsync(turnContext, cancellationToken);
+                    await dialogContext.BeginDialogAsync(DetailsWaterfall, null, cancellationToken);
                 }
             }
             else
             {
-                await turnContext.SendActivityAsync($"{turnContext.Activity.Type} event detected");
+                if (turnContext.Activity.Type == ActivityTypes.ConversationUpdate && turnContext.Activity.MembersAdded.FirstOrDefault()?.Id == turnContext.Activity.Recipient.Id)
+                {
+                    var reply = MessageFactory.Text(Properties.strings.welcome,
+                                                    Properties.strings.welcome,
+                                                    InputHints.IgnoringInput);
+                    await turnContext.SendActivityAsync(reply, cancellationToken);
+                }
             }
 
             // Save the dialog state into the conversation state.
@@ -116,57 +121,55 @@ namespace ProxiCall
             await _accessors.UserState.SaveChangesAsync(turnContext, false, cancellationToken);
         }
 
-        private static async Task SendWelcomeMessageAsync(ITurnContext turnContext, CancellationToken cancellationToken)
+        private async Task<DialogTurnResult> QuerySearchStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
         {
-            foreach (var member in turnContext.Activity.MembersAdded)
-            {
-                if (member.Id != turnContext.Activity.Recipient.Id)
-                {
-                    var reply = MessageFactory.Text(
-                    Properties.strings.welcome,
-                    Properties.strings.welcome,
-                    InputHints.IgnoringInput);
-                    await turnContext.SendActivityAsync(reply, cancellationToken).ConfigureAwait(false);
-                }
-            }
-        }
-
-        private static async Task<DialogTurnResult> QuerySearchStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
-        {
-            return await stepContext.PromptAsync("querysearch", new PromptOptions { Prompt = MessageFactory.Text(Properties.strings.querySearchPerson) }, cancellationToken);
+            return await stepContext.PromptAsync(QuerySearchPrompt, new PromptOptions { Prompt = MessageFactory.Text(Properties.strings.querySearchPerson) }, cancellationToken);
         }
 
         private async Task<DialogTurnResult> ResponseToQueryStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
         {
             // Get the current profile object from user state.
-            var userProfile = await _accessors.UserProfile.GetAsync(stepContext.Context, () => new UserProfile(), cancellationToken);
+            var searchedUser = await _accessors.UserProfile.GetAsync(stepContext.Context, () => new UserProfile(), cancellationToken);
 
             // Update the profile.
-            userProfile.Name = (string)stepContext.Result;
+            searchedUser.Name = (string)stepContext.Result;
 
-            var phoneNumber = "0000";
+            var phoneNumber = "0000"; //TODO remove hardcoded number
 
             // INSERT QUERY TO DATABASE HERE
 
-            userProfile.PhoneNumber = phoneNumber;
+            searchedUser.PhoneNumber = phoneNumber;
             await stepContext.Context
                 .SendActivityAsync(MessageFactory
-                .Text($"Le numéro de {stepContext.Result} est le " + phoneNumber + "."), cancellationToken);
+                .Text($"{Properties.strings.phoneNumberOf_1} {stepContext.Result} {Properties.strings.phoneNumberOf_2} : " + phoneNumber + "."), cancellationToken);
 
             return await stepContext.ContinueDialogAsync();
         }
 
         private async Task<DialogTurnResult> ConfirmCallStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
         {
-            var userProfile = await _accessors.UserProfile.GetAsync(stepContext.Context, () => new UserProfile(), cancellationToken);
+            var searchedUser = await _accessors.UserProfile.GetAsync(stepContext.Context, () => new UserProfile(), cancellationToken);
 
-            return await stepContext
-                .PromptAsync("confirm",
-                new PromptOptions { Prompt = MessageFactory.Text("Voulez-vous appeler ce numéro (" + userProfile.PhoneNumber + ")") }, cancellationToken);
+            var response = new PromptOptions
+            {
+                Prompt = MessageFactory.Text(Properties.strings.forwardCallPrompt + $" - ({searchedUser.PhoneNumber})"),
+                RetryPrompt = MessageFactory.Text(Properties.strings.retryPrompt),
+            };
+            return await stepContext.PromptAsync(ConfirmCallPrompt, response, cancellationToken);
         }
 
         private async Task<DialogTurnResult> EndDialogStepsAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
         {
+            var searchedUser = await _accessors.UserProfile.GetAsync(stepContext.Context, () => new UserProfile(), cancellationToken);
+            var confirmation = (bool)stepContext.Result;
+            string msg = null;
+            if (confirmation)
+            {
+                msg = $"{Properties.strings.callForwardingConfirmed} {searchedUser.Name} (demo).";
+                await stepContext.Context.SendActivityAsync(MessageFactory.Text(msg), cancellationToken);
+                //TODO ask for call forwarding
+            }
+
             await stepContext.Context.SendActivityAsync(MessageFactory.Text(Properties.strings.goodbye), cancellationToken);
             return await stepContext.EndDialogAsync(cancellationToken: cancellationToken);
         }
