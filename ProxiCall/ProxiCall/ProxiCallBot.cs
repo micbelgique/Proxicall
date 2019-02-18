@@ -9,6 +9,7 @@ using Microsoft.Bot.Schema;
 using Microsoft.Bot.Builder.Dialogs;
 using Microsoft.Extensions.Logging;
 using ProxiCall.Models;
+using System.Linq;
 
 namespace ProxiCall
 {
@@ -96,17 +97,15 @@ namespace ProxiCall
                     await dialogContext.BeginDialogAsync("details", null, cancellationToken);
                 }
             }
-            // Processes ConversationUpdate Activities to welcome the user.
-            else if (turnContext.Activity.Type == ActivityTypes.ConversationUpdate)
-            {
-                if (turnContext.Activity.MembersAdded != null)
-                {
-                    await SendWelcomeMessageAsync(turnContext, cancellationToken);
-                }
-            }
             else
             {
-                await turnContext.SendActivityAsync($"{turnContext.Activity.Type} event detected");
+                if (turnContext.Activity.Type == ActivityTypes.ConversationUpdate && turnContext.Activity.MembersAdded.FirstOrDefault()?.Id == turnContext.Activity.Recipient.Id)
+                {
+                    var reply = MessageFactory.Text(Properties.strings.welcome,
+                                                    Properties.strings.welcome,
+                                                    InputHints.IgnoringInput);
+                    await turnContext.SendActivityAsync(reply, cancellationToken);
+                }
             }
 
             // Save the dialog state into the conversation state.
@@ -160,9 +159,8 @@ namespace ProxiCall
         {
             var userProfile = await _accessors.UserProfile.GetAsync(stepContext.Context, () => new UserProfile(), cancellationToken);
 
-            return await stepContext
-                .PromptAsync("confirm",
-                new PromptOptions { Prompt = MessageFactory.Text("Do you want to call this number (" + userProfile.PhoneNumber + ")?") }, cancellationToken);
+            return await stepContext.PromptAsync("confirm",
+                                                   new PromptOptions { Prompt = MessageFactory.Text("Do you want to call this number (" + userProfile.PhoneNumber + ")?") }, cancellationToken);
         }
 
         private async Task<DialogTurnResult> EndDialogStepsAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
