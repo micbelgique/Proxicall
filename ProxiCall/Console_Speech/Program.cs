@@ -16,7 +16,10 @@ namespace Console_Speech
             var str2 = SpeechToText.RecognizeSpeechFromBytesAsync(wav).Result;
             Console.WriteLine(str2);
 
-            byte[] result_tts = TextToSpeech.TransformTextToSpeechAsync("Test of Text To Speech in console", "en-US").Result;
+            byte[] result_tts = TextToSpeech.TransformTextToSpeechAsync("This is a test in english.", "en-US").Result;
+            FormatConvertor.TurnAudioStreamToFile(result_tts, path).Wait();
+
+            result_tts = TextToSpeech.TransformTextToSpeechAsync("Je m'appelle Julie et j'adore le php", "fr-FR").Result;
             FormatConvertor.TurnAudioStreamToFile(result_tts, path).Wait();
             Console.WriteLine("Please press a key to continue.");
             Console.ReadLine();

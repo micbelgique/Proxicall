@@ -13,6 +13,21 @@ namespace Console_Speech.Services.Speech
         public static async Task<byte[]> TransformTextToSpeechAsync
             (string texttotransform, string locale, string region = "westeurope")
         {
+            var voiceName = String.Empty;
+            switch(locale)
+            {
+                case "en-US":
+                    voiceName = "JessaNeural";
+                    break;
+                case "fr-FR":
+                    voiceName = "Julie, Apollo";
+                    break;
+                default:
+                    locale = "fr-FR";
+                    voiceName = "Julie, Apollo";
+                    break;
+            }
+
             string accessToken;
             // If your resource isn't in WEST EUROPE, change the endpoint (ex: "westus")
             AuthentificationSpeechApi auth = new AuthentificationSpeechApi(Environment.GetEnvironmentVariable("SpeechApiKey"));
@@ -20,7 +35,7 @@ namespace Console_Speech.Services.Speech
 
             // Set request body
             string body = @"<speak version='1.0' xmlns='http://www.w3.org/2001/10/synthesis' xml:lang='" + locale + "'>" +
-                                "<voice name='Microsoft Server Speech Text to Speech Voice (en-US, JessaNeural)'>" +
+                                "<voice name='Microsoft Server Speech Text to Speech Voice (" + locale + ", " + voiceName + ")'>" +
                                     texttotransform +
                                 "</voice>" +
                             "</speak>";
