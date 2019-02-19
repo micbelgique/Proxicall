@@ -61,7 +61,7 @@ namespace ProxiCall.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to We are transfering your call to.
+        ///   Looks up a localized string similar to Nous transférons votre appel..
         /// </summary>
         public static string callForwardingConfirmed {
             get {
@@ -70,7 +70,7 @@ namespace ProxiCall.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Do you want to call this number?.
+        ///   Looks up a localized string similar to Souhaitez vous être mis en contact ?.
         /// </summary>
         public static string forwardCallPrompt {
             get {
@@ -79,7 +79,7 @@ namespace ProxiCall.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Thank you for using ProxiCall. Have a nice day..
+        ///   Looks up a localized string similar to Merci d&apos;avoir utiliser ProxiCall. Bonne journée..
         /// </summary>
         public static string goodbye {
             get {
@@ -88,7 +88,7 @@ namespace ProxiCall.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The phone number of.
+        ///   Looks up a localized string similar to Le numéro de.
         /// </summary>
         public static string phoneNumberOf_1 {
             get {
@@ -97,7 +97,7 @@ namespace ProxiCall.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to is.
+        ///   Looks up a localized string similar to est le.
         /// </summary>
         public static string phoneNumberOf_2 {
             get {
@@ -106,7 +106,7 @@ namespace ProxiCall.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Who are you trying to reach?.
+        ///   Looks up a localized string similar to Quelle est la personne que vous recherchez ?.
         /// </summary>
         public static string querySearchPerson {
             get {
@@ -115,7 +115,7 @@ namespace ProxiCall.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Please say &apos;Yes&apos; or  &apos;No&apos; to confirm..
+        ///   Looks up a localized string similar to Veuillez répondre par &apos;Oui&apos; ou  &apos;Non&apos; pour confirmer..
         /// </summary>
         public static string retryPrompt {
             get {
@@ -124,7 +124,7 @@ namespace ProxiCall.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Welcome to ProxiCall..
+        ///   Looks up a localized string similar to Bienvenue sur ProxiCall..
         /// </summary>
         public static string welcome {
             get {
