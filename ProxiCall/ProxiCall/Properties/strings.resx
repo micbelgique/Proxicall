@@ -133,7 +133,7 @@
     <value>is</value>
   </data>
   <data name="querySearchPerson" xml:space="preserve">
-    <value>Who are trying to reach?</value>
+    <value>Who are you trying to reach?</value>
   </data>
   <data name="retryPrompt" xml:space="preserve">
     <value>Please say 'Yes' or  'No' to confirm.</value>

@@ -106,7 +106,7 @@ namespace ProxiCall.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Who are trying to reach?.
+        ///   Looks up a localized string similar to Who are you trying to reach?.
         /// </summary>
         public static string querySearchPerson {
             get {
