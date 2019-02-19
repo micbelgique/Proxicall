@@ -134,14 +134,14 @@ namespace ProxiCall
             // Update the profile.
             searchedUser.Name = (string)stepContext.Result;
 
-            var phoneNumber = "0000"; //TODO remove hardcoded number
+            var phoneNumber = "0000"; // TODO remove hardcoded number
 
-            // INSERT QUERY TO DATABASE HERE
+            // TODO INSERT QUERY TO DATABASE HERE
 
             searchedUser.PhoneNumber = phoneNumber;
             await stepContext.Context
                 .SendActivityAsync(MessageFactory
-                .Text($"{Properties.strings.phoneNumberOf_1} {stepContext.Result} {Properties.strings.phoneNumberOf_2} : " + phoneNumber + "."), cancellationToken);
+                .Text($"{Properties.strings.phoneNumberOf_1} {stepContext.Result} {Properties.strings.phoneNumberOf_2} " + phoneNumber + "."), cancellationToken);
 
             return await stepContext.ContinueDialogAsync();
         }
@@ -152,7 +152,7 @@ namespace ProxiCall
 
             var response = new PromptOptions
             {
-                Prompt = MessageFactory.Text(Properties.strings.forwardCallPrompt + $" - ({searchedUser.PhoneNumber})"),
+                Prompt = MessageFactory.Text(Properties.strings.forwardCallPrompt),
                 RetryPrompt = MessageFactory.Text(Properties.strings.retryPrompt),
             };
             return await stepContext.PromptAsync(ConfirmCallPrompt, response, cancellationToken);
@@ -165,7 +165,7 @@ namespace ProxiCall
             string msg = null;
             if (confirmation)
             {
-                msg = $"{Properties.strings.callForwardingConfirmed} {searchedUser.Name} (demo).";
+                msg = $"{Properties.strings.callForwardingConfirmed}";
                 await stepContext.Context.SendActivityAsync(MessageFactory.Text(msg), cancellationToken);
                 //TODO ask for call forwarding
             }

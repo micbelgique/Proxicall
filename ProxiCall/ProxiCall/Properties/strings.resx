@@ -118,27 +118,27 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="callForwardingConfirmed" xml:space="preserve">
-    <value>We are transfering your call to</value>
+    <value>Nous transférons votre appel.</value>
   </data>
   <data name="forwardCallPrompt" xml:space="preserve">
-    <value>Do you want to call this number?</value>
+    <value>Souhaitez vous être mis en contact ?</value>
   </data>
   <data name="goodbye" xml:space="preserve">
-    <value>Thank you for using ProxiCall. Have a nice day.</value>
+    <value>Merci d'avoir utiliser ProxiCall. Bonne journée.</value>
   </data>
   <data name="phoneNumberOf_1" xml:space="preserve">
-    <value>The phone number of</value>
+    <value>Le numéro de</value>
   </data>
   <data name="phoneNumberOf_2" xml:space="preserve">
-    <value>is</value>
+    <value>est le</value>
   </data>
   <data name="querySearchPerson" xml:space="preserve">
-    <value>Who are you trying to reach?</value>
+    <value>Quelle est la personne que vous recherchez ?</value>
   </data>
   <data name="retryPrompt" xml:space="preserve">
-    <value>Please say 'Yes' or  'No' to confirm.</value>
+    <value>Veuillez répondre par 'Oui' ou  'Non' pour confirmer.</value>
   </data>
   <data name="welcome" xml:space="preserve">
-    <value>Welcome to ProxiCall.</value>
+    <value>Bienvenue sur ProxiCall.</value>
   </data>
 </root>
