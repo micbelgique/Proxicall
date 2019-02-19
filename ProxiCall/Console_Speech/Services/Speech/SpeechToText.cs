@@ -9,7 +9,7 @@ namespace Console_Speech.Services.Speech
 {
     class SpeechToText
     {
-        public static async Task<string> RecognizeSpeechFromBytesAsync(byte[] bytes)
+        public static async Task<string> RecognizeSpeechFromBytesAsync(byte[] bytes, string locale)
         {
             Console.WriteLine("Processing .wav file to text");
             MemoryStream stream = new MemoryStream(bytes);
@@ -18,6 +18,7 @@ namespace Console_Speech.Services.Speech
             var speechApiRegion = Environment.GetEnvironmentVariable("SpeechApiRegion");
 
             var speechConfig = SpeechConfig.FromSubscription(speechApiKey, speechApiRegion);
+            speechConfig.SpeechRecognitionLanguage = locale;
 
             var audioFormat = AudioStreamFormat.GetWaveFormatPCM(16000, 16, 1);
             var audioStream = new VoiceAudioStream(stream);
@@ -28,12 +29,13 @@ namespace Console_Speech.Services.Speech
             return result.Text;
         }
 
-        public static async Task<string> RecognizeSpeechFromMicInputAsync()
+        public static async Task<string> RecognizeSpeechFromMicInputAsync(string locale)
         {
             var speechApiKey = Environment.GetEnvironmentVariable("SpeechApiKey");
             var speechApiRegion = Environment.GetEnvironmentVariable("SpeechApiRegion");
 
             var speechConfig = SpeechConfig.FromSubscription(speechApiKey, speechApiRegion);
+            speechConfig.SpeechRecognitionLanguage = locale;
 
             using (var recognizer = new SpeechRecognizer(speechConfig))
             {

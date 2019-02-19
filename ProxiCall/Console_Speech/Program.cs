@@ -11,10 +11,10 @@ namespace Console_Speech
         {
             var path = new DirectoryInfo(Environment.CurrentDirectory).Parent.Parent.Parent.FullName;
             byte[] wav = File.ReadAllBytes(Path.Combine(path, $"Resources", $"whatstheweatherlike.wav"));
-            var str = SpeechToText.RecognizeSpeechFromMicInputAsync().Result;
+            var str = SpeechToText.RecognizeSpeechFromMicInputAsync("fr-FR").Result;
             Console.WriteLine(str);
-            var str2 = SpeechToText.RecognizeSpeechFromBytesAsync(wav).Result;
-            Console.WriteLine(str2);
+            //var str2 = SpeechToText.RecognizeSpeechFromBytesAsync(wav,"en-US").Result;
+            //Console.WriteLine(str2);
 
             byte[] result_tts = TextToSpeech.TransformTextToSpeechAsync("This is a test in english.", "en-US").Result;
             FormatConvertor.TurnAudioStreamToFile(result_tts, path).Wait();
