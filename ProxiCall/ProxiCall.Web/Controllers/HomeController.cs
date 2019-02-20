@@ -13,8 +13,7 @@ namespace ProxiCall.Web.Controllers
     {
         public async Task<IActionResult> Index()
         {
-            var model = new IndexModel();
-            return View(model);
+            return View();
         }
 
         public IActionResult Privacy()
