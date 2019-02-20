@@ -28,7 +28,7 @@ namespace ProxiCall.Web.Services
         public async Task StartWebsocket(OnReplyHandler SendToUser)
         {
             var webSocket = new ClientWebSocket();
-            await webSocket.ConnectAsync(new Uri(_streamUrl), CancellationToken.None);
+            await webSocket.ConnectAsync(new Uri(_streamUrl), CancellationToken.None); 
 
             var buffer = ClientWebSocket.CreateClientBuffer(1024 * 4, 1024 * 4);
 
