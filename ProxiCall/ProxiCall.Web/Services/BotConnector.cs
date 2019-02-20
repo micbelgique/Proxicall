@@ -15,7 +15,7 @@ namespace ProxiCall.Web.Services
         private string _conversationId;
         private string _streamUrl;
 
-        public delegate Activity OnReplyHandler(IList<Activity> botReply);
+        public delegate void OnReplyHandler(IList<Activity> botReplies);
 
         public BotConnector()
         {
@@ -56,11 +56,15 @@ namespace ProxiCall.Web.Services
                             activities.Add(activity);
                         }
                     }
-                    var userReply = SendToUser(activities);
-                    await _directLineClient.Conversations.PostActivityAsync(_conversationId, userReply, CancellationToken.None);
+                    SendToUser(activities);
                 }
             }
             await webSocket.CloseAsync(result.CloseStatus.Value, result.CloseStatusDescription, CancellationToken.None);
+        }
+
+        public async Task SendMessageAsync(Activity userReply)
+        {
+            await _directLineClient.Conversations.PostActivityAsync(_conversationId, userReply, CancellationToken.None);
         }
     }
 }

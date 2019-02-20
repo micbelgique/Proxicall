@@ -13,15 +13,8 @@ namespace ProxiCall.Web.Controllers
     {
         public async Task<IActionResult> Index()
         {
-            var botConnector = new BotConnector();
-            await botConnector.StartWebsocket(OnMessageReceivedHandler);
-            var activitiesFromBot = ;
-            return View();
-        }
-
-        private Activity OnMessageReceivedHandler(IList<Activity> botReply)
-        {
-            throw new NotImplementedException();
+            var model = new IndexModel();
+            return View(model);
         }
 
         public IActionResult Privacy()

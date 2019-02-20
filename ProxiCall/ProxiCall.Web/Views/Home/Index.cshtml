@@ -2,7 +2,29 @@
     ViewData["Title"] = "Home Page";
 }
 
+@model IndexModel
+
 <div class="text-center">
     <h1 class="display-4">Welcome</h1>
     <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+
+    <div id="botMessages">
+        @if (Model.Activities == null)
+        {
+            <p>Pas encore de réponses</p>
+        }
+        else
+        {
+            @foreach (var activity in Model.Activities)
+            {
+                <p>@activity.Text</p>
+            }
+        }
+    </div>
+    <div id="userReply">
+        <form method="post">
+            <input asp-for="UserReply" placeholder="Votre message..."/>
+            <button asp-action="SendMessage">Envoyer</button>
+        </form>
+    </div>
 </div>
