@@ -12,6 +12,8 @@
     <PackageReference Include="Microsoft.AspNetCore.Razor.Design" Version="2.2.0" PrivateAssets="All" />
     <PackageReference Include="Microsoft.Bot.Connector.DirectLine" Version="3.0.2" />
     <PackageReference Include="Microsoft.CognitiveServices.Speech" Version="1.2.0" />
+    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="2.2.0" />
+    <PackageReference Include="Nexmo.Csharp.Client" Version="3.2.4" />
   </ItemGroup>
 
 </Project>
