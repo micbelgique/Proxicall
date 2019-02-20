@@ -11,7 +11,7 @@ namespace NexmoVoiceASPNetCoreQuickStarts
             /// Depending on what you want to achieve (inbound call, handle DTMF input etc...)
             /// pick the suitable method to return the right NCCO for webhook/answer
             /// </summary>
-            Get["/webhook/answer"] = x => "PUT_METHOD_HERE";
+            Get["/webhook/answer"] = x => GetInboundNCCO();
             Post["/webhook/dtmf"] = x => GetDTMFInput();
             Post["/webhook/event"] = x => Request.Query["status"];
         }

@@ -64,7 +64,6 @@ namespace NexmoVoiceASPNetCoreQuickStarts
             });
 
             app.UseOwin(x => x.UseNancy());
-
         }
 
         
