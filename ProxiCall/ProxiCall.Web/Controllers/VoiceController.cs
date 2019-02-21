@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Hosting;
+﻿using Console_Speech.Services.Speech;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Bot.Connector.DirectLine;
@@ -141,7 +142,7 @@ namespace ProxiCall.Web.Controllers
                     _botConnector = new BotConnector();
                     _nexmoConnector = new NexmoConnector(webSocket);
 
-                    await _botConnector.StartWebsocket(OnBotReplyHandler);
+                    await _botConnector.ReceiveMessagesFromBotAsync(OnBotReplyHandler);
                     await _nexmoConnector.WebsocketHandler(OnAudioReceivedAsync);
                 }
                 else
@@ -157,19 +158,19 @@ namespace ProxiCall.Web.Controllers
 
             foreach(var activity in botReplies)
             {
-                /*var audioToSend = await TextToSpeech(activity.Text);
-                _nexmoConnector.SendAudioAsync(audioToSend);*/
+                var audioToSend = await TextToSpeech.TransformTextToSpeechAsync(activity.Text, "fr-FR");
+                await _nexmoConnector.SendAudioAsync(audioToSend);
             }
         }
 
         public async Task OnAudioReceivedAsync(byte[] audioReceived)
         {
-            /*var textFromUser = await SpeechToText(audioReceived);
+            var textFromUser = await SpeechToText.RecognizeSpeechFromBytesAsync(audioReceived, "fr-FR");
             var activity = new Activity();
             activity.From = new ChannelAccount("userid", "username"); //TODO replace id and name with userid and username from nexmo
             activity.Type = "message";
             activity.Text = textFromUser;
-            await _botConnector.SendMessageAsync(activity);*/
+            await _botConnector.SendMessageToBotAsync(activity);
         }
     }
 }
