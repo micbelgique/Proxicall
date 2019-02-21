@@ -20,7 +20,7 @@ namespace NexmoVoiceASPNetCoreQuickStarts
         {
             dynamic TalkNCCO = new JObject();
             TalkNCCO.action = "talk";
-            TalkNCCO.text = "Thank you for calling from "+ string.Join(" ", this.Request.Query["from"].ToCharArray());
+            TalkNCCO.text = "Thank you for calling from "+ string.Join(" ", this.Request.Query["from"]);
             TalkNCCO.voiceName = "Kimberly";
             
             JArray jarrayObj = new JArray();
