@@ -8,6 +8,7 @@ using ProxiCall.Web.Helpers;
 using ProxiCall.Web.Services;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.WebSockets;
 using System.Threading;
 using System.Threading.Tasks;
@@ -22,7 +23,9 @@ namespace ProxiCall.Web.Controllers
         private NCCOHelpers _nccohelper;
 
         private BotConnector _botConnector;
-        private delegate Task<byte[]> OnAudioReceivedHandler(byte[] audioReceived);
+        private NexmoConnector _nexmoConnector;
+
+        private string _userTextReply;
 
         public VoiceController(IHostingEnvironment hostingEnvironment)
         {
@@ -136,8 +139,10 @@ namespace ProxiCall.Web.Controllers
                 {
                     WebSocket webSocket = await HttpContext.WebSockets.AcceptWebSocketAsync();
                     _botConnector = new BotConnector();
+                    _nexmoConnector = new NexmoConnector(webSocket);
+
                     await _botConnector.StartWebsocket(OnBotReplyHandler);
-                    await WebsocketHandler(HttpContext, webSocket, OnAudioReceivedAsync);
+                    await _nexmoConnector.WebsocketHandler(OnAudioReceivedAsync);
                 }
                 else
                 {
@@ -148,41 +153,23 @@ namespace ProxiCall.Web.Controllers
 
         public async void OnBotReplyHandler(IList<Activity> botReplies)
         {
-            //Handle bot responses
+            var replyNeeded = botReplies.Last().InputHint != "ignoringInput";
+
+            foreach(var activity in botReplies)
+            {
+                /*var audioToSend = await TextToSpeech(activity.Text);
+                _nexmoConnector.SendAudioAsync(audioToSend);*/
+            }
         }
 
-        public async Task<byte[]> OnAudioReceivedAsync(byte[] audioReceived)
+        public async Task OnAudioReceivedAsync(byte[] audioReceived)
         {
-            /*var textFromUser = SpeechToText(audioReceived);
+            /*var textFromUser = await SpeechToText(audioReceived);
             var activity = new Activity();
             activity.From = new ChannelAccount("userid", "username"); //TODO replace id and name with userid and username from nexmo
             activity.Type = "message";
             activity.Text = textFromUser;
             await _botConnector.SendMessageAsync(activity);*/
-
-
-            //TODO refactor return type to void
-            //move websocket to a connector class in services
-            //add sendAudio method in newly created connector
-
-            return null;
-        }
-
-        private async Task WebsocketHandler(HttpContext httpContext, WebSocket webSocket, OnAudioReceivedHandler audioReceivedHandler)
-        {
-            var receivingBuffer = WebSocket.CreateServerBuffer(1024 * 4);
-            WebSocketReceiveResult result = new WebSocketReceiveResult(0, WebSocketMessageType.Binary, true);
-            while (!result.CloseStatus.HasValue)
-            {
-                do
-                {
-                    result = await webSocket.ReceiveAsync(receivingBuffer, CancellationToken.None);
-                } while (!result.EndOfMessage);
-                var audioReceived = receivingBuffer.ToArray();
-                var audioToSend = await audioReceivedHandler(audioReceived);
-                await webSocket.SendAsync(new ArraySegment<byte>(audioToSend, 0, audioToSend.Length), WebSocketMessageType.Binary, true, CancellationToken.None);
-            }
-            await webSocket.CloseAsync(result.CloseStatus.Value, result.CloseStatusDescription, CancellationToken.None);
         }
     }
 }
