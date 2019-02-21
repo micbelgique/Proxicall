@@ -12,8 +12,8 @@ namespace ProxiCall.Web.Services
     public class BotConnector
     {
         private DirectLineClient _directLineClient;
-        private string _conversationId;
-        private string _streamUrl;
+        private readonly string _conversationId;
+        private readonly string _streamUrl;
 
         public delegate void OnReplyHandler(IList<Activity> botReplies);
 
@@ -25,29 +25,26 @@ namespace ProxiCall.Web.Services
             _streamUrl = conversation.StreamUrl;
         }
 
-        public async Task StartWebsocket(OnReplyHandler SendToUser)
+        public async Task ReceiveMessagesFromBotAsync(OnReplyHandler SendActivitiesToUser)
         {
             var webSocket = new ClientWebSocket();
             await webSocket.ConnectAsync(new Uri(_streamUrl), CancellationToken.None); 
 
             var buffer = ClientWebSocket.CreateClientBuffer(1024 * 4, 1024 * 4);
 
-            string reply;
-            WebSocketReceiveResult result = new WebSocketReceiveResult(0, WebSocketMessageType.Text, true);
-            while (!result.CloseStatus.HasValue)
+            string repliesFromBot = String.Empty;
+            WebSocketReceiveResult websocketReceivedResult = new WebSocketReceiveResult(0, WebSocketMessageType.Text, true);
+            while (!websocketReceivedResult.CloseStatus.HasValue)
             {
                 do
                 {
-                    result = await webSocket.ReceiveAsync(buffer, CancellationToken.None);
-                } while (!result.EndOfMessage);
-                if (result.Count == 0 && result.EndOfMessage)
+                    websocketReceivedResult = await webSocket.ReceiveAsync(buffer, CancellationToken.None);
+                } while (!websocketReceivedResult.EndOfMessage);
+
+                if (websocketReceivedResult.Count != 0)
                 {
-                    reply = String.Empty; //ignore empty message
-                }
-                else
-                {
-                    reply = Encoding.UTF8.GetString(buffer.ToArray(), 0, result.Count);
-                    var activitySet = JsonConvert.DeserializeObject<ActivitySet>(reply);
+                    repliesFromBot = Encoding.UTF8.GetString(buffer.ToArray(), 0, websocketReceivedResult.Count);
+                    var activitySet = JsonConvert.DeserializeObject<ActivitySet>(repliesFromBot);
                     var activities = new List<Activity>();
                     foreach (Activity activity in activitySet.Activities)
                     {
@@ -56,15 +53,15 @@ namespace ProxiCall.Web.Services
                             activities.Add(activity);
                         }
                     }
-                    SendToUser(activities);
+                    SendActivitiesToUser(activities);
                 }
             }
-            await webSocket.CloseAsync(result.CloseStatus.Value, result.CloseStatusDescription, CancellationToken.None);
+            await webSocket.CloseAsync(websocketReceivedResult.CloseStatus.Value, websocketReceivedResult.CloseStatusDescription, CancellationToken.None);
         }
 
-        public async Task SendMessageAsync(Activity userReply)
+        public async Task SendMessageToBotAsync(Activity userMessage)
         {
-            await _directLineClient.Conversations.PostActivityAsync(_conversationId, userReply, CancellationToken.None);
+            await _directLineClient.Conversations.PostActivityAsync(_conversationId, userMessage, CancellationToken.None);
         }
     }
 }
