@@ -19,27 +19,21 @@ namespace ProxiCall.Web.Controllers
         private BotConnector _botConnector;
         private NexmoConnector _nexmoConnector;
 
-        [HttpGet("answer/{to}&{from}&{conversation_uuid}&{uuid}")]
-        public IActionResult AnswerHandler(string to, string from, string conversation_uuid, string uuid)
+        [HttpGet("answer")]
+        public IActionResult AnswerHandler()
         {
             var nccos = new JArray();
 
             var nccoTalk = new JObject();
             nccoTalk.Add("action", "talk");
-            nccoTalk.Add("voiceName", "Russell");
             nccoTalk.Add("text", "You are listening to a test text-to-speech call made with Nexmo Voice API");
 
-            var nccoConnect = new JObject();
-            nccoConnect.Add("action", "talk");
-            nccoConnect.Add("text", "This is the second message we are reading to you");
-
             nccos.Add(nccoTalk);
-            nccos.Add(nccoConnect);
-            return Content(nccos.ToString());
+            return Content(nccos.ToString(), "application/json");
         }
         
-        [HttpPost("event/{conversation_uuid}&{direction}&{from}&{status}&{timestamp}&{to}${uuid}")]
-        public IActionResult EventHandler(string conversation_uuid, string direction, string from, string status, string timestamp, string to, string uuid)
+        [HttpPost("event")]
+        public IActionResult EventHandler()
         {
             return Ok();
         }

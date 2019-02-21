@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Net;
 using System.Net.WebSockets;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
@@ -10,6 +12,7 @@ using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.FileProviders;
 
 namespace ProxiCall.Web
 {
@@ -50,8 +53,10 @@ namespace ProxiCall.Web
                 app.UseHsts();
             }
 
-            app.UseHttpsRedirection();
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+            
             app.UseStaticFiles();
+
             app.UseCookiePolicy();
 
             var webSocketOptions = new WebSocketOptions()
