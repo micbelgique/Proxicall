@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.28307.329
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9092AA53-FB77-4645-B42D-1CCCA6BD08BD}") = "ProxiCall.Web", "ProxiCall.Web\ProxiCall.Web.njsproj", "{3A88FE2D-2767-4461-AA47-65B03C7E96ED}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{3A88FE2D-2767-4461-AA47-65B03C7E96ED}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3A88FE2D-2767-4461-AA47-65B03C7E96ED}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3A88FE2D-2767-4461-AA47-65B03C7E96ED}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3A88FE2D-2767-4461-AA47-65B03C7E96ED}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {9C9498DD-7DE6-4001-8C4C-3CE3874F6764}
+	EndGlobalSection
+EndGlobal
