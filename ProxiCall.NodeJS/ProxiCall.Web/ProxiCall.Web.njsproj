@@ -5,7 +5,7 @@
     <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
     <Name>ProxiCall.Web</Name>
     <RootNamespace>ProxiCall.Web</RootNamespace>
-    <LastActiveSolutionConfig>Release|Any CPU</LastActiveSolutionConfig>
+    <LastActiveSolutionConfig>Debug|Any CPU</LastActiveSolutionConfig>
     <NameOfLastUsedPublishProfile>proxicallweb - Web Deploy</NameOfLastUsedPublishProfile>
     <SaveNodeJsSettingsInProjectFile>True</SaveNodeJsSettingsInProjectFile>
     <Environment>
@@ -40,13 +40,8 @@
     <Compile Include="routes\webhooks.js">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="services\text-to-speech.js" />
-    <Compile Include="text-to-speech.js">
-      <SubType>Code</SubType>
-    </Compile>
     <Content Include=".env" />
     <Content Include="package.json" />
-    <None Include="proxicallweb - Web Deploy.pubxml" />
     <Content Include="public\stylesheets\main.css" />
     <Content Include="README.md" />
     <Content Include="views\index.pug" />
