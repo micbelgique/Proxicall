@@ -7,6 +7,7 @@ using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Logging;
 using Nancy.Owin;
 using System.IO;
+using System.Net;
 
 namespace NexmoVoiceASPNetCoreQuickStarts
 {
@@ -46,6 +47,8 @@ namespace NexmoVoiceASPNetCoreQuickStarts
             {
                 app.UseExceptionHandler("/Home/Error");
             }
+
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
 
             app.UseStaticFiles();
 

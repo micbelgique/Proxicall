@@ -1,5 +1,6 @@
 ﻿using Nancy;
 using Newtonsoft.Json.Linq;
+using System.Net;
 
 namespace NexmoVoiceASPNetCoreQuickStarts
 {
@@ -12,6 +13,7 @@ namespace NexmoVoiceASPNetCoreQuickStarts
             /// pick the suitable method to return the right NCCO for webhook/answer
             /// </summary>
             Get["/webhook/answer"] = x => GetInboundNCCO();
+            //Get["/webhook/answer"] = x => "Hello happy path";
             Post["/webhook/dtmf"] = x => GetDTMFInput();
             Post["/webhook/event"] = x => Request.Query["status"];
         }
@@ -20,13 +22,15 @@ namespace NexmoVoiceASPNetCoreQuickStarts
         {
             dynamic TalkNCCO = new JObject();
             TalkNCCO.action = "talk";
-            TalkNCCO.text = "Thank you for calling from "+ string.Join(" ", this.Request.Query["from"]);
-            TalkNCCO.voiceName = "Kimberly";
-            
+            var from = this.Request.Query["from"];
+            TalkNCCO.text = "Thank you for calling from "+ string.Join(" ", from);
+            TalkNCCO.voiceName = "Amy";
+            //TEST TalkNCCO.text = "<speak><lang xml:lang='pt-BR'>Bom dia.</lang> <prosody rate='fast'>I can speak fast.</prosody> <lang xml:lang='fr'>Au revoir!</lang></speak>";
+
             JArray jarrayObj = new JArray();
             jarrayObj.Add(TalkNCCO);
-
-            return jarrayObj.ToString();
+            var json = jarrayObj.ToString();
+            return json;
 
         }
 
@@ -47,7 +51,6 @@ namespace NexmoVoiceASPNetCoreQuickStarts
             jarrayObj.Add(InputNCCO);
 
             return jarrayObj.ToString();
-
         }
 
         private string GetDTMFInput()
