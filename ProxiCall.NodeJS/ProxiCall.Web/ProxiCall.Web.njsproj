@@ -40,6 +40,9 @@
     <Compile Include="routes\webhooks.js">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="services\text-to-speech.js">
+      <SubType>Code</SubType>
+    </Compile>
     <Content Include=".env" />
     <Content Include="package.json" />
     <Content Include="public\stylesheets\main.css" />

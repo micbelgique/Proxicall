@@ -15,11 +15,13 @@
     "debug": "^2.2.0",
     "dotenv": "^6.2.0",
     "express": "^4.14.0",
+    "fs": "0.0.1-security",
     "morgan": "^1.7.0",
     "pug": "^2.0.0-beta6",
     "readline-sync": "^1.4.9",
     "request": "^2.88.0",
-    "serve-favicon": "^2.3.0"
+    "serve-favicon": "^2.3.0",
+    "xmlbuilder": "^11.0.0"
   },
   "engines": {
     "node": "~6.10.x"
