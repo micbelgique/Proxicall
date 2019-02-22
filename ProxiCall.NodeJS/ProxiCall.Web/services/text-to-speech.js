@@ -3,8 +3,6 @@
 const request = require('request');
 // Requires fs to write synthesized speech to a file
 const fs = require('fs');
-// Requires readline-sync to read command line inputs
-const readline = require('readline-sync');
 // Requires xmlbuilder to build the SSML body
 const xmlbuilder = require('xmlbuilder');
 
@@ -21,10 +19,6 @@ const subscriptionRegion = process.env.SPEECH_Region;
 if (!subscriptionRegion) {
     throw new Error('Environment variable for your subscription region is not set.')
 };
-
-// Prompts the user to input text.
-let text = readline.question('What would you like to convert to speech?');
-
 
 function textToSpeech(subscriptionKey, subscriptionRegion, saveAudio) {
     let options = {
@@ -61,7 +55,7 @@ function saveAudio(accessToken) {
         .ele('voice')
         .att('xml:lang', 'en-us')
         .att('name', 'Microsoft Server Speech Text to Speech Voice (en-US, Guy24KRUS)')
-        .txt(text)
+        .txt("test")
         .end();
     // Convert the XML into a string to send in the TTS request.
     let body = xml_body.toString();
