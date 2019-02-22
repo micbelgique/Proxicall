@@ -1,8 +1,6 @@
 ﻿'use strict';
 // Requires request for HTTP requests
 const request = require('request');
-// Requires fs to write synthesized speech to a file
-const fs = require('fs');
 // Requires xmlbuilder to build the SSML body
 const xmlbuilder = require('xmlbuilder');
 
@@ -19,6 +17,8 @@ const subscriptionRegion = process.env.SPEECH_Region;
 if (!subscriptionRegion) {
     throw new Error('Environment variable for your subscription region is not set.')
 };
+
+var byteArray;
 
 function textToSpeech(subscriptionKey, subscriptionRegion, saveAudio) {
     let options = {
@@ -85,14 +85,15 @@ function saveAudio(accessToken) {
             throw new Error(error);
         }
         console.log("Your file is ready.\n");
+        var buf = Buffer.from(body);
+        byteArray = buf.readUInt8(0);
     }
-    // Pipe the response to file.
-    var streamaudio = request(options, convertText).pipe(fs.createWriteStream('sample.wav'));
-    console.log(streamaudio);
+    request(options, convertText);
 }
 
 function runTextToSpeech() {
-    textToSpeech('8b3affa678a740c28cfc410d1117ad38', 'westeurope', saveAudio);
+    textToSpeech(process.env.SPEECH_KEY, 'westeurope', saveAudio);
+    return byteArray;
 }
 
 module.exports.runTextToSpeech = runTextToSpeech;
