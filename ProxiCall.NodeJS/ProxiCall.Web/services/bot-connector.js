@@ -10,7 +10,6 @@ class BotConnector {
     constructor() {
         this.directLine = new DirectLine({
             secret : process.env.DIRECTLINE_SECRET
-            //secret = "Ng-CNh07_ys.PMF4jKQCP4mSjpWzqs2HXjliAl_flSPugcc3ZaiHts4"
         });
     }
 
