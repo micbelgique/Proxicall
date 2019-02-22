@@ -5,7 +5,7 @@
     <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
     <Name>ProxiCall.Web</Name>
     <RootNamespace>ProxiCall.Web</RootNamespace>
-    <LastActiveSolutionConfig>Release|Any CPU</LastActiveSolutionConfig>
+    <LastActiveSolutionConfig>Debug|Any CPU</LastActiveSolutionConfig>
     <NameOfLastUsedPublishProfile>proxicallweb - Web Deploy</NameOfLastUsedPublishProfile>
   </PropertyGroup>
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
@@ -37,6 +37,9 @@
     <Compile Include="routes\webhooks.js">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="services\bot-connector.js">
+      <SubType>Code</SubType>
+    </Compile>
     <Content Include="package.json" />
     <None Include="proxicallweb - Web Deploy.pubxml" />
     <Content Include="public\stylesheets\main.css" />
@@ -46,6 +49,7 @@
     <Content Include="views\error.pug" />
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="services\" />
     <Folder Include="public\" />
     <Folder Include="public\images\" />
     <Folder Include="public\javascripts\" />

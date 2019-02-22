@@ -7,6 +7,9 @@ var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 
+global.XMLHttpRequest = require('xhr2');
+global.WebSocket = require('ws');
+
 var routes = require('./routes/index');
 var users = require('./routes/users');
 var webhooks = require('./routes/webhooks');

@@ -1,15 +1,16 @@
 ﻿'use strict';
-var express = require('express');
-var router = express.Router();
+const express = require('express');
+const router = express.Router();
 
 /* Answer url for nexmo */
 router.get('/answer', function (req, res) {
+    botConnector.test();
     const ncco = [{
         action: 'talk',
         text: "I am a node js web application in need of love"
     }];
 
-    res.send(ncco);
+    res.json(ncco);
 });
 
 /* Event url for nexmo */
