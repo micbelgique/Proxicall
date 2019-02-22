@@ -84,10 +84,11 @@ function saveAudio(accessToken) {
         else {
             throw new Error(error);
         }
-        console.log("Your file is ready.\n")
+        console.log("Your file is ready.\n");
     }
     // Pipe the response to file.
-    request(options, convertText).pipe(fs.createWriteStream('sample.wav'));
+    var streamaudio = request(options, convertText).pipe(fs.createWriteStream('sample.wav'));
+    console.log(streamaudio);
 }
 
 function runTextToSpeech() {
