@@ -22,11 +22,11 @@
     "pug": "^2.0.0-beta6",
     "request": "^2.88.0",
     "serve-favicon": "^2.3.0",
+    "stream": "0.0.2",
     "stream-to-array": "^2.3.0",
-    "xmlbuilder": "^11.0.0"
-    "serve-favicon": "^2.3.0",
     "ws": "^6.1.4",
-    "xhr2": "^0.1.4"
+    "xhr2": "^0.1.4",
+    "xmlbuilder": "^11.0.0"
   },
   "engines": {
     "node": "~6.10.x"

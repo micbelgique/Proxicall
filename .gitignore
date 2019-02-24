@@ -216,3 +216,5 @@ FakesAssemblies/
 **/*.Server/GeneratedArtifacts
 **/*.Server/ModelManifest.xml
 _Pvt_Extensions
+
+ProxiCall\.NodeJS/ProxiCall\.Web/package-lock\.json

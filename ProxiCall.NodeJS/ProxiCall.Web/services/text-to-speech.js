@@ -4,6 +4,8 @@ const request = require('request');
 // Requires xmlbuilder to build the SSML body
 const xmlbuilder = require('xmlbuilder');
 
+const stream = require('stream')
+
 // Requires dotenv to read .env
 const dotenv = require('dotenv');
 dotenv.config();
@@ -18,7 +20,7 @@ if (!subscriptionRegion) {
     throw new Error('Environment variable for your subscription region is not set.')
 };
 
-var byteArray;
+var byteArray = new stream.Writable();
 
 function textToSpeech(subscriptionKey, subscriptionRegion, saveAudio) {
     let options = {
@@ -84,11 +86,10 @@ function saveAudio(accessToken) {
         else {
             throw new Error(error);
         }
+        console.log(typeof body)
         console.log("Your file is ready.\n");
-        var buf = Buffer.from(body);
-        byteArray = buf.readUInt8(0);
     }
-    request(options, convertText);
+    request(options, convertText).pipe(byteArray);
 }
 
 function runTextToSpeech() {
