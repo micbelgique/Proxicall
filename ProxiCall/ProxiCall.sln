@@ -13,6 +13,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ProxiCall.Web", "ProxiCall.
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NexmoVoiceASPNetCoreQuickStarts", "NexmoVoiceASPNetCoreQuickStarts\NexmoVoiceASPNetCoreQuickStarts.csproj", "{BE495697-B06C-4F05-BAE5-5518747091D3}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebSocketsEcho", "WebSocketsEcho\WebSocketsEcho.csproj", "{C9ED193E-5852-44B2-8EED-F137531205BE}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +41,10 @@ Global
 		{BE495697-B06C-4F05-BAE5-5518747091D3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BE495697-B06C-4F05-BAE5-5518747091D3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BE495697-B06C-4F05-BAE5-5518747091D3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C9ED193E-5852-44B2-8EED-F137531205BE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C9ED193E-5852-44B2-8EED-F137531205BE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C9ED193E-5852-44B2-8EED-F137531205BE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C9ED193E-5852-44B2-8EED-F137531205BE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
