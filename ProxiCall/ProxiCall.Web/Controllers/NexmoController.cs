@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.WebSockets;
+using System.Threading;
 using System.Threading.Tasks;
 using Console_Speech.Services.Speech;
 using Microsoft.AspNetCore.Http;
@@ -17,19 +18,38 @@ namespace ProxiCall.Web.Controllers
     public class NexmoController : ControllerBase
     {
         private BotConnector _botConnector;
-        private NexmoConnector _nexmoConnector;
+        private WebSocket _webSocket;
 
         [HttpGet("answer")]
         public IActionResult AnswerHandler()
         {
+            /* Nexmo tts for testing connection
             var nccos = new JArray();
-
             var nccoTalk = new JObject();
             nccoTalk.Add("action", "talk");
             nccoTalk.Add("text", "You are listening to a test text-to-speech call made with Nexmo Voice API");
+            */
+            //const string host = "proxicallweb.azurewebsites.net";
+            const string host = "a8959bb6.ngrok.io";
+            const string locale = "fr-FR";
 
-            nccos.Add(nccoTalk);
-            return Content(nccos.ToString(), "application/json");
+            var nccoWS = new JArray(new JObject()
+            {
+                { "action", "connect" },
+                { "endpoint", new JArray(new JObject{
+                        { "type", "websocket" },
+                        { "uri", $"wss://{host}/api/nexmo/socket"},
+                        { "content-type", "audio/l16;rate=16000"},
+                        { "headers", new JObject {
+                                { "language", locale },
+                                { "callerID", "32471452559" } //TODO replace number with from parameter
+                            }
+                        }
+                    })
+                }
+            });
+
+            return Content(nccoWS.ToString(), "application/json");
         }
         
         [HttpPost("event")]
@@ -38,17 +58,29 @@ namespace ProxiCall.Web.Controllers
             return Ok();
         }
 
-        [HttpGet("ws")]
+        [HttpGet("socket")]
         public async Task GetAudio()
         {
             if (HttpContext.WebSockets.IsWebSocketRequest)
             {
-                WebSocket webSocket = await HttpContext.WebSockets.AcceptWebSocketAsync();
+                _webSocket = await HttpContext.WebSockets.AcceptWebSocketAsync();
                 _botConnector = new BotConnector();
-                _nexmoConnector = new NexmoConnector(webSocket);
 
-                await _botConnector.ReceiveMessagesFromBotAsync(OnBotReplyHandler);
-                await _nexmoConnector.WebsocketHandler(OnAudioReceivedAsync);
+                _botConnector.ReceiveMessagesFromBotAsync(OnBotReplyHandler);
+                
+                var receivingBuffer = WebSocket.CreateServerBuffer(1024 * 4);
+                var result = new WebSocketReceiveResult(0, WebSocketMessageType.Binary, true);
+                while (!result.CloseStatus.HasValue)
+                {
+                    do
+                    {
+                        result = await _webSocket.ReceiveAsync(receivingBuffer, CancellationToken.None);
+                    } while (!result.EndOfMessage);
+                    var firstMessage = receivingBuffer.ToString();
+                    var audioReceived = receivingBuffer.ToArray();
+                    //await OnAudioReceivedAsync(audioReceived);
+                }
+                await _webSocket.CloseAsync(result.CloseStatus.Value, result.CloseStatusDescription, CancellationToken.None);
             }
             else
             {
@@ -63,8 +95,13 @@ namespace ProxiCall.Web.Controllers
             foreach (var activity in botReplies)
             {
                 var audioToSend = await TextToSpeech.TransformTextToSpeechAsync(activity.Text, "fr-FR");
-                await _nexmoConnector.SendAudioAsync(audioToSend);
+                await SendAudioAsync(audioToSend);
             }
+        }
+
+        public async Task SendAudioAsync(byte[] audioToSend)
+        {
+            await _webSocket.SendAsync(new ArraySegment<byte>(audioToSend, 0, audioToSend.Length), WebSocketMessageType.Binary, true, CancellationToken.None);
         }
 
         public async Task OnAudioReceivedAsync(byte[] audioReceived)

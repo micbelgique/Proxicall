@@ -12,7 +12,8 @@
       "commandName": "IISExpress",
       "launchBrowser": true,
       "environmentVariables": {
-        "DirectLineSecret": "Ng-CNh07_ys.PMF4jKQCP4mSjpWzqs2HXjliAl_flSPugcc3ZaiHts4",
+        "SpeechApiKey": "8b3affa678a740c28cfc410d1117ad38",
+        "DirectLineSecret": "Ng-CNh07_ys.FJym16qMIS2-GuMs153E-uXmRvKyrXuQVq2PGINR2uk",
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
     },
