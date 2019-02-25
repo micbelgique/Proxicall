@@ -64,28 +64,43 @@ namespace ProxiCall.Web.Controllers
             if (HttpContext.WebSockets.IsWebSocketRequest)
             {
                 _webSocket = await HttpContext.WebSockets.AcceptWebSocketAsync();
-                _botConnector = new BotConnector();
+                //_botConnector = new BotConnector();
 
-                _botConnector.ReceiveMessagesFromBotAsync(OnBotReplyHandler);
-                
-                var receivingBuffer = WebSocket.CreateServerBuffer(1024 * 4);
+                //_botConnector.ReceiveMessagesFromBotAsync(OnBotReplyHandler);
+
+                await Echo(HttpContext, _webSocket);
+
+                /*var receivingBuffer = new byte[1024 * 4];
                 var result = new WebSocketReceiveResult(0, WebSocketMessageType.Binary, true);
                 while (!result.CloseStatus.HasValue)
                 {
                     do
                     {
-                        result = await _webSocket.ReceiveAsync(receivingBuffer, CancellationToken.None);
+                        result = await _webSocket.ReceiveAsync(new ArraySegment<byte>(receivingBuffer), CancellationToken.None);
                     } while (!result.EndOfMessage);
-                    var firstMessage = receivingBuffer.ToString();
+                    
                     var audioReceived = receivingBuffer.ToArray();
-                    //await OnAudioReceivedAsync(audioReceived);
+                    await OnAudioReceivedAsync(audioReceived);
                 }
-                await _webSocket.CloseAsync(result.CloseStatus.Value, result.CloseStatusDescription, CancellationToken.None);
+                await _webSocket.CloseAsync(result.CloseStatus.Value, result.CloseStatusDescription, CancellationToken.None);*/
             }
             else
             {
                 HttpContext.Response.StatusCode = 400;
             }
+        }
+
+        private async Task Echo(HttpContext context, WebSocket webSocket)
+        {
+            var buffer = new byte[1024 * 4];
+            WebSocketReceiveResult result = await webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
+            while (!result.CloseStatus.HasValue)
+            {
+                await webSocket.SendAsync(new ArraySegment<byte>(buffer, 0, result.Count), result.MessageType, result.EndOfMessage, CancellationToken.None);
+
+                result = await webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
+            }
+            await webSocket.CloseAsync(result.CloseStatus.Value, result.CloseStatusDescription, CancellationToken.None);
         }
 
         public async void OnBotReplyHandler(IList<Activity> botReplies)
