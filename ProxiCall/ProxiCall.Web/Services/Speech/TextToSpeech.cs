@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Console_Speech.Services.Speech
+namespace ProxiCall.Web.Services.Speech
 {
     class TextToSpeech
     {

@@ -12,13 +12,13 @@
       "commandName": "IISExpress",
       "launchBrowser": true,
       "environmentVariables": {
-        "SpeechApiKey": "8b3affa678a740c28cfc410d1117ad38",
-        "DirectLineSecret": "Ng-CNh07_ys.FJym16qMIS2-GuMs153E-uXmRvKyrXuQVq2PGINR2uk",
+        "SpeechApiKey": "5801820bf589448ebea3cc096fa9068f",
+        "DirectLineSecret": "Ng-CNh07_ys.PMKiv1z14p9j_eltlf7kEcvsENgOqboVawTOSRLUtKk",
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
     },
     "ProxiCall.Web": {
-      "commandName": "Project",
+      "commandName": "IISExpress",
       "launchBrowser": true,
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
