@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.WebSockets;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Console_Speech.Services.Speech;
@@ -30,21 +31,15 @@ namespace ProxiCall.Web.Controllers
             nccoTalk.Add("text", "You are listening to a test text-to-speech call made with Nexmo Voice API");
             */
             //const string host = "proxicallweb.azurewebsites.net";
-            const string host = "a8959bb6.ngrok.io";
-            const string locale = "fr-FR";
+            const string host = "07ab57b8.ngrok.io";
 
             var nccoWS = new JArray(new JObject()
             {
                 { "action", "connect" },
                 { "endpoint", new JArray(new JObject{
                         { "type", "websocket" },
-                        { "uri", $"wss://{host}/api/nexmo/socket"},
+                        { "uri", $"wss://{host}/ws"},
                         { "content-type", "audio/l16;rate=16000"},
-                        { "headers", new JObject {
-                                { "language", locale },
-                                { "callerID", "32471452559" } //TODO replace number with from parameter
-                            }
-                        }
                     })
                 }
             });
@@ -63,12 +58,13 @@ namespace ProxiCall.Web.Controllers
         {
             if (HttpContext.WebSockets.IsWebSocketRequest)
             {
-                _webSocket = await HttpContext.WebSockets.AcceptWebSocketAsync();
+                using (_webSocket = await HttpContext.WebSockets.AcceptWebSocketAsync())
+                {
+                    await Echo(HttpContext, _webSocket);
+                }
                 //_botConnector = new BotConnector();
 
                 //_botConnector.ReceiveMessagesFromBotAsync(OnBotReplyHandler);
-
-                await Echo(HttpContext, _webSocket);
 
                 /*var receivingBuffer = new byte[1024 * 4];
                 var result = new WebSocketReceiveResult(0, WebSocketMessageType.Binary, true);
@@ -92,11 +88,13 @@ namespace ProxiCall.Web.Controllers
 
         private async Task Echo(HttpContext context, WebSocket webSocket)
         {
-            var buffer = new byte[1024 * 4];
-            WebSocketReceiveResult result = await webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
+            var test = "Hello ! I hate you.";
+            var buffer = await TextToSpeech.TransformTextToSpeechAsync(test, "fr-FR");
+            //var result = await webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
+            var result = new WebSocketReceiveResult(1024, WebSocketMessageType.Text, true);
             while (!result.CloseStatus.HasValue)
             {
-                await webSocket.SendAsync(new ArraySegment<byte>(buffer, 0, result.Count), result.MessageType, result.EndOfMessage, CancellationToken.None);
+                await webSocket.SendAsync(new ArraySegment<byte>(buffer, 0, buffer.Count()), result.MessageType, result.EndOfMessage, CancellationToken.None);
 
                 result = await webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
             }
