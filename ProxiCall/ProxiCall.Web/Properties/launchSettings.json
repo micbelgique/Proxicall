@@ -14,7 +14,8 @@
       "environmentVariables": {
         "SpeechApiKey": "5801820bf589448ebea3cc096fa9068f",
         "DirectLineSecret": "Ng-CNh07_ys.PMKiv1z14p9j_eltlf7kEcvsENgOqboVawTOSRLUtKk",
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "SpeechApiRegion": "westeurope"
       }
     },
     "ProxiCall.Web": {

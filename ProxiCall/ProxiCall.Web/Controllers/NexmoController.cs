@@ -13,7 +13,7 @@ namespace ProxiCall.Web.Controllers
         [HttpGet("answer")]
         public IActionResult AnswerHandler()
         {
-            const string host = "proxicallweb.azurewebsites.net";
+            const string host = "proxicallhub.azurewebsites.net";
 
             //_botConnector = new BotConnector();
 
@@ -26,7 +26,7 @@ namespace ProxiCall.Web.Controllers
                         { "content-type", "audio/l16;rate=16000"},
                         { "headers",  new JObject {
                                 //{ "conversationID", _botConnector.ConversationId }
-                                { "conversationID", "ifhjvbfhvbahfbd" }
+                                { "conversationID", "dghjnxfghjhgdjk" }
                             }
                         }
                     })
