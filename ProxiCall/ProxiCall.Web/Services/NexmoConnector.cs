@@ -46,18 +46,19 @@ namespace ProxiCall.Web.Services
             const int chunkSize = 640;
             var chunkCount = 1;
             var offset = 0;
-
-            var lastChunkIndex = ttsAudio.Length / chunkSize;
+            
+            var lastFullChunck = ttsAudio.Length < (offset + chunkSize);
 
             try
             {
-                while(chunkCount != lastChunkIndex)
+                while(lastFullChunck)
                 {
-                    offset = chunkSize * chunkCount;
-                    await webSocket.SendAsync(new ArraySegment<byte>(ttsAudio, offset - 1, chunkSize), WebSocketMessageType.Binary, false, CancellationToken.None);
+                    await webSocket.SendAsync(new ArraySegment<byte>(ttsAudio, offset, chunkSize), WebSocketMessageType.Binary, false, CancellationToken.None);
                     chunkCount++;
+                    offset = chunkSize * chunkCount - 1;
+                    lastFullChunck = ttsAudio.Length < (offset + chunkSize);
                 }
-                await webSocket.SendAsync(new ArraySegment<byte>(ttsAudio, offset - 1, ttsAudio.Length - offset), WebSocketMessageType.Binary, true, CancellationToken.None);
+                await webSocket.SendAsync(new ArraySegment<byte>(ttsAudio, offset, ttsAudio.Length - offset), WebSocketMessageType.Binary, true, CancellationToken.None);
             }
             catch (ArgumentException ex)
             {
