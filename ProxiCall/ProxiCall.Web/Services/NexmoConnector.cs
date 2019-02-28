@@ -68,20 +68,20 @@ namespace ProxiCall.Web.Services
             var lastFullChunck = ttsAudio.Length < (offset + chunkSize);
 
             Logger.LogInformation($"ttsAudio length : {ttsAudio.Length}");
-            Logger.LogInformation($"lastChunkIndex : {lastChunkIndex}");
+            Logger.LogInformation($"lastFullChunck : {lastFullChunck}");
             try
             {
                 while(lastFullChunck)
                 {
                     await webSocket.SendAsync(new ArraySegment<byte>(ttsAudio, offset, chunkSize), WebSocketMessageType.Binary, false, CancellationToken.None);
-                    Logger.LogInformation($"SendSpeech loop condition : chunkCount {chunkCount} < lastChunkIndex {lastChunkIndex}");
                     Logger.LogInformation($"SendSpeech loop offset : {offset}");
                     chunkCount++;
                     offset = chunkSize * chunkCount - 1;
                     lastFullChunck = ttsAudio.Length < (offset + chunkSize);
                 }
-                await webSocket.SendAsync(new ArraySegment<byte>(ttsAudio, offset, ttsAudio.Length - offset), WebSocketMessageType.Binary, true, CancellationToken.None);
-                Logger.LogInformation($"SendSpeech after loop lasMessageSize : {lastMessageSize}");
+                var lastMessageSize = ttsAudio.Length - offset;
+                Logger.LogInformation($"SendSpeech after loop lastMessageSize : {lastMessageSize}");
+                await webSocket.SendAsync(new ArraySegment<byte>(ttsAudio, offset, lastMessageSize), WebSocketMessageType.Binary, true, CancellationToken.None);
             }
             catch (Exception ex)
             {
