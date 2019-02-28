@@ -14,14 +14,27 @@ namespace ProxiCall.Web.Services
         public static async Task Echo(HttpContext context, WebSocket webSocket)
         {
             var buffer = new byte[1024 * 4];
-            byte[] sendBuffer;
+
+            byte[] audioBytes;
+
+            var silence = new byte[32000];
+            var silence_buffer = new ArraySegment<byte>(silence);
+            var lenght=0;
+
             WebSocketReceiveResult result = await webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
             while (!result.CloseStatus.HasValue)
             {
-                sendBuffer = await TextToSpeech.TransformTextToSpeechAsync("I hate everything, especially php", "en-US");
-                //sendBuffer = buffer;
-                
-                await webSocket.SendAsync(new ArraySegment<byte>(sendBuffer, 0, sendBuffer.Length), result.MessageType, result.EndOfMessage, CancellationToken.None);
+                //audioBytes = await TextToSpeech.TransformTextToSpeechAsync("No No No No No No No No No.", "en-US");
+                //var audioBuffer = new ArraySegment<byte>(audioBytes, 0, audioBytes.Length);
+
+                //Audio
+                //await webSocket.SendAsync(audioBuffer, WebSocketMessageType.Binary, true, CancellationToken.None);
+
+                //Silence
+                //await webSocket.SendAsync(silence_buffer, WebSocketMessageType.Binary, true, CancellationToken.None);
+
+                //Buffer
+                await webSocket.SendAsync(new ArraySegment<byte>(buffer, 0, result.Count), result.MessageType, result.EndOfMessage, CancellationToken.None);
 
                 result = await webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
             }

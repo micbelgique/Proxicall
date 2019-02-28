@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json.Linq;
 using ProxiCall.Web.Services;
+using ProxiCall.Web.Services.Speech;
+using System.Threading.Tasks;
 
 namespace ProxiCall.Web.Controllers
 {
@@ -10,14 +12,32 @@ namespace ProxiCall.Web.Controllers
     {
         private BotConnector _botConnector;
 
+        private static async Task<string> TestSpeech()
+        {
+            byte[] result_tts = await TextToSpeech.TransformTextToSpeechAsync("This is a test in english.", "en-US");
+            var str = await SpeechToText.RecognizeSpeechFromBytesAsync(result_tts, "en-US");
+            return str;
+        }
+
         [HttpGet("answer")]
         public IActionResult AnswerHandler()
         {
-            const string host = "proxicallweb.azurewebsites.net";
+            //const string host = "bfa64ee2.ngrok.io";
+            const string host = "proxicallmel.azurewebsites.net";
 
             //_botConnector = new BotConnector();
+            var nccos = new JArray();
 
-            var nccoWS = new JArray(new JObject()
+            //var result = TestSpeech().Result;
+            var result = "Test Talk";
+
+            var nccoTalk = new JObject()
+            {
+                { "action", "talk" },
+                { "text", result }
+            };
+
+            var nccoConnect = new JObject()
             {
                 { "action", "connect" },
                 { "endpoint", new JArray(new JObject{
@@ -31,9 +51,10 @@ namespace ProxiCall.Web.Controllers
                         }
                     })
                 }
-            });
-
-            return Content(nccoWS.ToString(), "application/json");
+            };
+            nccos.Add(nccoTalk);
+            nccos.Add(nccoConnect);
+            return Content(nccos.ToString(), "application/json");
         }
         
         [HttpPost("event")]
