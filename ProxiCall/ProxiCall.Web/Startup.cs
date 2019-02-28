@@ -14,15 +14,19 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
+using Microsoft.Extensions.Logging;
 using ProxiCall.Web.Services;
 
 namespace ProxiCall.Web
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration)
+        private readonly ILogger<Startup> logger;
+
+        public Startup(IConfiguration configuration, ILogger<Startup> logger)
         {
             Configuration = configuration;
+            this.logger = logger;
         }
 
         public IConfiguration Configuration { get; }
@@ -76,7 +80,8 @@ namespace ProxiCall.Web
                     if (context.WebSockets.IsWebSocketRequest)
                     {
                         WebSocket webSocket = await context.WebSockets.AcceptWebSocketAsync();
-                        await NexmoConnector.Echo(context, webSocket);
+                        NexmoConnector.Logger = logger;
+                        await NexmoConnector.NexmoTextToSpeech(context, webSocket);
                     }
                     else
                     {
