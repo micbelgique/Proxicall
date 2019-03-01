@@ -7,6 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using ProxiCall.Web.Services.Speech;
 using Microsoft.Extensions.Logging;
+using System.Text;
 
 namespace ProxiCall.Web.Services
 {
@@ -14,6 +15,7 @@ namespace ProxiCall.Web.Services
     {
         public static ILogger<Startup> Logger { get; set; }
 
+        //NexmoSpeechToText
         public static async Task NexmoSpeechToText(HttpContext context, WebSocket webSocket)
         {
             var buffer = new byte[1024 * 4];
@@ -30,19 +32,24 @@ namespace ProxiCall.Web.Services
             await webSocket.CloseAsync(result.CloseStatus.Value, result.CloseStatusDescription, CancellationToken.None);
         }
 
+        //Echo
         public static async Task Echo(HttpContext context, WebSocket webSocket)
         {
             var buffer = new byte[1024 * 4];
             WebSocketReceiveResult result = await webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
+            Logger.LogInformation($"Message BEFORE WHILE : {result.Count}");
             while (!result.CloseStatus.HasValue)
             {
                 await webSocket.SendAsync(new ArraySegment<byte>(buffer, 0, result.Count), result.MessageType, result.EndOfMessage, CancellationToken.None);
 
+                Logger.LogInformation($"Message AFTER SEND : {result.Count}");
                 result = await webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
+                Logger.LogInformation($"Message BEFORE SEND : {result.Count}");
             }
             await webSocket.CloseAsync(result.CloseStatus.Value, result.CloseStatusDescription, CancellationToken.None);
         }
 
+        //NexmoTextToSpeech
         public static async Task NexmoTextToSpeech(HttpContext context, WebSocket webSocket)
         {
             var isDone = false;
@@ -65,6 +72,7 @@ namespace ProxiCall.Web.Services
             await webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Closing Socket", CancellationToken.None);
         }
 
+        //SendSpeech
         private static async Task<bool> SendSpeech(HttpContext context, WebSocket webSocket, byte[] ttsAudio)
         {
             const int chunkSize = 640;
@@ -78,8 +86,11 @@ namespace ProxiCall.Web.Services
             {
                 while(!lastFullChunck)
                 {
-                    await webSocket.SendAsync(new ArraySegment<byte>(ttsAudio, offset, chunkSize), WebSocketMessageType.Binary, false, CancellationToken.None);
-                    Logger.LogInformation($"SendSpeech IN loop offset : {offset}");
+                    var segment = new ArraySegment<byte>(ttsAudio, offset, chunkSize);
+                    
+                    Logger.LogInformation($"SendSpeech IN loop segment : {segment.Count}");
+                    await webSocket.SendAsync(segment, WebSocketMessageType.Binary, false, CancellationToken.None);
+                    //Logger.LogInformation($"SendSpeech IN loop offset : {offset}");
                     offset = chunkSize * chunkCount;
                     chunkCount++;
                     lastFullChunck = ttsAudio.Length < (offset + chunkSize);
@@ -90,7 +101,7 @@ namespace ProxiCall.Web.Services
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine(ex.Message);
+                Logger.LogInformation($"SendSpeech EXCEPTION : {ex.Message}");
             }
             return true;
         }
