@@ -45,21 +45,27 @@ namespace ProxiCall.Web.Services
 
         public static async Task NexmoTextToSpeech(HttpContext context, WebSocket webSocket)
         {
-            var ttsAudio = await TextToSpeech.TransformTextToSpeechAsync("This is a test", "en-US");
-            var buffer = new byte[1024 * 4];
+            var isDone = false;
+            var ttsAudio = await TextToSpeech.TransformTextToSpeechAsync("Dear Websocket and Nexmo, just work. Thank you.", "en-US");
+            var buffer = new byte[1024 * 6];
             WebSocketReceiveResult result = await webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
 
             Logger.LogInformation($"First message : {buffer.ToString()}");
 
             while (!result.CloseStatus.HasValue)
             {
-                Logger.LogInformation("In NexmoTextToSpeech ws loop");
-                await SendSpeech(context, webSocket, ttsAudio);
+                if (!isDone)
+                {
+                    Logger.LogInformation("In NexmoTextToSpeech WS ISDONE loop");
+                    isDone = await SendSpeech(context, webSocket, ttsAudio);
+                }
+                result = await webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
             }
-            await webSocket.CloseAsync(result.CloseStatus.Value, result.CloseStatusDescription, CancellationToken.None);
+            Logger.LogInformation($"AFTER WS LOOP : Closing");
+            await webSocket.CloseAsync(WebSocketCloseStatus.NormalClosure, "Closing Socket", CancellationToken.None);
         }
 
-        private static async Task SendSpeech(HttpContext context, WebSocket webSocket, byte[] ttsAudio)
+        private static async Task<bool> SendSpeech(HttpContext context, WebSocket webSocket, byte[] ttsAudio)
         {
             const int chunkSize = 640;
             var chunkCount = 1;
@@ -67,27 +73,26 @@ namespace ProxiCall.Web.Services
             
             var lastFullChunck = ttsAudio.Length < (offset + chunkSize);
 
-            Logger.LogInformation($"ttsAudio length : {ttsAudio.Length}");
-            Logger.LogInformation($"lastFullChunck : {lastFullChunck}");
+            Logger.LogInformation($"ttsAudio length : {ttsAudio.Length} | lastFullChunck : {lastFullChunck}");
             try
             {
-                while(lastFullChunck)
+                while(!lastFullChunck)
                 {
                     await webSocket.SendAsync(new ArraySegment<byte>(ttsAudio, offset, chunkSize), WebSocketMessageType.Binary, false, CancellationToken.None);
-                    Logger.LogInformation($"SendSpeech loop offset : {offset}");
+                    Logger.LogInformation($"SendSpeech IN loop offset : {offset}");
+                    offset = chunkSize * chunkCount;
                     chunkCount++;
-                    offset = chunkSize * chunkCount - 1;
                     lastFullChunck = ttsAudio.Length < (offset + chunkSize);
                 }
                 var lastMessageSize = ttsAudio.Length - offset;
-                Logger.LogInformation($"SendSpeech after loop lastMessageSize : {lastMessageSize}");
+                Logger.LogInformation($"SendSpeech AFTER loop offset : {offset} | lastMessageSize : {lastMessageSize}");
                 await webSocket.SendAsync(new ArraySegment<byte>(ttsAudio, offset, lastMessageSize), WebSocketMessageType.Binary, true, CancellationToken.None);
             }
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine(ex.Message);
             }
-            
+            return true;
         }
     }
 }

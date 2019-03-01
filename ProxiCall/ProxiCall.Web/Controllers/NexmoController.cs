@@ -13,7 +13,7 @@ namespace ProxiCall.Web.Controllers
         [HttpGet("answer")]
         public IActionResult AnswerHandler()
         {
-            const string host = "proxicallhub.azurewebsites.net";
+            const string host = "proxicallmel.azurewebsites.net";
 
             //_botConnector = new BotConnector();
 
