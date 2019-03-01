@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -82,6 +82,8 @@ namespace ProxiCall.Web
                         WebSocket webSocket = await context.WebSockets.AcceptWebSocketAsync();
                         NexmoConnector.Logger = logger;
                         await NexmoConnector.NexmoTextToSpeech(context, webSocket);
+                        //await NexmoConnector.NexmoSpeechToText(context, webSocket);
+                        //await NexmoConnector.Echo(context, webSocket);
                     }
                     else
                     {
