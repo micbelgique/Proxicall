@@ -8,6 +8,9 @@ using System.Threading.Tasks;
 using ProxiCall.Web.Services.Speech;
 using Microsoft.Extensions.Logging;
 using System.Text;
+using Nexmo.Api;
+using Newtonsoft.Json;
+using ProxiCall.Web.Models.DTO;
 
 namespace ProxiCall.Web.Services
 {
@@ -35,6 +38,13 @@ namespace ProxiCall.Web.Services
         {
             var buffer = new byte[1024 * 4];
             WebSocketReceiveResult result = await webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
+
+            var firstMessage = Encoding.UTF8.GetString(buffer);
+            var dto = JsonConvert.DeserializeObject<NexmoFirstMessageDTO>(firstMessage);
+            
+            Logger.LogInformation($"UUID IN WEBSOCKET {dto.Uuid}");
+            TestPlayAudio(dto.Uuid);
+
             while (!result.CloseStatus.HasValue)
             {
                 await webSocket.SendAsync(new ArraySegment<byte>(buffer, 0, result.Count), result.MessageType, result.EndOfMessage, CancellationToken.None);
@@ -42,6 +52,23 @@ namespace ProxiCall.Web.Services
                 result = await webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
             }
             await webSocket.CloseAsync(result.CloseStatus.Value, result.CloseStatusDescription, CancellationToken.None);
+        }
+
+        private static void TestPlayAudio(string uuid)
+        {
+            Logger.LogInformation($"appsettings test : {Configuration.Instance.Settings["appsettings:Nexmo.api_key"]}");
+            var _client = new Client(creds: new Nexmo.Api.Request.Credentials
+            {
+                ApiKey = Configuration.Instance.Settings["appsettings:Nexmo.api_key"],
+                ApiSecret = Configuration.Instance.Settings["appsettings:Nexmo.api_secret"]
+            });
+            _client.Call.BeginStream(uuid, new Nexmo.Api.Voice.Call.StreamCommand
+            {
+                stream_url = new[]
+                {
+                    "http://www.largesound.com/ashborytour/sound/brobob.mp3"
+                }
+            });
         }
 
         public static async Task NexmoTextToSpeech(HttpContext context, WebSocket webSocket)

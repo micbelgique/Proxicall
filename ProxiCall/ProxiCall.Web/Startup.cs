@@ -1,19 +1,12 @@
 using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using System.Net;
 using System.Net.WebSockets;
-using System.Threading;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Logging;
 using ProxiCall.Web.Services;
 
@@ -21,13 +14,19 @@ namespace ProxiCall.Web
 {
     public class Startup
     {
-        private readonly ILogger<Startup> logger;
-
-        public Startup(IConfiguration configuration, ILogger<Startup> logger)
+        private readonly ILogger<Startup> _logger;
+        
+        public Startup(IHostingEnvironment env, ILogger<Startup> logger)
         {
-            Configuration = configuration;
-            this.logger = logger;
+            var builder = new ConfigurationBuilder()
+                .SetBasePath(env.ContentRootPath)
+                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+                .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true)
+                .AddEnvironmentVariables();
+            Configuration = builder.Build();
+            _logger = logger;
         }
+
 
         public IConfiguration Configuration { get; }
 
@@ -80,10 +79,10 @@ namespace ProxiCall.Web
                     if (context.WebSockets.IsWebSocketRequest)
                     {
                         WebSocket webSocket = await context.WebSockets.AcceptWebSocketAsync();
-                        NexmoConnector.Logger = logger;
-                        await NexmoConnector.NexmoTextToSpeech(context, webSocket);
+                        NexmoConnector.Logger = _logger;
+                        //await NexmoConnector.NexmoTextToSpeech(context, webSocket);
                         //await NexmoConnector.NexmoSpeechToText(context, webSocket);
-                        //await NexmoConnector.Echo(context, webSocket);
+                        await NexmoConnector.Echo(context, webSocket);
                     }
                     else
                     {
