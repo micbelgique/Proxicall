@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
+using ProxiCall.Web.Models;
 using ProxiCall.Web.Services;
 
 namespace ProxiCall.Web.Controllers
@@ -9,6 +11,13 @@ namespace ProxiCall.Web.Controllers
     public class NexmoController : ControllerBase
     {
         private BotConnector _botConnector;
+
+        public NexmoController(ILogger<NexmoController> logger)
+        {
+            Logger = logger;
+        }
+
+        public ILogger<NexmoController> Logger { get; }
 
         [HttpGet("answer")]
         public IActionResult AnswerHandler()
@@ -39,6 +48,13 @@ namespace ProxiCall.Web.Controllers
         [HttpPost("event")]
         public IActionResult EventHandler()
         {
+            return Ok();
+        }
+
+        [HttpPut("stream/{id}")]
+        public IActionResult StreamAudioToNexmo(string id, [FromBody] StreamAudioFileDTO dto)
+        {
+            Nexmo.Api.Voice.Call.
             return Ok();
         }
     }
