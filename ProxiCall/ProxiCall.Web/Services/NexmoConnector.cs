@@ -60,13 +60,15 @@ namespace ProxiCall.Web.Services
             var _client = new Client(creds: new Nexmo.Api.Request.Credentials
             {
                 ApiKey = Configuration.Instance.Settings["appsettings:Nexmo.api_key"],
-                ApiSecret = Configuration.Instance.Settings["appsettings:Nexmo.api_secret"]
+                ApiSecret = Configuration.Instance.Settings["appsettings:Nexmo.api_secret"],
+                ApplicationId = Configuration.Instance.Settings["appsettings:Nexmo.Application.Id"],
+                ApplicationKey = Configuration.Instance.Settings["appsettings:Nexmo.Application.Key"]
             });
             _client.Call.BeginStream(uuid, new Nexmo.Api.Voice.Call.StreamCommand
             {
                 stream_url = new[]
                 {
-                    "http://www.largesound.com/ashborytour/sound/brobob.mp3"
+                    "https://raw.githubusercontent.com/nexmo-community/ncco-examples/gh-pages/assets/welcome_to_nexmo.mp3"
                 }
             });
         }
