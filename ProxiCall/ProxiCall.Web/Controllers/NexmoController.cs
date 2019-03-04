@@ -30,7 +30,7 @@ namespace ProxiCall.Web.Controllers
         [HttpGet("answer")]
         public IActionResult AnswerHandler([FromQuery] string uuid)
         {
-            const string host = "proxicallhub.azurewebsites.net";
+            string host = Configuration.Instance.Settings["azure:host"];
 
             //_botConnector = new BotConnector();
 

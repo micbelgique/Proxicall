@@ -219,3 +219,7 @@ _Pvt_Extensions
 ProxiCall\.NodeJS/ProxiCall\.Web/\.env
 
 ProxiCall\.NodeJS/ProxiCall\.Web/package-lock\.json
+
+ProxiCall/ProxiCall\.Web/appsettings\.json
+
+ProxiCall/ProxiCall\.Web/private\.key
