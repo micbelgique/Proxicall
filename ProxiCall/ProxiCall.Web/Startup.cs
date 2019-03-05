@@ -1,23 +1,32 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using System;
+using System.Net;
+using System.Net.WebSockets;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using ProxiCall.Web.Services;
 
 namespace ProxiCall.Web
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration)
+        private readonly ILogger<Startup> _logger;
+        
+        public Startup(IHostingEnvironment env, ILogger<Startup> logger)
         {
-            Configuration = configuration;
+            var builder = new ConfigurationBuilder()
+                .SetBasePath(env.ContentRootPath)
+                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+                .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true)
+                .AddEnvironmentVariables();
+            Configuration = builder.Build();
+            _logger = logger;
         }
+
 
         public IConfiguration Configuration { get; }
 
@@ -49,9 +58,44 @@ namespace ProxiCall.Web
                 app.UseHsts();
             }
 
-            app.UseHttpsRedirection();
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
+            
             app.UseStaticFiles();
+
             app.UseCookiePolicy();
+
+            var webSocketOptions = new WebSocketOptions()
+            {
+                KeepAliveInterval = TimeSpan.FromSeconds(120),
+                ReceiveBufferSize = 4 * 1024
+            };
+            
+            app.UseWebSockets(webSocketOptions);
+
+            app.Use(async (context, next) =>
+            {
+                if (context.Request.Path == "/socket")
+                {
+                    if (context.WebSockets.IsWebSocketRequest)
+                    {
+                        WebSocket webSocket = await context.WebSockets.AcceptWebSocketAsync();
+                        NexmoConnector.Logger = _logger;
+                        //await NexmoConnector.NexmoTextToSpeech(context, webSocket);
+                        //await NexmoConnector.NexmoSpeechToText(context, webSocket);
+                        await NexmoConnector.Echo(context, webSocket);
+                        //await NexmoConnector.TestPlayAudio(webSocket);
+                    }
+                    else
+                    {
+                        context.Response.StatusCode = 400;
+                    }
+                }
+                else
+                {
+                    await next();
+                }
+
+            });
 
             app.UseMvc(routes =>
             {

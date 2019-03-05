@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.CognitiveServices.Speech;
 using Microsoft.CognitiveServices.Speech.Audio;
 
-namespace Console_Speech.Services.Speech
+namespace ProxiCall.Web.Services.Speech
 {
     class SpeechToText
     {

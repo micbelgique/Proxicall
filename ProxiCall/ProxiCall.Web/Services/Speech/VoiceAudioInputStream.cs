@@ -2,7 +2,7 @@
 using System.Threading;
 using Microsoft.CognitiveServices.Speech.Audio;
 
-namespace Console_Speech.Services.Speech
+namespace ProxiCall.Web.Services.Speech
 {
     public class VoiceAudioInputStream : PullAudioInputStreamCallback
     {

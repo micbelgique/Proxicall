@@ -3,7 +3,7 @@ using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Console_Speech.Services.Speech
+namespace ProxiCall.Web.Services.Speech
 {
     class AuthentificationApi
     {
