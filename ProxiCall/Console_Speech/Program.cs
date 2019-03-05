@@ -19,7 +19,7 @@ namespace Console_Speech
             byte[] result_tts = TextToSpeech.TransformTextToSpeechAsync("This is a test in english.", "en-US").Result;
             //FormatConvertor.TurnAudioStreamToFile(result_tts, path).Wait();
             Console.WriteLine(SpeechToText.RecognizeSpeechFromBytesAsync(result_tts, "en-US").Result);
-            result_tts = TextToSpeech.TransformTextToSpeechAsync("Voic le test en français.", "fr-FR").Result;
+            result_tts = TextToSpeech.TransformTextToSpeechAsync("Voici le test en français.", "fr-FR").Result;
             //FormatConvertor.TurnAudioStreamToFile(result_tts, path).Wait();
             Console.WriteLine(SpeechToText.RecognizeSpeechFromBytesAsync(result_tts, "fr-FR").Result);
 
