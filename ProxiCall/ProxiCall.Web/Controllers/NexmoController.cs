@@ -12,7 +12,7 @@ namespace ProxiCall.Web.Controllers
     [ApiController]
     public class NexmoController : ControllerBase
     {
-        private BotConnector _botConnector;
+        //private readonly BotConnector _botConnector;
         private readonly Client _client;
 
         public NexmoController(ILogger<NexmoController> logger)

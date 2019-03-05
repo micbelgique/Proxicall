@@ -69,7 +69,7 @@ namespace ProxiCall.Web
                 KeepAliveInterval = TimeSpan.FromSeconds(120),
                 ReceiveBufferSize = 4 * 1024
             };
-
+            
             app.UseWebSockets(webSocketOptions);
 
             app.Use(async (context, next) =>
@@ -82,7 +82,8 @@ namespace ProxiCall.Web
                         NexmoConnector.Logger = _logger;
                         //await NexmoConnector.NexmoTextToSpeech(context, webSocket);
                         //await NexmoConnector.NexmoSpeechToText(context, webSocket);
-                        await NexmoConnector.Echo(context, webSocket);
+                        //await NexmoConnector.Echo(context, webSocket);
+                        await NexmoConnector.TestPlayAudio(webSocket);
                     }
                     else
                     {

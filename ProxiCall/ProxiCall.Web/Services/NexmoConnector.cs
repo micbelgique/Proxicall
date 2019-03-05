@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using System;
-using System.Collections.Generic;
-using System.Linq;
+using System.Web;
 using System.Net.WebSockets;
 using System.Threading;
 using System.Threading.Tasks;
@@ -11,6 +10,7 @@ using System.Text;
 using Nexmo.Api;
 using Newtonsoft.Json;
 using ProxiCall.Web.Models.DTO;
+using Nexmo.Api.Voice;
 
 namespace ProxiCall.Web.Services
 {
@@ -43,7 +43,7 @@ namespace ProxiCall.Web.Services
             var dto = JsonConvert.DeserializeObject<NexmoFirstMessageDTO>(firstMessage);
             
             Logger.LogInformation($"UUID IN WEBSOCKET {dto.Uuid}");
-            TestPlayAudio(dto.Uuid);
+            //TestPlayAudio(dto.Uuid);
 
             while (!result.CloseStatus.HasValue)
             {
@@ -54,9 +54,19 @@ namespace ProxiCall.Web.Services
             await webSocket.CloseAsync(result.CloseStatus.Value, result.CloseStatusDescription, CancellationToken.None);
         }
 
-        private static void TestPlayAudio(string uuid)
+        public static async Task TestPlayAudio(WebSocket webSocket)
         {
-            Logger.LogInformation($"appsettings test : {Configuration.Instance.Settings["appsettings:Nexmo.api_key"]}");
+            var buffer = new byte[1024 * 4];
+            WebSocketReceiveResult result = await webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
+
+            var firstMessage = Encoding.UTF8.GetString(buffer);
+            var dto = JsonConvert.DeserializeObject<NexmoFirstMessageDTO>(firstMessage);
+
+            Logger.LogInformation($"UPDATE UUID IN WEBSOCKET {dto.Uuid}");
+            Logger.LogInformation($"API KEY : {Configuration.Instance.Settings["appsettings:Nexmo.api_key"]}");
+
+            Logger.LogInformation($"APP KEY : {Configuration.Instance.Settings["appsettings:Nexmo.Application.Key"]}");
+
             var _client = new Client(creds: new Nexmo.Api.Request.Credentials
             {
                 ApiKey = Configuration.Instance.Settings["appsettings:Nexmo.api_key"],
@@ -64,12 +74,23 @@ namespace ProxiCall.Web.Services
                 ApplicationId = Configuration.Instance.Settings["appsettings:Nexmo.Application.Id"],
                 ApplicationKey = Configuration.Instance.Settings["appsettings:Nexmo.Application.Key"]
             });
-            _client.Call.BeginStream(uuid, new Nexmo.Api.Voice.Call.StreamCommand
+            //Logger.LogInformation($"CLIENT 2 : {_client.Credentials.ApiKey} ");
+            //Logger.LogInformation($"CLIENT 3 : {_client.Credentials.ApiSecret} ");
+            //Logger.LogInformation($"CLIENT 4 : {_client.Credentials.ApplicationId} ");
+            //Logger.LogInformation($"CLIENT 5 : {_client.Credentials.ApplicationKey} ");
+            //if (_client==null)
+            //Logger.LogInformation($"CLIENT NULL ");
+            //var command = new Nexmo.Api.Voice.Call.StreamCommand();
+            //command.stream_url = new string[]
+            //    {
+            //        "http://www.noiseaddicts.com/samples_1w72b820/201.mp3"
+            //    };
+            //Logger.LogInformation($"COMMAND : {command.stream_url[0]} ");
+            //_client.Call.BeginStream(dto.Uuid, command);
+            var test = _client.Call.BeginTalk(dto.Uuid, new Call.TalkCommand
             {
-                stream_url = new[]
-                {
-                    "https://raw.githubusercontent.com/nexmo-community/ncco-examples/gh-pages/assets/welcome_to_nexmo.mp3"
-                }
+                text = "Hello Text to Speech",
+                voice_name = "Kimberly"
             });
         }
 

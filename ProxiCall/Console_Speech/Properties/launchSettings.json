@@ -3,7 +3,7 @@
     "Console_Speech": {
       "commandName": "Project",
       "environmentVariables": {
-        "SpeechApiKey": "8b3affa678a740c28cfc410d1117ad38",
+        "SpeechApiKey": "5801820bf589448ebea3cc096fa9068f",
         "SpeechApiRegion": "westeurope"
       }
     }
