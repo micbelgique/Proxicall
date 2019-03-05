@@ -39,11 +39,10 @@ namespace ProxiCall.Web.Services
             var buffer = new byte[1024 * 4];
             WebSocketReceiveResult result = await webSocket.ReceiveAsync(new ArraySegment<byte>(buffer), CancellationToken.None);
 
-            var firstMessage = Encoding.UTF8.GetString(buffer);
-            var dto = JsonConvert.DeserializeObject<NexmoFirstMessageDTO>(firstMessage);
+            //var firstMessage = Encoding.UTF8.GetString(buffer);
+            //var dto = JsonConvert.DeserializeObject<NexmoFirstMessageDTO>(firstMessage);
             
-            Logger.LogInformation($"UUID IN WEBSOCKET {dto.Uuid}");
-            //TestPlayAudio(dto.Uuid);
+            //Logger.LogInformation($"UUID IN WEBSOCKET {dto.Uuid}");
 
             while (!result.CloseStatus.HasValue)
             {

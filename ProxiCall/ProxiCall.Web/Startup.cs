@@ -82,8 +82,8 @@ namespace ProxiCall.Web
                         NexmoConnector.Logger = _logger;
                         //await NexmoConnector.NexmoTextToSpeech(context, webSocket);
                         //await NexmoConnector.NexmoSpeechToText(context, webSocket);
-                        //await NexmoConnector.Echo(context, webSocket);
-                        await NexmoConnector.TestPlayAudio(webSocket);
+                        await NexmoConnector.Echo(context, webSocket);
+                        //await NexmoConnector.TestPlayAudio(webSocket);
                     }
                     else
                     {
