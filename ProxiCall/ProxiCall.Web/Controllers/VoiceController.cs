@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Twilio.AspNet.Core;
 using Twilio.TwiML;
+using Twilio.TwiML.Voice;
 
 namespace ProxiCall.Web.Controllers
 {
@@ -25,7 +26,7 @@ namespace ProxiCall.Web.Controllers
             _actionContextAccessor = actionContextAccessor;
         }
 
-        [HttpPost]
+        [HttpGet("receive")]
         public async Task<IActionResult> ReceiveCallAsync()
         {
             var botConnector = new BotConnector();
@@ -51,9 +52,27 @@ namespace ProxiCall.Web.Controllers
         {
             var response = new VoiceResponse();
 
-            response.Say(botReplies[0].Text);
+            response.Say(botReplies[0].Text, voice: "alice", language: "fr-FR");
+            response.Gather(
+                input: new List<Gather.InputEnum> { Gather.InputEnum.Speech }, 
+                language: Gather.LanguageEnum.FrFr, 
+                action: new Uri("https://08b1eb59.ngrok.io/api/voice/reply"), 
+                method: Twilio.Http.HttpMethod.Get, 
+                speechTimeout: "auto"
+            );
 
+            //TODO .Start or .RunSynchronously ?
             TwiML(response).ExecuteResultAsync(_actionContextAccessor.ActionContext).RunSynchronously();
+        }
+
+        [HttpGet("reply")]
+        public async Task<IActionResult> UserReply([FromQuery] string SpeechResult, [FromQuery] double Confidence)
+        {
+            var response = new VoiceResponse();
+
+            response.Say(SpeechResult, voice: "alice", language: "fr-FR");
+
+            return TwiML(response);
         }
 
         [HttpGet]
