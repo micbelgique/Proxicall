@@ -3,6 +3,7 @@
   <PropertyGroup>
     <TargetFramework>netcoreapp2.2</TargetFramework>
     <AspNetCoreHostingModel>InProcess</AspNetCoreHostingModel>
+    <UserSecretsId>1e139998-339d-4ee0-929e-c40e17b667ce</UserSecretsId>
   </PropertyGroup>
 
 
@@ -11,6 +12,7 @@
     <PackageReference Include="Microsoft.AspNetCore.Razor.Design" Version="2.2.0" PrivateAssets="All" />
     <PackageReference Include="Microsoft.Bot.Connector.DirectLine" Version="3.0.2" />
     <PackageReference Include="Microsoft.CognitiveServices.Speech" Version="1.2.0" />
+    <PackageReference Include="Microsoft.Rest.ClientRuntime" Version="2.3.20" />
     <PackageReference Include="Twilio.AspNet.Core" Version="5.20.1" />
   </ItemGroup>
 
