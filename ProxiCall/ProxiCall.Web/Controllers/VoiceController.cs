@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.Bot.Connector.DirectLine;
 using ProxiCall.Web.Services;
 using System;
@@ -15,20 +16,28 @@ namespace ProxiCall.Web.Controllers
     {
         //private readonly string Sid = Environment.GetEnvironmentVariable("TwilioSid");
         //private readonly string Token = Environment.GetEnvironmentVariable("TwilioToken");
-        private IList<String> _messages;
-        [HttpPost]
-        public IActionResult ReceiveCall()
-        {
-            _messages = new List<String>();
-            var botConnector = new BotConnector();
-            var response = new VoiceResponse();
+        private IList<string> _messages;
 
-            botConnector.ReceiveMessagesFromBotAsync(ReceiveMessageFromBot).Wait();
+        private readonly IActionContextAccessor _actionContextAccessor;
+
+        public VoiceController(IActionContextAccessor actionContextAccessor)
+        {
+            _actionContextAccessor = actionContextAccessor;
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ReceiveCallAsync()
+        {
+            var botConnector = new BotConnector();
+
+            await botConnector.ReceiveMessagesFromBotAsync(ReceiveMessageFromBot);
             // Use <Say> to give the caller some instructions
-            foreach(var message in _messages)
-            {
-                response.Say(message);
-            }
+            //foreach(var message in _messages)
+            //{
+            //    megastring += message;
+            //}
+            var response = new VoiceResponse();
+            response.Say("Bye");
 
             // Use <Record> to record the caller's message
             //response.Record();
@@ -40,11 +49,11 @@ namespace ProxiCall.Web.Controllers
 
         private void ReceiveMessageFromBot(IList<Activity> botReplies)
         {
-            _messages.Clear();
-            foreach(var activity in botReplies)
-            {
-                _messages.Add(activity.Text);
-            }
+            var response = new VoiceResponse();
+
+            response.Say(botReplies[0].Text);
+
+            TwiML(response).ExecuteResultAsync(_actionContextAccessor.ActionContext).RunSynchronously();
         }
 
         [HttpGet]
