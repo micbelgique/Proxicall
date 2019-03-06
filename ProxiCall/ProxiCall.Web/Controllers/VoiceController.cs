@@ -17,8 +17,7 @@ namespace ProxiCall.Web.Controllers
     {
         //private readonly string Sid = Environment.GetEnvironmentVariable("TwilioSid");
         //private readonly string Token = Environment.GetEnvironmentVariable("TwilioToken");
-        private IList<string> _messages;
-
+        private static BotConnector _botConnector;
         private readonly IActionContextAccessor _actionContextAccessor;
 
         public VoiceController(IActionContextAccessor actionContextAccessor)
@@ -29,9 +28,9 @@ namespace ProxiCall.Web.Controllers
         [HttpGet("receive")]
         public async Task<IActionResult> ReceiveCallAsync()
         {
-            var botConnector = new BotConnector();
+            _botConnector = new BotConnector();
 
-            await botConnector.ReceiveMessagesFromBotAsync(ReceiveMessageFromBot);
+            await _botConnector.ReceiveMessagesFromBotAsync(ReceiveMessageFromBot);
             // Use <Say> to give the caller some instructions
             //foreach(var message in _messages)
             //{
@@ -52,11 +51,14 @@ namespace ProxiCall.Web.Controllers
         {
             var response = new VoiceResponse();
 
-            response.Say(botReplies[0].Text, voice: "alice", language: "fr-FR");
+            foreach(var activity in botReplies)
+            {
+                response.Say(activity.Text, voice: "alice", language: "fr-FR");
+            }
             response.Gather(
                 input: new List<Gather.InputEnum> { Gather.InputEnum.Speech }, 
                 language: Gather.LanguageEnum.FrFr, 
-                action: new Uri("https://08b1eb59.ngrok.io/api/voice/reply"), 
+                action: new Uri("https://3178f91b.ngrok.io/api/voice/reply"), 
                 method: Twilio.Http.HttpMethod.Get, 
                 speechTimeout: "auto"
             );
@@ -68,9 +70,17 @@ namespace ProxiCall.Web.Controllers
         [HttpGet("reply")]
         public async Task<IActionResult> UserReply([FromQuery] string SpeechResult, [FromQuery] double Confidence)
         {
+            var activity = new Activity();
+            activity.From = new ChannelAccount("TwilioUserId", "TwilioUser");
+            activity.Type = "message";
+            activity.Text = SpeechResult;
+
+            await _botConnector.SendMessageToBotAsync(activity);
+
             var response = new VoiceResponse();
 
-            response.Say(SpeechResult, voice: "alice", language: "fr-FR");
+            response.Pause(30);
+            response.Say("Le bot ne répond pas", voice: "alice", language: "fr-FR");
 
             return TwiML(response);
         }

@@ -19,7 +19,11 @@ namespace ProxiCall.Web.Services
 
         public BotConnector()
         {
-            _directLineClient = new DirectLineClient(Environment.GetEnvironmentVariable("DirectLineSecret"));
+            var dlSecret = Environment.GetEnvironmentVariable("DirectLineSecret");
+            if(dlSecret == "") {
+                throw new Exception("DirectLineSecret doesn't exist");
+            }
+            _directLineClient = new DirectLineClient(dlSecret);
             var conversation = _directLineClient.Conversations.StartConversation();
             _conversationId = conversation.ConversationId;
             _streamUrl = conversation.StreamUrl;
