@@ -1,5 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.Bot.Connector.DirectLine;
+using ProxiCall.Web.Services;
 using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 using Twilio.AspNet.Core;
 using Twilio.TwiML;
 
@@ -11,14 +15,20 @@ namespace ProxiCall.Web.Controllers
     {
         //private readonly string Sid = Environment.GetEnvironmentVariable("TwilioSid");
         //private readonly string Token = Environment.GetEnvironmentVariable("TwilioToken");
-
+        private IList<String> _messages;
         [HttpPost]
         public IActionResult ReceiveCall()
         {
+            _messages = new List<String>();
+            var botConnector = new BotConnector();
             var response = new VoiceResponse();
 
+            botConnector.ReceiveMessagesFromBotAsync(ReceiveMessageFromBot).Wait();
             // Use <Say> to give the caller some instructions
-            response.Say("Hello, Twilio works. Yeay!");
+            foreach(var message in _messages)
+            {
+                response.Say(message);
+            }
 
             // Use <Record> to record the caller's message
             //response.Record();
@@ -26,6 +36,15 @@ namespace ProxiCall.Web.Controllers
             response.Hangup();
 
             return TwiML(response);
+        }
+
+        private void ReceiveMessageFromBot(IList<Activity> botReplies)
+        {
+            _messages.Clear();
+            foreach(var activity in botReplies)
+            {
+                _messages.Add(activity.Text);
+            }
         }
 
         [HttpGet]
