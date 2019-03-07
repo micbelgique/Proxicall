@@ -53,14 +53,19 @@ namespace ProxiCall.Web.Services
                     repliesFromBot = Encoding.UTF8.GetString(buffer.ToArray(), 0, websocketReceivedResult.Count);
                     var activitySet = JsonConvert.DeserializeObject<ActivitySet>(repliesFromBot);
                     var activities = new List<Activity>();
+                    var isEmpty = true;
                     foreach (Activity activity in activitySet.Activities)
                     {
                         if (activity.From.Name == "ProxiCallBot")
                         {
                             activities.Add(activity);
+                            isEmpty = false;
                         }
                     }
-                    SendActivitiesToUser(activities, _callSid);
+                    if(!isEmpty)
+                    {
+                        SendActivitiesToUser(activities, _callSid);
+                    }
                 }
             }
             await webSocket.CloseAsync(websocketReceivedResult.CloseStatus.Value, websocketReceivedResult.CloseStatusDescription, CancellationToken.None);

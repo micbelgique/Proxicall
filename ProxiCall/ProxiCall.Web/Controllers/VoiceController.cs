@@ -12,6 +12,7 @@ using Twilio;
 using Twilio.Rest.Api.V2010.Account;
 using Microsoft.AspNetCore.Hosting;
 using System.IO;
+using System.Text;
 
 namespace ProxiCall.Web.Controllers
 {
@@ -33,14 +34,15 @@ namespace ProxiCall.Web.Controllers
         }
 
         [HttpGet("receive")]
-        public IActionResult ReceiveCall([FromQuery] string CallSid)
+        public async Task<IActionResult> ReceiveCall([FromQuery] string CallSid)
         {
             _botConnector = new BotConnector(CallSid);
 
             _botConnector.ReceiveMessagesFromBotAsync(ReceiveMessageFromBot);
 
             var response = new VoiceResponse();
-            response.Say("VOUS NE PASSEREZ PAS!", voice: "alice", language: "fr-FR");
+            response.Say("", voice: "alice", language: "fr-FR");
+            response.Pause(15);
 
             return TwiML(response);
         }
@@ -48,11 +50,13 @@ namespace ProxiCall.Web.Controllers
         private void ReceiveMessageFromBot(IList<Activity> botReplies, string callSid)
         {
             var response = new VoiceResponse();
-
-            foreach(var activity in botReplies)
+            //response.Say("Le botte dit : ", voice: "alice", language: "fr-FR");
+            var says = new StringBuilder();
+            foreach (var activity in botReplies)
             {
-                response.Say(activity.Text, voice: "alice", language: "fr-FR");
+                says.Append(activity.Text);
             }
+            response.Say(says.ToString(), voice: "alice", language: "fr-FR");
             response.Gather(
                 input: new List<Gather.InputEnum> { Gather.InputEnum.Speech }, 
                 language: Gather.LanguageEnum.FrFr,
@@ -73,36 +77,38 @@ namespace ProxiCall.Web.Controllers
         }
 
         [HttpGet("reply")]
-        public async System.Threading.Tasks.Task UserReply([FromQuery] string SpeechResult, [FromQuery] double Confidence, [FromQuery] string CallSid)
+        public IActionResult UserReply([FromQuery] string SpeechResult, [FromQuery] double Confidence, [FromQuery] string CallSid)
         {
-            var files = Directory.GetFiles(_hostingEnvironment.WebRootPath + "/xml");
-            foreach(var file in files)
-            {
-                System.IO.File.Delete(file);
-            }
+            //var files = Directory.GetFiles(_hostingEnvironment.WebRootPath + "/xml");
+            //foreach(var file in files)
+            //{
+            //    System.IO.File.Delete(file);
+            //}
 
             var activity = new Activity();
             activity.From = new ChannelAccount("TwilioUserId", "TwilioUser");
             activity.Type = "message";
             activity.Text = SpeechResult;
 
-            #region bot timeout message
             var response = new VoiceResponse();
             response.Pause(15);
             response.Say("Le botte ne répond pas.", voice: "alice", language: "fr-FR"); //Bot is mispelled for phonetic purpose
 
-            var fileName = Guid.NewGuid();
-            var path = _hostingEnvironment.WebRootPath + "/xml";
-            System.IO.File.WriteAllText($"{path}/{fileName}.xml", response.ToString());
+            //#region bot timeout message
+            //var fileName = Guid.NewGuid();
+            //var path = _hostingEnvironment.WebRootPath + "/xml";
+            //System.IO.File.WriteAllText($"{path}/{fileName}.xml", response.ToString());
 
-            var call = CallResource.Update(
-                method: Twilio.Http.HttpMethod.Get,
-                url: new Uri($"{Environment.GetEnvironmentVariable("Host")}/xml/{fileName}.xml"),
-                pathSid: CallSid
-            );
-            #endregion
+            //var call = CallResource.Update(
+            //    method: Twilio.Http.HttpMethod.Get,
+            //    url: new Uri($"{Environment.GetEnvironmentVariable("Host")}/xml/{fileName}.xml"),
+            //    pathSid: CallSid
+            //);
+            //#endregion
 
-            await _botConnector.SendMessageToBotAsync(activity);
+            _botConnector.SendMessageToBotAsync(activity);
+
+            return TwiML(response);
         }
 
         [HttpGet]
