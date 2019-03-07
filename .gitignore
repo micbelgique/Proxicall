@@ -349,3 +349,5 @@ healthchecksdb
 # End of https://www.gitignore.io/api/visualstudio
 
 ProxiCall/ProxiCall\.Web/Properties/launchSettings\.json
+
+ProxiCall/ProxiCall\.Web/wwwroot/xml/
