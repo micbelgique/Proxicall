@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Response>
+  <Gather input="speech" action="https://ae7f7af7.ngrok.io/api/voice/reply" method="GET" speechTimeout="auto" language="fr-FR"></Gather>
+</Response>

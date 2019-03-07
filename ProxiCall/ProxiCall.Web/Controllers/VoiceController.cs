@@ -8,6 +8,10 @@ using System.Threading.Tasks;
 using Twilio.AspNet.Core;
 using Twilio.TwiML;
 using Twilio.TwiML.Voice;
+using Twilio;
+using Twilio.Rest.Api.V2010.Account;
+using Microsoft.AspNetCore.Hosting;
+using System.IO;
 
 namespace ProxiCall.Web.Controllers
 {
@@ -15,39 +19,33 @@ namespace ProxiCall.Web.Controllers
     [ApiController]
     public class VoiceController : TwilioController
     {
-        //private readonly string Sid = Environment.GetEnvironmentVariable("TwilioSid");
-        //private readonly string Token = Environment.GetEnvironmentVariable("TwilioToken");
+        private readonly string Sid = Environment.GetEnvironmentVariable("TwilioSid");
+        private readonly string Token = Environment.GetEnvironmentVariable("TwilioToken");
         private static BotConnector _botConnector;
         private readonly IActionContextAccessor _actionContextAccessor;
+        private readonly IHostingEnvironment _hostingEnvironment;
 
-        public VoiceController(IActionContextAccessor actionContextAccessor)
+        public VoiceController(IActionContextAccessor actionContextAccessor, IHostingEnvironment hostingEnvironment)
         {
             _actionContextAccessor = actionContextAccessor;
+            _hostingEnvironment = hostingEnvironment;
+            TwilioClient.Init(Sid, Token);
         }
 
         [HttpGet("receive")]
-        public async Task<IActionResult> ReceiveCallAsync()
+        public IActionResult ReceiveCall([FromQuery] string CallSid)
         {
-            _botConnector = new BotConnector();
+            _botConnector = new BotConnector(CallSid);
 
-            await _botConnector.ReceiveMessagesFromBotAsync(ReceiveMessageFromBot);
-            // Use <Say> to give the caller some instructions
-            //foreach(var message in _messages)
-            //{
-            //    megastring += message;
-            //}
+            _botConnector.ReceiveMessagesFromBotAsync(ReceiveMessageFromBot);
+
             var response = new VoiceResponse();
-            response.Say("Bye");
-
-            // Use <Record> to record the caller's message
-            //response.Record();
-
-            response.Hangup();
+            response.Say("VOUS NE PASSEREZ PAS!", voice: "alice", language: "fr-FR");
 
             return TwiML(response);
         }
 
-        private void ReceiveMessageFromBot(IList<Activity> botReplies)
+        private void ReceiveMessageFromBot(IList<Activity> botReplies, string callSid)
         {
             var response = new VoiceResponse();
 
@@ -57,32 +55,54 @@ namespace ProxiCall.Web.Controllers
             }
             response.Gather(
                 input: new List<Gather.InputEnum> { Gather.InputEnum.Speech }, 
-                language: Gather.LanguageEnum.FrFr, 
-                action: new Uri("https://3178f91b.ngrok.io/api/voice/reply"), 
+                language: Gather.LanguageEnum.FrFr,
+                action: new Uri($"{Environment.GetEnvironmentVariable("Host")}/api/voice/reply"),
                 method: Twilio.Http.HttpMethod.Get, 
                 speechTimeout: "auto"
             );
 
-            //TODO .Start or .RunSynchronously ?
-            TwiML(response).ExecuteResultAsync(_actionContextAccessor.ActionContext).RunSynchronously();
+            var fileName = Guid.NewGuid();
+            var path = _hostingEnvironment.WebRootPath + "/xml";
+            System.IO.File.WriteAllText($"{path}/{fileName}.xml", response.ToString());
+
+            var call = CallResource.Update(
+                method: Twilio.Http.HttpMethod.Get,
+                url: new Uri($"{Environment.GetEnvironmentVariable("Host")}/xml/{fileName}.xml"),
+                pathSid: callSid
+            );
         }
 
         [HttpGet("reply")]
-        public async Task<IActionResult> UserReply([FromQuery] string SpeechResult, [FromQuery] double Confidence)
+        public async System.Threading.Tasks.Task UserReply([FromQuery] string SpeechResult, [FromQuery] double Confidence, [FromQuery] string CallSid)
         {
+            var files = Directory.GetFiles(_hostingEnvironment.WebRootPath + "/xml");
+            foreach(var file in files)
+            {
+                System.IO.File.Delete(file);
+            }
+
             var activity = new Activity();
             activity.From = new ChannelAccount("TwilioUserId", "TwilioUser");
             activity.Type = "message";
             activity.Text = SpeechResult;
 
-            await _botConnector.SendMessageToBotAsync(activity);
-
+            #region bot timeout message
             var response = new VoiceResponse();
+            response.Pause(15);
+            response.Say("Le botte ne répond pas.", voice: "alice", language: "fr-FR"); //Bot is mispelled for phonetic purpose
 
-            response.Pause(30);
-            response.Say("Le bot ne répond pas", voice: "alice", language: "fr-FR");
+            var fileName = Guid.NewGuid();
+            var path = _hostingEnvironment.WebRootPath + "/xml";
+            System.IO.File.WriteAllText($"{path}/{fileName}.xml", response.ToString());
 
-            return TwiML(response);
+            var call = CallResource.Update(
+                method: Twilio.Http.HttpMethod.Get,
+                url: new Uri($"{Environment.GetEnvironmentVariable("Host")}/xml/{fileName}.xml"),
+                pathSid: CallSid
+            );
+            #endregion
+
+            await _botConnector.SendMessageToBotAsync(activity);
         }
 
         [HttpGet]

@@ -16,4 +16,9 @@
     <PackageReference Include="Twilio.AspNet.Core" Version="5.20.1" />
   </ItemGroup>
 
+
+  <ItemGroup>
+    <Folder Include="wwwroot\xml\" />
+  </ItemGroup>
+
 </Project>

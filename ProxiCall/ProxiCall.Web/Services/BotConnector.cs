@@ -1,4 +1,5 @@
-﻿using Microsoft.Bot.Connector.DirectLine;
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.Bot.Connector.DirectLine;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -14,10 +15,11 @@ namespace ProxiCall.Web.Services
         private DirectLineClient _directLineClient;
         private readonly string _conversationId;
         private readonly string _streamUrl;
+        private readonly string _callSid;
 
-        public delegate void OnReplyHandler(IList<Activity> botReplies);
+        public delegate void OnReplyHandler(IList<Activity> botReplies, string callSid);
 
-        public BotConnector()
+        public BotConnector(string callSid)
         {
             var dlSecret = Environment.GetEnvironmentVariable("DirectLineSecret");
             if(dlSecret == "") {
@@ -27,6 +29,7 @@ namespace ProxiCall.Web.Services
             var conversation = _directLineClient.Conversations.StartConversation();
             _conversationId = conversation.ConversationId;
             _streamUrl = conversation.StreamUrl;
+            _callSid = callSid;
         }
 
         public async Task ReceiveMessagesFromBotAsync(OnReplyHandler SendActivitiesToUser)
@@ -57,7 +60,7 @@ namespace ProxiCall.Web.Services
                             activities.Add(activity);
                         }
                     }
-                    SendActivitiesToUser(activities);
+                    SendActivitiesToUser(activities, _callSid);
                 }
             }
             await webSocket.CloseAsync(websocketReceivedResult.CloseStatus.Value, websocketReceivedResult.CloseStatusDescription, CancellationToken.None);
@@ -65,7 +68,8 @@ namespace ProxiCall.Web.Services
 
         public async Task SendMessageToBotAsync(Activity userMessage)
         {
-            await _directLineClient.Conversations.PostActivityAsync(_conversationId, userMessage, CancellationToken.None);
+            var postedActivity = await _directLineClient.Conversations.PostActivityAsync(_conversationId, userMessage, CancellationToken.None);
+            Console.WriteLine(postedActivity);
         }
     }
 }
