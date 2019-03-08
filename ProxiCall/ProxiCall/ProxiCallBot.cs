@@ -69,7 +69,7 @@ namespace ProxiCall
             _dialogs.Add(new WaterfallDialog(DetailsWaterfall, waterfallSteps));
             _dialogs.Add(new TextPrompt(QuerySearchPrompt));
             _dialogs.Add(new TextPrompt(PhoneNumberPrompt));
-            _dialogs.Add(new ConfirmPrompt(ConfirmCallPrompt));
+            _dialogs.Add(new ConfirmPrompt(ConfirmCallPrompt, defaultLocale: "fr-fr"));
         }
 
         /// <summary>
