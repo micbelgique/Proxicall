@@ -351,3 +351,5 @@ healthchecksdb
 ProxiCall/ProxiCall\.Web/Properties/launchSettings\.json
 
 ProxiCall/ProxiCall\.Web/wwwroot/xml/
+
+ProxiCall/ProxiCall/Properties/launchSettings\.json
