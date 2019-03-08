@@ -34,12 +34,15 @@ namespace ProxiCall.Web.Controllers
         }
 
         [HttpGet("receive")]
-        public async Task<IActionResult> ReceiveCall([FromQuery] string CallSid)
+        public IActionResult ReceiveCall([FromQuery] string CallSid)
         {
             _botConnector = new BotConnector(CallSid);
 
+            //TODO : async not as async?
             _botConnector.ReceiveMessagesFromBotAsync(ReceiveMessageFromBot);
-
+            
+            //Preventing the call from hanging up (/receive needs to return a TwiML)
+            //TODO : search for another solution?
             var response = new VoiceResponse();
             response.Say("", voice: "alice", language: "fr-FR");
             response.Pause(15);
@@ -49,13 +52,13 @@ namespace ProxiCall.Web.Controllers
 
         private void ReceiveMessageFromBot(IList<Activity> botReplies, string callSid)
         {
-            var response = new VoiceResponse();
+            var voiceResponse = new VoiceResponse();
             var says = new StringBuilder();
             foreach (var activity in botReplies)
             {
-                response.Say(activity.Text, voice: "alice", language: "fr-FR");
+                voiceResponse.Say(activity.Text, voice: "alice", language: "fr-FR");
             }
-            response.Gather(
+            voiceResponse.Gather(
                 input: new List<Gather.InputEnum> { Gather.InputEnum.Speech },
                 language: Gather.LanguageEnum.FrFr,
                 action: new Uri($"{Environment.GetEnvironmentVariable("Host")}/api/voice/send"),
@@ -63,19 +66,19 @@ namespace ProxiCall.Web.Controllers
                 speechTimeout: "auto"
             );
 
-            var fileName = Guid.NewGuid();
-            var path = _hostingEnvironment.WebRootPath + "/xml";
-            System.IO.File.WriteAllText($"{path}/{fileName}.xml", response.ToString());
+            var xmlFileName = Guid.NewGuid();
+            var pathToXMLDirectory = _hostingEnvironment.WebRootPath + "/xml";
+            System.IO.File.WriteAllText($"{pathToXMLDirectory}/{xmlFileName}.xml", voiceResponse.ToString());
 
-            var call = CallResource.Update(
+            CallResource.Update(
                 method: Twilio.Http.HttpMethod.Get,
-                url: new Uri($"{Environment.GetEnvironmentVariable("Host")}/xml/{fileName}.xml"),
+                url: new Uri($"{Environment.GetEnvironmentVariable("Host")}/xml/{xmlFileName}.xml"),
                 pathSid: callSid
             );
         }
 
         [HttpGet("send")]
-        public IActionResult UserReply([FromQuery] string SpeechResult, [FromQuery] double Confidence, [FromQuery] string CallSid)
+        public IActionResult SendUserMessageToBot([FromQuery] string SpeechResult, [FromQuery] double Confidence, [FromQuery] string CallSid)
         {
             //var files = Directory.GetFiles(_hostingEnvironment.WebRootPath + "/xml");
             //foreach(var file in files)
@@ -83,15 +86,21 @@ namespace ProxiCall.Web.Controllers
             //    System.IO.File.Delete(file);
             //}
 
-            var activity = new Activity();
-            activity.From = new ChannelAccount("TwilioUserId", "TwilioUser");
-            activity.Type = "message";
-            activity.Text = SpeechResult;
+            var activityToSend = new Activity
+            {
+                From = new ChannelAccount("TwilioUserId", "TwilioUser"),
+                Type = "message",
+                Text = SpeechResult
+            };
 
-            _botConnector.SendMessageToBotAsync(activity);
+            //TODO : async not as async?
+            _botConnector.SendMessageToBotAsync(activityToSend);
 
+            //Preventing the call from hanging up
             var response = new VoiceResponse();
             response.Pause(15);
+
+            //DEBUG
             response.Say("Le botte ne répond pas.", voice: "alice", language: "fr-FR"); //Bot is mispelled for phonetic purpose
 
             return TwiML(response);

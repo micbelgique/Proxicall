@@ -21,11 +21,7 @@ namespace ProxiCall.Web.Services
 
         public BotConnector(string callSid)
         {
-            var dlSecret = Environment.GetEnvironmentVariable("DirectLineSecret");
-            if(dlSecret == "") {
-                throw new Exception("DirectLineSecret doesn't exist");
-            }
-            _directLineClient = new DirectLineClient(dlSecret);
+            _directLineClient = new DirectLineClient(Environment.GetEnvironmentVariable("DirectLineSecret"));
             var conversation = _directLineClient.Conversations.StartConversation();
             _conversationId = conversation.ConversationId;
             _streamUrl = conversation.StreamUrl;
@@ -35,25 +31,26 @@ namespace ProxiCall.Web.Services
         public async Task ReceiveMessagesFromBotAsync(OnReplyHandler SendActivitiesToUser)
         {
             var webSocket = new ClientWebSocket();
-            await webSocket.ConnectAsync(new Uri(_streamUrl), CancellationToken.None); 
+            await webSocket.ConnectAsync(new Uri(_streamUrl), CancellationToken.None);
 
-            var buffer = ClientWebSocket.CreateClientBuffer(1024 * 4, 1024 * 4);
+
+            string botReply = String.Empty;
+            var replyBuffer = ClientWebSocket.CreateClientBuffer(1024 * 4, 1024 * 4);
             
             var activities = new List<Activity>();
 
-            string repliesFromBot = String.Empty;
             WebSocketReceiveResult websocketReceivedResult = new WebSocketReceiveResult(0, WebSocketMessageType.Text, true);
             while (!websocketReceivedResult.CloseStatus.HasValue)
             {
                 do
                 {
-                    websocketReceivedResult = await webSocket.ReceiveAsync(buffer, CancellationToken.None);
+                    websocketReceivedResult = await webSocket.ReceiveAsync(replyBuffer, CancellationToken.None);
                 } while (!websocketReceivedResult.EndOfMessage);
 
                 if (websocketReceivedResult.Count != 0)
                 {
-                    repliesFromBot = Encoding.UTF8.GetString(buffer.ToArray(), 0, websocketReceivedResult.Count);
-                    var activitySet = JsonConvert.DeserializeObject<ActivitySet>(repliesFromBot);
+                    botReply = Encoding.UTF8.GetString(replyBuffer.ToArray(), 0, websocketReceivedResult.Count);
+                    var activitySet = JsonConvert.DeserializeObject<ActivitySet>(botReply);
                     var isFromBot = true;
                     foreach (Activity activity in activitySet.Activities)
                     {
@@ -75,8 +72,7 @@ namespace ProxiCall.Web.Services
 
         public async Task SendMessageToBotAsync(Activity userMessage)
         {
-            var postedActivity = await _directLineClient.Conversations.PostActivityAsync(_conversationId, userMessage, CancellationToken.None);
-            Console.WriteLine(postedActivity);
+            await _directLineClient.Conversations.PostActivityAsync(_conversationId, userMessage, CancellationToken.None);
         }
     }
 }
