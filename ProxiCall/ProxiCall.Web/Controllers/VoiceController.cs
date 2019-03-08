@@ -52,18 +52,23 @@ namespace ProxiCall.Web.Controllers
             var response = new VoiceResponse();
             //response.Say("Le botte dit : ", voice: "alice", language: "fr-FR");
             var says = new StringBuilder();
+            var isIgnoringInput = false;
             foreach (var activity in botReplies)
             {
                 says.Append(activity.Text);
+                //isIgnoringInput = activity.InputHint == InputHints.IgnoringInput;
             }
             response.Say(says.ToString(), voice: "alice", language: "fr-FR");
-            response.Gather(
-                input: new List<Gather.InputEnum> { Gather.InputEnum.Speech }, 
-                language: Gather.LanguageEnum.FrFr,
-                action: new Uri($"{Environment.GetEnvironmentVariable("Host")}/api/voice/reply"),
-                method: Twilio.Http.HttpMethod.Get, 
-                speechTimeout: "auto"
-            );
+            //if (!isIgnoringInput)
+            //{
+                    response.Gather(
+                    input: new List<Gather.InputEnum> { Gather.InputEnum.Speech },
+                    language: Gather.LanguageEnum.FrFr,
+                    action: new Uri($"{Environment.GetEnvironmentVariable("Host")}/api/voice/reply"),
+                    method: Twilio.Http.HttpMethod.Get,
+                    speechTimeout: "auto"
+                );
+            //}
 
             var fileName = Guid.NewGuid();
             var path = _hostingEnvironment.WebRootPath + "/xml";
