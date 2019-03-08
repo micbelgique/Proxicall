@@ -44,7 +44,7 @@ namespace ProxiCall.Web.Controllers
             //Preventing the call from hanging up (/receive needs to return a TwiML)
             //TODO : search for another solution?
             var response = new VoiceResponse();
-            response.Say("", voice: "alice", language: "fr-FR");
+            response.Say("", voice: "alice", language: Say.LanguageEnum.FrFr);
             response.Pause(15);
 
             return TwiML(response);
@@ -56,7 +56,7 @@ namespace ProxiCall.Web.Controllers
             var says = new StringBuilder();
             foreach (var activity in botReplies)
             {
-                voiceResponse.Say(activity.Text, voice: "alice", language: "fr-FR");
+                voiceResponse.Say(activity.Text, voice: "alice", language: Say.LanguageEnum.FrFr);
             }
             voiceResponse.Gather(
                 input: new List<Gather.InputEnum> { Gather.InputEnum.Speech },
@@ -80,11 +80,11 @@ namespace ProxiCall.Web.Controllers
         [HttpGet("send")]
         public IActionResult SendUserMessageToBot([FromQuery] string SpeechResult, [FromQuery] double Confidence, [FromQuery] string CallSid)
         {
-            //var files = Directory.GetFiles(_hostingEnvironment.WebRootPath + "/xml");
-            //foreach(var file in files)
-            //{
-            //    System.IO.File.Delete(file);
-            //}
+            var filesToDelete = Directory.GetFiles(_hostingEnvironment.WebRootPath + "/xml");
+            foreach (var file in filesToDelete)
+            {
+                System.IO.File.Delete(file);
+            }
 
             var activityToSend = new Activity
             {
@@ -101,7 +101,7 @@ namespace ProxiCall.Web.Controllers
             response.Pause(15);
 
             //DEBUG
-            response.Say("Le botte ne répond pas.", voice: "alice", language: "fr-FR"); //Bot is mispelled for phonetic purpose
+            response.Say("Le botte ne répond pas.", voice: "alice", language : Say.LanguageEnum.FrFr); //Bot is mispelled for phonetic purpose
 
             return TwiML(response);
         }
