@@ -109,7 +109,7 @@ namespace ProxiCall
                 {
                     var reply = MessageFactory.Text(Properties.strings.welcome,
                                                     Properties.strings.welcome,
-                                                    InputHints.IgnoringInput);
+                                                    InputHints.AcceptingInput);
                     await turnContext.SendActivityAsync(reply, cancellationToken);
                 }
             }
@@ -138,10 +138,12 @@ namespace ProxiCall
 
             // TODO INSERT QUERY TO DATABASE HERE
 
+            var textMessage = $"{Properties.strings.phoneNumberOf_1} {stepContext.Result} {Properties.strings.phoneNumberOf_2} " + phoneNumber + ".";
             searchedUser.PhoneNumber = phoneNumber;
             await stepContext.Context
                 .SendActivityAsync(MessageFactory
-                .Text($"{Properties.strings.phoneNumberOf_1} {stepContext.Result} {Properties.strings.phoneNumberOf_2} " + phoneNumber + "."), cancellationToken);
+                    .Text(textMessage, textMessage, InputHints.IgnoringInput)
+                    , cancellationToken);
 
             return await stepContext.ContinueDialogAsync();
         }
@@ -166,7 +168,7 @@ namespace ProxiCall
             if (confirmation)
             {
                 msg = $"{Properties.strings.callForwardingConfirmed}";
-                await stepContext.Context.SendActivityAsync(MessageFactory.Text(msg), cancellationToken);
+                await stepContext.Context.SendActivityAsync(MessageFactory.Text(msg, msg, InputHints.IgnoringInput), cancellationToken);
                 //TODO ask for call forwarding
             }
 
