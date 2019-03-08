@@ -38,6 +38,8 @@ namespace ProxiCall.Web.Services
             await webSocket.ConnectAsync(new Uri(_streamUrl), CancellationToken.None); 
 
             var buffer = ClientWebSocket.CreateClientBuffer(1024 * 4, 1024 * 4);
+            
+            var activities = new List<Activity>();
 
             string repliesFromBot = String.Empty;
             WebSocketReceiveResult websocketReceivedResult = new WebSocketReceiveResult(0, WebSocketMessageType.Text, true);
@@ -52,19 +54,19 @@ namespace ProxiCall.Web.Services
                 {
                     repliesFromBot = Encoding.UTF8.GetString(buffer.ToArray(), 0, websocketReceivedResult.Count);
                     var activitySet = JsonConvert.DeserializeObject<ActivitySet>(repliesFromBot);
-                    var activities = new List<Activity>();
-                    var isEmpty = true;
+                    var isFromBot = true;
                     foreach (Activity activity in activitySet.Activities)
                     {
-                        if (activity.From.Name == "ProxiCallBot")
+                        isFromBot = activity.From.Name == "ProxiCallBot";
+                        if (isFromBot)
                         {
                             activities.Add(activity);
-                            isEmpty = false;
+                            if(activity.InputHint != InputHints.IgnoringInput)
+                            {
+                                SendActivitiesToUser(activities, _callSid);
+                                activities.Clear();
+                            }
                         }
-                    }
-                    if(!isEmpty)
-                    {
-                        SendActivitiesToUser(activities, _callSid);
                     }
                 }
             }

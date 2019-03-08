@@ -50,25 +50,18 @@ namespace ProxiCall.Web.Controllers
         private void ReceiveMessageFromBot(IList<Activity> botReplies, string callSid)
         {
             var response = new VoiceResponse();
-            //response.Say("Le botte dit : ", voice: "alice", language: "fr-FR");
             var says = new StringBuilder();
-            var isIgnoringInput = false;
             foreach (var activity in botReplies)
             {
-                says.Append(activity.Text);
-                //isIgnoringInput = activity.InputHint == InputHints.IgnoringInput;
+                response.Say(activity.Text, voice: "alice", language: "fr-FR");
             }
-            response.Say(says.ToString(), voice: "alice", language: "fr-FR");
-            //if (!isIgnoringInput)
-            //{
-                    response.Gather(
-                    input: new List<Gather.InputEnum> { Gather.InputEnum.Speech },
-                    language: Gather.LanguageEnum.FrFr,
-                    action: new Uri($"{Environment.GetEnvironmentVariable("Host")}/api/voice/reply"),
-                    method: Twilio.Http.HttpMethod.Get,
-                    speechTimeout: "auto"
-                );
-            //}
+            response.Gather(
+                input: new List<Gather.InputEnum> { Gather.InputEnum.Speech },
+                language: Gather.LanguageEnum.FrFr,
+                action: new Uri($"{Environment.GetEnvironmentVariable("Host")}/api/voice/send"),
+                method: Twilio.Http.HttpMethod.Get,
+                speechTimeout: "auto"
+            );
 
             var fileName = Guid.NewGuid();
             var path = _hostingEnvironment.WebRootPath + "/xml";
@@ -81,7 +74,7 @@ namespace ProxiCall.Web.Controllers
             );
         }
 
-        [HttpGet("reply")]
+        [HttpGet("send")]
         public IActionResult UserReply([FromQuery] string SpeechResult, [FromQuery] double Confidence, [FromQuery] string CallSid)
         {
             //var files = Directory.GetFiles(_hostingEnvironment.WebRootPath + "/xml");
@@ -95,23 +88,11 @@ namespace ProxiCall.Web.Controllers
             activity.Type = "message";
             activity.Text = SpeechResult;
 
+            _botConnector.SendMessageToBotAsync(activity);
+
             var response = new VoiceResponse();
             response.Pause(15);
             response.Say("Le botte ne répond pas.", voice: "alice", language: "fr-FR"); //Bot is mispelled for phonetic purpose
-
-            //#region bot timeout message
-            //var fileName = Guid.NewGuid();
-            //var path = _hostingEnvironment.WebRootPath + "/xml";
-            //System.IO.File.WriteAllText($"{path}/{fileName}.xml", response.ToString());
-
-            //var call = CallResource.Update(
-            //    method: Twilio.Http.HttpMethod.Get,
-            //    url: new Uri($"{Environment.GetEnvironmentVariable("Host")}/xml/{fileName}.xml"),
-            //    pathSid: CallSid
-            //);
-            //#endregion
-
-            _botConnector.SendMessageToBotAsync(activity);
 
             return TwiML(response);
         }
