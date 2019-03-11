@@ -26,6 +26,13 @@ namespace ProxiCall
     /// <seealso cref="https://docs.microsoft.com/en-us/aspnet/core/fundamentals/dependency-injection?view=aspnetcore-2.1"/>
     public class ProxiCallBot : IBot
     {
+        private const string LuisConfiguration = "proxicall-luis";
+
+
+        // Supported LUIS Intents
+        public const string NoneIntent = "None";
+        public const string MakeACallIntent = "MakeACall";
+
         private readonly BotServices _services;
         private readonly UserState _userState;
         private readonly ConversationState _conversationState;
@@ -46,6 +53,12 @@ namespace ProxiCall
         public ProxiCallBot(BotServices services, UserState userState, ConversationState conversationState, ILoggerFactory loggerFactory)
         {
             _services = services ?? throw new ArgumentNullException(nameof(services));
+            
+            if (!_services.LuisServices.ContainsKey(LuisConfiguration))
+            {
+                throw new System.ArgumentException($"The bot configuration does not contain a service type of `luis` with the id `{LuisConfiguration}`.");
+            }
+
             _userState = userState ?? throw new ArgumentNullException(nameof(userState));
             _conversationState = conversationState ?? throw new ArgumentNullException(nameof(conversationState));
 
@@ -75,26 +88,84 @@ namespace ProxiCall
                 throw new ArgumentNullException(nameof(turnContext));
             }
 
-            if (turnContext.Activity.Type == ActivityTypes.Message)
-            {
-                var dialogContext = await Dialogs.CreateContextAsync(turnContext, cancellationToken);
-                var results = await dialogContext.ContinueDialogAsync(cancellationToken);
+            var activity = turnContext.Activity;
 
-                // If the DialogTurnStatus is Empty we should start a new dialog.
-                if (results.Status == DialogTurnStatus.Empty)
+            // Create a dialog context
+            var dialogContext = await Dialogs.CreateContextAsync(turnContext);
+
+            if (activity.Type == ActivityTypes.Message)
+            {
+                // Perform a call to LUIS to retrieve results for the current activity message.
+                var luisResults = await _services.LuisServices[LuisConfiguration].RecognizeAsync(dialogContext.Context, cancellationToken);
+
+                // If any entities were updated, treat as interruption.
+                // For example, "no my name is tony" will manifest as an update of the name to be "tony".
+                var topScoringIntent = luisResults?.GetTopScoringIntent();
+
+                var topIntent = topScoringIntent.Value.intent;
+
+
+                //TODO 
+                //// Handle conversation interrupts first.
+                //var interrupted = await IsTurnInterruptedAsync(dialogContext, topIntent);
+                //if (interrupted)
+                //{
+                //    // Bypass the dialog.
+                //    // Save state before the next turn.
+                //    await _conversationState.SaveChangesAsync(turnContext);
+                //    await _userState.SaveChangesAsync(turnContext);
+                //    return;
+                //}
+
+                // Continue the current dialog
+                var dialogResult = await dialogContext.ContinueDialogAsync();
+
+                // if no one has responded,
+                if (!dialogContext.Context.Responded)
                 {
-                    await dialogContext.BeginDialogAsync(nameof(CallDialog));
+                    // examine results from active dialog
+                    switch (dialogResult.Status)
+                    {
+                        case DialogTurnStatus.Empty:
+                            switch (topIntent)
+                            {
+                                case MakeACallIntent:
+                                    // update call state with any entities captured
+                                    await UpdateCallStateAsync(luisResults, dialogContext.Context);
+
+                                    await dialogContext.BeginDialogAsync(nameof(CallDialog));
+                                    break;
+
+                                case NoneIntent:
+                                default:
+                                    // Help or no intent identified, either way, let's provide some help.
+                                    // to the user
+                                    await dialogContext.Context.SendActivityAsync("I didn't understand what you just said to me.");
+                                    break;
+                            }
+
+                            break;
+
+                        case DialogTurnStatus.Waiting:
+                            // The active dialog is waiting for a response from the user, so do nothing.
+                            break;
+
+                        case DialogTurnStatus.Complete:
+                            await dialogContext.EndDialogAsync();
+                            break;
+
+                        default:
+                            await dialogContext.CancelAllDialogsAsync();
+                            break;
+                    }
                 }
             }
-            else
+            else if (turnContext.Activity.Type == ActivityTypes.ConversationUpdate && turnContext.Activity.MembersAdded.FirstOrDefault()?.Id == turnContext.Activity.Recipient.Id)
             {
-                if (turnContext.Activity.Type == ActivityTypes.ConversationUpdate && turnContext.Activity.MembersAdded.FirstOrDefault()?.Id == turnContext.Activity.Recipient.Id)
-                {
-                    var reply = MessageFactory.Text(Properties.strings.welcome,
-                                                    Properties.strings.welcome,
-                                                    InputHints.AcceptingInput);
-                    await turnContext.SendActivityAsync(reply, cancellationToken);
-                }
+                var reply = MessageFactory.Text(Properties.strings.welcome,
+                                                Properties.strings.welcome,
+                                                InputHints.AcceptingInput);
+                await turnContext.SendActivityAsync(reply, cancellationToken);
             }
 
             // Save the dialog state into the conversation state.
@@ -103,5 +174,76 @@ namespace ProxiCall
             // Save the user profile updates into the user state.
             await _userState.SaveChangesAsync(turnContext, false, cancellationToken);
         }
+
+        /// <summary>
+        /// Helper function to update greeting state with entities returned by LUIS.
+        /// <param name="luisResult">LUIS recognizer <see cref="RecognizerResult"/>.</param>
+        /// <param name="turnContext">A <see cref="ITurnContext"/> containing all the data needed
+        /// for processing this conversation turn.</param>
+        /// <returns>A task that represents the work queued to execute.</returns>
+        /// </summary>
+        private async Task UpdateCallStateAsync(RecognizerResult luisResult, ITurnContext turnContext)
+        {
+            if (luisResult.Entities != null && luisResult.Entities.HasValues)
+            {
+                // Get latest GreetingState
+                var callState = await _callStateAccessor.GetAsync(turnContext, () => new CallState());
+                var entities = luisResult.Entities;
+
+                // Supported LUIS Entities
+                string[] personNameEntities = { "personName" };
+
+                // Update any entities
+                // Note: Consider a confirm dialog, instead of just updating.
+                foreach (var entity in personNameEntities)
+                {
+                    // Check if we found valid slot values in entities returned from LUIS.
+                    if (entities[entity] != null)
+                    {
+                        // Capitalize and set new user name.
+                        var fullName = (string)entities[entity][0];
+                        callState.RecipientFullName = fullName;
+                        break;
+                    }
+                }
+
+                // Set the new values into state.
+                await _callStateAccessor.SetAsync(turnContext, callState);
+            }
+        }
+
+        //// Determine if an interruption has occurred before we dispatch to any active dialog.
+        //private async Task<bool> IsTurnInterruptedAsync(DialogContext dc, string topIntent)
+        //{
+        //    // See if there are any conversation interrupts we need to handle.
+        //    if (topIntent.Equals(CancelIntent))
+        //    {
+        //        if (dc.ActiveDialog != null)
+        //        {
+        //            await dc.CancelAllDialogsAsync();
+        //            await dc.Context.SendActivityAsync("Ok. I've canceled our last activity.");
+        //        }
+        //        else
+        //        {
+        //            await dc.Context.SendActivityAsync("I don't have anything to cancel.");
+        //        }
+
+        //        return true;        // Handled the interrupt.
+        //    }
+
+        //    if (topIntent.Equals(HelpIntent))
+        //    {
+        //        await dc.Context.SendActivityAsync("Let me try to provide some help.");
+        //        await dc.Context.SendActivityAsync("I understand greetings, being asked for help, or being asked to cancel what I am doing.");
+        //        if (dc.ActiveDialog != null)
+        //        {
+        //            await dc.RepromptDialogAsync();
+        //        }
+
+        //        return true;        // Handled the interrupt.
+        //    }
+
+        //    return false;           // Did not handle the interrupt.
+        //}
     }
 }

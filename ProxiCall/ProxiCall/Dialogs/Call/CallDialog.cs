@@ -58,7 +58,16 @@ namespace ProxiCall.Dialogs.Call
 
         private async Task<DialogTurnResult> PromptForRecipientNameStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
         {
-            return await stepContext.PromptAsync(RecipientPrompt, new PromptOptions { Prompt = MessageFactory.Text(Properties.strings.querySearchPerson) }, cancellationToken);
+            var searchedRecipient = await CallStateAccessor.GetAsync(stepContext.Context);
+
+            if (string.IsNullOrEmpty(searchedRecipient.RecipientFullName))
+            {
+                return await stepContext.PromptAsync(RecipientPrompt, new PromptOptions { Prompt = MessageFactory.Text(Properties.strings.querySearchPerson) }, cancellationToken);
+            }
+            else
+            {
+                return await stepContext.ContinueDialogAsync();
+            }
         }
 
         private async Task<DialogTurnResult> PromptForRecipientNumberStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
@@ -67,17 +76,21 @@ namespace ProxiCall.Dialogs.Call
             var searchedRecipient = await CallStateAccessor.GetAsync(stepContext.Context);
 
             // Update the profile.
-            searchedRecipient.RecipientFirstName = (string)stepContext.Result;
+            if (string.IsNullOrEmpty(searchedRecipient.RecipientFullName))
+            {
+                searchedRecipient.RecipientFullName = (string)stepContext.Result;
+            }
 
             var phoneNumber = "555-2368 (Ghost Busters!)"; // TODO remove hardcoded number
 
             // TODO INSERT QUERY TO DATABASE HERE
 
-            var textMessage = $"{Properties.strings.phoneNumberOf_1} {stepContext.Result} {Properties.strings.phoneNumberOf_2} " + phoneNumber + ".";
             searchedRecipient.PhoneNumber = phoneNumber;
 
             await CallStateAccessor.SetAsync(stepContext.Context, searchedRecipient);
 
+            var textMessage = $"{Properties.strings.phoneNumberOf_1} {searchedRecipient.RecipientFullName} {Properties.strings.phoneNumberOf_2} " + phoneNumber + ".";
+            
             await stepContext.Context
                 .SendActivityAsync(MessageFactory
                     .Text(textMessage, textMessage, InputHints.IgnoringInput)
