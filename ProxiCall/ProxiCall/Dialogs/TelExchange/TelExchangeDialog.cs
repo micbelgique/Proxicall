@@ -22,7 +22,6 @@ namespace ProxiCall.Dialogs.TelExchange
         private const string RecipientNamePrompt = "recipientNamePrompt";
         private const string RetryNumberSearchPrompt = "retryNumberSearchPrompt";
         private const string ConfirmForwardingPrompt = "confirmForwardingPrompt";
-        private const string EndCallDialogPrompt = "endCallDialogPrompt";
 
         public TelExchangeDialog(IStatePropertyAccessor<TelExchangeState> telExchangeStateAccessor, ILoggerFactory loggerFactory, BotServices botServices) : base(nameof(TelExchangeDialog))
         {
@@ -36,14 +35,12 @@ namespace ProxiCall.Dialogs.TelExchange
                 PromptForRecipientNameStepAsync,
                 SearchRecipientNumberStepAsync,
                 ResultHandlerStepAsync,
-                ForwardCallStepAsync,
-                EndTelExchangeDialogStepAsync,
+                EndTelExchangeDialogStepAsync
             };
             AddDialog(new WaterfallDialog(TelExchangeWaterfall, waterfallSteps));
             AddDialog(new TextPrompt(RecipientNamePrompt));
             AddDialog(new ConfirmPrompt(RetryNumberSearchPrompt, defaultLocale: "fr-fr"));
             AddDialog(new ConfirmPrompt(ConfirmForwardingPrompt, defaultLocale: "fr-fr"));
-            AddDialog(new ConfirmPrompt(EndCallDialogPrompt, defaultLocale: "fr-fr"));
         }
 
         private async Task<DialogTurnResult> InitializeStateStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
@@ -117,13 +114,14 @@ namespace ProxiCall.Dialogs.TelExchange
         private async Task<DialogTurnResult> ResultHandlerStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
         {
             var searchedRecipient = await TelExchangeStateAccessor.GetAsync(stepContext.Context);
+
             if (string.IsNullOrEmpty(searchedRecipient.PhoneNumber)) 
             {
                 var retry = (bool) stepContext.Result;
                 if(retry)
                 {
                     await ResetState(stepContext);
-                    return await stepContext.
+                    return await stepContext.ReplaceDialogAsync(nameof(TelExchangeDialog), cancellationToken);
                 }
                 else
                 {
@@ -133,7 +131,7 @@ namespace ProxiCall.Dialogs.TelExchange
 
             if (searchedRecipient.IntentName == Intents.TelephoneExchange)
             {
-                var textMessage = $"{Properties.strings.phoneNumberOf_1} {searchedRecipient.RecipientFullName} {Properties.strings.phoneNumberOf_2} " + phoneNumber + ".";
+                var textMessage = $"{Properties.strings.phoneNumberOf_1} {searchedRecipient.RecipientFullName} {Properties.strings.phoneNumberOf_2} " + searchedRecipient.PhoneNumber + ".";
 
                 await stepContext.Context
                     .SendActivityAsync(MessageFactory
@@ -161,14 +159,26 @@ namespace ProxiCall.Dialogs.TelExchange
             await TelExchangeStateAccessor.SetAsync(stepContext.Context, state);
         }
 
-        private Task<DialogTurnResult> ForwardCallStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
+        private async Task<DialogTurnResult> EndTelExchangeDialogStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
-        }
+            var searchedRecipient = await TelExchangeStateAccessor.GetAsync(stepContext.Context);
 
-        private Task<DialogTurnResult> EndTelExchangeDialogStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
-        {
-            throw new NotImplementedException();
+            if (searchedRecipient.IntentName == Intents.TelephoneExchange)
+            {
+                var forward = (bool) stepContext.Result;
+                if(!forward)
+                {
+                    return await stepContext.EndDialogAsync();
+                }
+            }
+
+            var textMessage = Properties.strings.callForwardingConfirmed;
+            var activity = MessageFactory.Text(textMessage, textMessage, InputHints.IgnoringInput);
+            activity.Label = searchedRecipient.PhoneNumber; //TODO entities
+
+            await stepContext.Context.SendActivityAsync(activity, cancellationToken);
+
+            return await stepContext.EndDialogAsync();
         }
     }
 }

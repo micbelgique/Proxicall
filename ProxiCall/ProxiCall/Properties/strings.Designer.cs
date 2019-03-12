@@ -133,7 +133,7 @@ namespace ProxiCall.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Bienvenue sur ProxiCall..
+        ///   Looks up a localized string similar to Bienvenue sur ProxiCall. Comment puis-je vous aider?.
         /// </summary>
         public static string welcome {
             get {

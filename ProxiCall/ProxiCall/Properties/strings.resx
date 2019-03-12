@@ -142,6 +142,6 @@
     <value>Veuillez répondre par 'Oui' ou  'Non' pour confirmer.</value>
   </data>
   <data name="welcome" xml:space="preserve">
-    <value>Bienvenue sur ProxiCall.</value>
+    <value>Bienvenue sur ProxiCall. Comment puis-je vous aider?</value>
   </data>
 </root>
