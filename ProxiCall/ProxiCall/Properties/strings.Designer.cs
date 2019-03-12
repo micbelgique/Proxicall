@@ -115,6 +115,15 @@ namespace ProxiCall.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to n&apos;a pas été trouvé. Souhaitez-vous réessayer?.
+        /// </summary>
+        public static string retryNumberSearchPrompt {
+            get {
+                return ResourceManager.GetString("retryNumberSearchPrompt", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Veuillez répondre par &apos;Oui&apos; ou  &apos;Non&apos; pour confirmer..
         /// </summary>
         public static string retryPrompt {
