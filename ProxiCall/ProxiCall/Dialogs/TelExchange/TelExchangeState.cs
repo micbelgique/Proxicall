@@ -12,7 +12,7 @@ namespace ProxiCall.Dialogs.TelExchange
         public string RecipientLastName { get; set; }
         public string PhoneNumber { get; set; }
 
-        private string recipientFullname;
+        private string recipientFullname = string.Empty;
 
         public string RecipientFullName {
             get { return recipientFullname; }
@@ -34,5 +34,15 @@ namespace ProxiCall.Dialogs.TelExchange
         }
 
         public string IntentName { get; set; }
+
+        public void Reset(bool keepIntent = false)
+        {
+            RecipientFullName = string.Empty;
+            PhoneNumber = string.Empty;
+            if(!keepIntent)
+            {
+                IntentName = string.Empty;
+            }
+        }
     }
 }

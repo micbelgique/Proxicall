@@ -133,7 +133,7 @@ namespace ProxiCall
                 options.OnTurnError = async (context, exception) =>
                 {
                     logger.LogError($"Exception caught : {exception}");
-                    await context.SendActivityAsync("Sorry, it looks like something went wrong.");
+                    await context.SendActivityAsync($"Sorry, it looks like something went wrong : {exception.Message}");
                 };
             });
         }

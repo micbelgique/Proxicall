@@ -120,11 +120,14 @@ namespace ProxiCall.Dialogs.TelExchange
                 var retry = (bool) stepContext.Result;
                 if(retry)
                 {
-                    await ResetState(stepContext);
+                    searchedRecipient.Reset(true);
+                    await TelExchangeStateAccessor.SetAsync(stepContext.Context, searchedRecipient);
                     return await stepContext.ReplaceDialogAsync(nameof(TelExchangeDialog), cancellationToken);
                 }
                 else
                 {
+                    searchedRecipient.Reset(true);
+                    await TelExchangeStateAccessor.SetAsync(stepContext.Context, searchedRecipient);
                     return await stepContext.EndDialogAsync();
                 }
             }
@@ -150,15 +153,6 @@ namespace ProxiCall.Dialogs.TelExchange
             return await stepContext.NextAsync();
         }
 
-        private async Task ResetState(WaterfallStepContext stepContext)
-        {
-            var intent = (await TelExchangeStateAccessor.GetAsync(stepContext.Context)).IntentName;
-            var state = new TelExchangeState();
-            state.IntentName = intent;
-
-            await TelExchangeStateAccessor.SetAsync(stepContext.Context, state);
-        }
-
         private async Task<DialogTurnResult> EndTelExchangeDialogStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
         {
             var searchedRecipient = await TelExchangeStateAccessor.GetAsync(stepContext.Context);
@@ -168,6 +162,8 @@ namespace ProxiCall.Dialogs.TelExchange
                 var forward = (bool) stepContext.Result;
                 if(!forward)
                 {
+                    searchedRecipient.Reset(true);
+                    await TelExchangeStateAccessor.SetAsync(stepContext.Context, searchedRecipient);
                     return await stepContext.EndDialogAsync();
                 }
             }
@@ -178,6 +174,8 @@ namespace ProxiCall.Dialogs.TelExchange
 
             await stepContext.Context.SendActivityAsync(activity, cancellationToken);
 
+            searchedRecipient.Reset(true);
+            await TelExchangeStateAccessor.SetAsync(stepContext.Context, searchedRecipient);
             return await stepContext.EndDialogAsync();
         }
     }
