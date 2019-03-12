@@ -88,6 +88,15 @@ namespace ProxiCall.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Je n&apos;ai pas compris ce que vous venez de dire..
+        /// </summary>
+        public static string noIntentError {
+            get {
+                return ResourceManager.GetString("noIntentError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Le numéro de.
         /// </summary>
         public static string phoneNumberOf_1 {
@@ -133,7 +142,7 @@ namespace ProxiCall.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Bienvenue sur ProxiCall. Comment puis-je vous aider?.
+        ///   Looks up a localized string similar to Bienvenue sur ProxiCall. Que puis-je faire pour vous?.
         /// </summary>
         public static string welcome {
             get {

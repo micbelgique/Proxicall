@@ -126,6 +126,9 @@
   <data name="goodbye" xml:space="preserve">
     <value>Merci d'avoir utiliser ProxiCall. Bonne journée.</value>
   </data>
+  <data name="noIntentError" xml:space="preserve">
+    <value>Je n'ai pas compris ce que vous venez de dire.</value>
+  </data>
   <data name="phoneNumberOf_1" xml:space="preserve">
     <value>Le numéro de</value>
   </data>
@@ -142,6 +145,6 @@
     <value>Veuillez répondre par 'Oui' ou  'Non' pour confirmer.</value>
   </data>
   <data name="welcome" xml:space="preserve">
-    <value>Bienvenue sur ProxiCall. Comment puis-je vous aider?</value>
+    <value>Bienvenue sur ProxiCall. Que puis-je faire pour vous?</value>
   </data>
 </root>

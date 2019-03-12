@@ -9,7 +9,8 @@ using Microsoft.Bot.Schema;
 using Microsoft.Bot.Builder.Dialogs;
 using Microsoft.Extensions.Logging;
 using System.Linq;
-using ProxiCall.Dialogs.Call;
+using ProxiCall.Dialogs.TelExchange;
+using ProxiCall.Models.Intents;
 
 namespace ProxiCall
 {
@@ -28,21 +29,16 @@ namespace ProxiCall
     {
         private const string LuisConfiguration = "proxicall-luis";
 
-
-        // Supported LUIS Intents
-        public const string NoneIntent = "None";
-        public const string MakeACallIntent = "MakeACall";
-
         private readonly BotServices _services;
         private readonly UserState _userState;
         private readonly ConversationState _conversationState;
-        private readonly ILoggerFactory loggerFactory;
+        private readonly ILoggerFactory _loggerFactory;
 
         private readonly IStatePropertyAccessor<DialogState> _dialogStateAccessor;
 
         public DialogSet Dialogs { get; private set; }
 
-        private readonly IStatePropertyAccessor<CallState> _callStateAccessor;
+        private readonly IStatePropertyAccessor<TelExchangeState> _telExchangeStateAccessor;
 
         /// <summary>
         /// Initializes a new instance of the class.
@@ -52,6 +48,7 @@ namespace ProxiCall
         /// <seealso cref="https://docs.microsoft.com/en-us/aspnet/core/fundamentals/logging/?view=aspnetcore-2.1#windows-eventlog-provider"/>
         public ProxiCallBot(BotServices services, UserState userState, ConversationState conversationState, ILoggerFactory loggerFactory)
         {
+            _loggerFactory = loggerFactory ?? throw new ArgumentNullException(nameof(loggerFactory));
             _services = services ?? throw new ArgumentNullException(nameof(services));
             
             if (!_services.LuisServices.ContainsKey(LuisConfiguration))
@@ -62,10 +59,10 @@ namespace ProxiCall
             _userState = userState ?? throw new ArgumentNullException(nameof(userState));
             _conversationState = conversationState ?? throw new ArgumentNullException(nameof(conversationState));
 
-            _callStateAccessor = _userState.CreateProperty<CallState>(nameof(CallState));
+            _telExchangeStateAccessor = _userState.CreateProperty<TelExchangeState>(nameof(TelExchangeState));
             _dialogStateAccessor = _conversationState.CreateProperty<DialogState>(nameof(DialogState));
             Dialogs = new DialogSet(_dialogStateAccessor);
-            Dialogs.Add(new CallDialog(_callStateAccessor, loggerFactory, _services));
+            Dialogs.Add(new TelExchangeDialog(_telExchangeStateAccessor, _loggerFactory, _services));
         }
 
         /// <summary>
@@ -129,18 +126,19 @@ namespace ProxiCall
                         case DialogTurnStatus.Empty:
                             switch (topIntent)
                             {
-                                case MakeACallIntent:
+                                case Intents.TelephoneExchange:
+                                case Intents.MakeACall:
                                     // update call state with any entities captured
-                                    await UpdateCallStateAsync(luisResults, dialogContext.Context);
+                                    await UpdateCallStateAsync(luisResults, topIntent, dialogContext.Context);
 
-                                    await dialogContext.BeginDialogAsync(nameof(CallDialog));
+                                    await dialogContext.BeginDialogAsync(nameof(TelExchangeDialog));
                                     break;
 
-                                case NoneIntent:
+                                case Intents.None:
                                 default:
                                     // Help or no intent identified, either way, let's provide some help.
                                     // to the user
-                                    await dialogContext.Context.SendActivityAsync("I didn't understand what you just said to me.");
+                                    await dialogContext.Context.SendActivityAsync(Properties.strings.noIntentError);
                                     break;
                             }
 
@@ -182,12 +180,12 @@ namespace ProxiCall
         /// for processing this conversation turn.</param>
         /// <returns>A task that represents the work queued to execute.</returns>
         /// </summary>
-        private async Task UpdateCallStateAsync(RecognizerResult luisResult, ITurnContext turnContext)
+        private async Task UpdateCallStateAsync(RecognizerResult luisResult, string intentName, ITurnContext turnContext)
         {
             if (luisResult.Entities != null && luisResult.Entities.HasValues)
             {
                 // Get latest GreetingState
-                var callState = await _callStateAccessor.GetAsync(turnContext, () => new CallState());
+                var telExchangeState = await _telExchangeStateAccessor.GetAsync(turnContext, () => new TelExchangeState());
                 var entities = luisResult.Entities;
 
                 // Supported LUIS Entities
@@ -202,13 +200,15 @@ namespace ProxiCall
                     {
                         // Capitalize and set new user name.
                         var fullName = (string)entities[entity][0];
-                        callState.RecipientFullName = fullName;
+                        telExchangeState.RecipientFullName = fullName;
                         break;
                     }
                 }
 
+                telExchangeState.IntentName = intentName;
+
                 // Set the new values into state.
-                await _callStateAccessor.SetAsync(turnContext, callState);
+                await _telExchangeStateAccessor.SetAsync(turnContext, telExchangeState);
             }
         }
 
