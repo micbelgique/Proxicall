@@ -27,7 +27,7 @@ namespace ProxiCall
     /// <seealso cref="https://docs.microsoft.com/en-us/aspnet/core/fundamentals/dependency-injection?view=aspnetcore-2.1"/>
     public class ProxiCallBot : IBot
     {
-        private const string LuisConfiguration = "proxicall-luis";
+        private const string LuisConfiguration = "ProxicallLuis";
 
         private readonly BotServices _services;
         private readonly UserState _userState;

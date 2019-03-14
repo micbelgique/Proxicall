@@ -1,15 +1,7 @@
 {
-    "name": "ProxiCall",
-    "description": "",
+  "name": "proxicallbot",
+  "description": "",
   "services": [
-    {
-      "type": "endpoint",
-      "appId": "",
-      "appPassword": "",
-      "endpoint": "http://localhost:3978/api/messages",
-      "id": "1",
-      "name": "development"
-    },
     {
       "type": "abs",
       "appId": "055b7097-5147-4c0f-8340-9b075b90d113",
@@ -20,23 +12,29 @@
       "tenantId": "71260448-f1a9-4729-b630-4882e4dc58f5"
     },
     {
+      "appId": "",
+      "appPassword": "",
+      "endpoint": "http://localhost:3978/api/messages",
       "type": "endpoint",
-      "appId": "055b7097-5147-4c0f-8340-9b075b90d113",
-      "appPassword": "auujtVTY2337@[udUREG6^*",
-      "channelService": "https://botframework.azure.us",
-      "endpoint": "https://proxicallbot.azurewebsites.net/api/messages",
-      "id": "3",
-      "name": "production"
+      "name": "development",
+      "id": "3"
     },
     {
-      "type": "luis",
-      "name": "proxicall-luis",
-      "appId": "fb433c90-d8af-477a-8fc9-6d7ca5813d3c",
-      "version": "0.1",
-      "authoringKey": "f5da09b674b1485198bf38d31d4c2e36",
-      "subscriptionKey": "b1f3b511b6bb449bacb84cc6e8c0ebc6",
-      "region": "westeurope",
+      "appId": "055b7097-5147-4c0f-8340-9b075b90d113",
+      "appPassword": "rmojJDL57?|vfsMNTM595[-",
+      "endpoint": "https://proxicallbot.azurewebsites.net/api/messages",
+      "type": "endpoint",
+      "name": "production",
       "id": "4"
+    },
+    {
+      "appId": "fb433c90-d8af-477a-8fc9-6d7ca5813d3c",
+      "authoringKey": "b1f3b511b6bb449bacb84cc6e8c0ebc6",
+      "version": "0.1",
+      "region": "westeurope",
+      "type": "luis",
+      "name": "ProxicallLuis",
+      "id": "6"
     }
   ]
 }
