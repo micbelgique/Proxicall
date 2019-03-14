@@ -2,6 +2,7 @@
 using Microsoft.Bot.Builder.Dialogs;
 using Microsoft.Bot.Schema;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json.Linq;
 using ProxiCall.Models.Intents;
 using System;
 using System.Collections.Generic;
@@ -82,7 +83,7 @@ namespace ProxiCall.Dialogs.TelExchange
                 searchedRecipient.RecipientFullName = (string)stepContext.Result;
             }
 
-            var phoneNumber = await SearchNumberAsync();
+            var phoneNumber = await SearchNumberAsync(searchedRecipient);
 
             if (string.IsNullOrEmpty(phoneNumber))
             {
@@ -102,9 +103,17 @@ namespace ProxiCall.Dialogs.TelExchange
             return await stepContext.NextAsync();
         }
 
-        private async Task<string> SearchNumberAsync()
+        private async Task<string> SearchNumberAsync(TelExchangeState user)
         {
-            var phoneNumber = "555-2368 (Ghost Busters!)"; // TODO remove hardcoded number
+            var phoneNumber = string.Empty;
+            if(user.RecipientFullName == "thomas")
+            {
+                phoneNumber = "32478073017";
+            }
+            else
+            {
+                phoneNumber = "555-2368 (Ghost Busters!)"; // TODO remove hardcoded number
+            }
 
             // TODO INSERT QUERY TO DATABASE HERE
             
@@ -169,8 +178,11 @@ namespace ProxiCall.Dialogs.TelExchange
             }
 
             var textMessage = Properties.strings.callForwardingConfirmed;
-            var activity = MessageFactory.Text(textMessage, textMessage, InputHints.IgnoringInput);
-            activity.Label = searchedRecipient.PhoneNumber; //TODO entities
+            Activity activity = MessageFactory.Text(textMessage, textMessage, InputHints.IgnoringInput);
+            //activity.Label = searchedRecipient.PhoneNumber; //TODO entities //no label in directline activities
+            var entity = new Entity();
+            entity.Properties.Add("forward", JToken.Parse(searchedRecipient.PhoneNumber));
+            activity.Entities.Add(entity);
 
             await stepContext.Context.SendActivityAsync(activity, cancellationToken);
 

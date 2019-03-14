@@ -13,6 +13,8 @@ using Twilio.Rest.Api.V2010.Account;
 using Microsoft.AspNetCore.Hosting;
 using System.IO;
 using System.Text;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace ProxiCall.Web.Controllers
 {
@@ -54,17 +56,34 @@ namespace ProxiCall.Web.Controllers
         {
             var voiceResponse = new VoiceResponse();
             var says = new StringBuilder();
+            var forwardingNumber = string.Empty;
+            var forward = false;
+
             foreach (var activity in botReplies)
             {
                 voiceResponse.Say(activity.Text, voice: "alice", language: Say.LanguageEnum.FrFr);
+
+                foreach(var entity in activity.Entities)
+                {
+                    forward = entity.Properties.TryGetValue("forward", out var jtoken);
+                    forwardingNumber = forward ? jtoken.ToString() : "";
+                }
             }
-            voiceResponse.Gather(
+            
+            if(forward)
+            {
+                voiceResponse.Dial(forwardingNumber);
+            }
+            else
+            {
+                voiceResponse.Gather(
                 input: new List<Gather.InputEnum> { Gather.InputEnum.Speech },
                 language: Gather.LanguageEnum.FrFr,
                 action: new Uri($"{Environment.GetEnvironmentVariable("Host")}/api/voice/send"),
                 method: Twilio.Http.HttpMethod.Get,
                 speechTimeout: "auto"
             );
+            }
 
             var xmlFileName = Guid.NewGuid();
             var pathToXMLDirectory = _hostingEnvironment.WebRootPath + "/xml";
