@@ -33,7 +33,7 @@
       "version": "0.1",
       "region": "westeurope",
       "type": "luis",
-      "name": "ProxicallLuis",
+      "name": "proxicall-luis",
       "id": "6"
     }
   ]
