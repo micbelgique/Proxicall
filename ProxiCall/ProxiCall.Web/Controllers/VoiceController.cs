@@ -72,7 +72,7 @@ namespace ProxiCall.Web.Controllers
             
             if(forward)
             {
-                voiceResponse.Dial(forwardingNumber);
+                voiceResponse.Dial(number: forwardingNumber);
             }
             else
             {
@@ -117,7 +117,7 @@ namespace ProxiCall.Web.Controllers
 
             //Preventing the call from hanging up
             var response = new VoiceResponse();
-            response.Pause(15);
+            response.Pause(31);
 
             //DEBUG
             response.Say("Le botte ne répond pas.", voice: "alice", language : Say.LanguageEnum.FrFr); //Bot is mispelled for phonetic purpose

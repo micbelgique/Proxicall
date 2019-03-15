@@ -106,17 +106,23 @@ namespace ProxiCall.Dialogs.TelExchange
         private async Task<string> SearchNumberAsync(TelExchangeState user)
         {
             var phoneNumber = string.Empty;
-            if(user.RecipientFullName == "thomas")
+            switch (user.RecipientFirstName)
             {
-                phoneNumber = "32478073017";
-            }
-            else
-            {
-                phoneNumber = "555-2368 (Ghost Busters!)"; // TODO remove hardcoded number
+                case "nathan":
+                case "Nathan":
+                    phoneNumber = "32472564525";
+                    break;
+                case "Sylvain":
+                case "sylvain":
+                    phoneNumber = "32471072868";
+                    break;
+                default:
+                    phoneNumber = "555-2368 (Ghost Busters!)"; // TODO remove hardcoded number
+                    break;
             }
 
             // TODO INSERT QUERY TO DATABASE HERE
-            
+
             return phoneNumber;
         }
 
@@ -178,7 +184,7 @@ namespace ProxiCall.Dialogs.TelExchange
             }
 
             var textMessage = Properties.strings.callForwardingConfirmed;
-            Activity activity = MessageFactory.Text(textMessage, textMessage, InputHints.IgnoringInput);
+            Activity activity = MessageFactory.Text(textMessage, textMessage, InputHints.AcceptingInput);
             //activity.Label = searchedRecipient.PhoneNumber; //TODO entities //no label in directline activities
             var entity = new Entity();
             entity.Properties.Add("forward", JToken.Parse(searchedRecipient.PhoneNumber));
