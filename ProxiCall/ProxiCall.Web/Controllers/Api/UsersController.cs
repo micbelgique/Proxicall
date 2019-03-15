@@ -5,7 +5,9 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json.Linq;
 using ProxiCall.Web.Models;
+using ProxiCall.Web.Models.DTO;
 
 namespace ProxiCall.Web.Controllers.Api
 {
@@ -18,6 +20,21 @@ namespace ProxiCall.Web.Controllers.Api
         public UsersController(AzureContext context)
         {
             _context = context;
+        }
+
+        [HttpGet("phonenumber/{firstname}")]
+        public IActionResult GetPhoneNumber(string firstname)
+        {
+            var foundUsers = _context.Users.Where<User>((user) => user.FirstName == firstname );
+
+            var result = new JArray();
+            foreach(var user in foundUsers)
+            {
+                result.Add(new JObject()
+                    { { user.ToString(), user.PhoneNumber } }
+                );
+            }
+            return new OkObjectResult(result);
         }
 
         // GET: api/Users
