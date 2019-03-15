@@ -3,8 +3,11 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using ProxiCall.Web.Models;
+using System;
 
 namespace ProxiCall.Web
 {
@@ -29,6 +32,11 @@ namespace ProxiCall.Web
 
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+
+            //var connection = Environment.GetEnvironmentVariable("AzureConnectionString");
+            var connection = "Server=tcp:proxicall.database.windows.net,1433;Initial Catalog=proxicall_db;Persist Security Info=False;User ID=proxicall_admin;Password=L1B0EDz8V1HUT24y;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;";
+            services.AddDbContext<AzureContext>(options => options.UseSqlServer(connection));
+
             services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();
         }
 

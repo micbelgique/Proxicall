@@ -16,7 +16,7 @@ using System.Text;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
-namespace ProxiCall.Web.Controllers
+namespace ProxiCall.Web.Controllers.Api
 {
     [Route("api/[controller]")]
     [ApiController]
