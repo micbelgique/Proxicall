@@ -4,6 +4,7 @@ using Microsoft.Bot.Schema;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
 using ProxiCall.Models.Intents;
+using ProxiCall.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -105,25 +106,8 @@ namespace ProxiCall.Dialogs.TelExchange
 
         private async Task<string> SearchNumberAsync(TelExchangeState user)
         {
-            var phoneNumber = string.Empty;
-            switch (user.RecipientFirstName)
-            {
-                case "nathan":
-                case "Nathan":
-                    phoneNumber = "32472564525";
-                    break;
-                case "Sylvain":
-                case "sylvain":
-                    phoneNumber = "32471072868";
-                    break;
-                default:
-                    phoneNumber = "555-2368 (Ghost Busters!)"; // TODO remove hardcoded number
-                    break;
-            }
-
-            // TODO INSERT QUERY TO DATABASE HERE
-
-            return phoneNumber;
+            var dao = new ProxicallDAO();
+            return await dao.GetPhoneNumberByFirstName(user.RecipientFirstName);
         }
 
         private async Task<DialogTurnResult> ResultHandlerStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)

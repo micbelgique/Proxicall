@@ -25,16 +25,13 @@ namespace ProxiCall.Web.Controllers.Api
         [HttpGet("phonenumber/{firstname}")]
         public IActionResult GetPhoneNumber(string firstname)
         {
-            var foundUsers = _context.Users.Where<User>((user) => user.FirstName == firstname );
+            var foundUser = _context.Users.FirstOrDefault((user) => user.FirstName == firstname );
 
-            var result = new JArray();
-            foreach(var user in foundUsers)
+            if(foundUser != null)
             {
-                result.Add(new JObject()
-                    { { user.ToString(), user.PhoneNumber } }
-                );
+                return new OkObjectResult(foundUser);
             }
-            return new OkObjectResult(result);
+            return NotFound();
         }
 
         // GET: api/Users
