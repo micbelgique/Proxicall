@@ -121,7 +121,7 @@ namespace ProxiCall.Dialogs.TelExchange
                 {
                     searchedRecipient.Reset(true);
                     await TelExchangeStateAccessor.SetAsync(stepContext.Context, searchedRecipient);
-                    return await stepContext.ReplaceDialogAsync(nameof(TelExchangeDialog), cancellationToken);
+                    return await stepContext.ReplaceDialogAsync(TelExchangeWaterfall, cancellationToken);
                 }
                 else
                 {
