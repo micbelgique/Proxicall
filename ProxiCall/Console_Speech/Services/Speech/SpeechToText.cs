@@ -9,10 +9,14 @@ namespace Console_Speech.Services.Speech
 {
     class SpeechToText
     {
-        public static async Task<string> RecognizeSpeechFromBytesAsync(byte[] bytes, string locale)
+        public static async Task<string> RecognizeSpeechFromUrlAsync(string url, string locale)
         {
-            Console.WriteLine("Processing .wav file to text");
-            MemoryStream stream = new MemoryStream(bytes);
+            byte[] audioData = null;
+            using (var wc = new System.Net.WebClient())
+            {
+                audioData = wc.DownloadData(url);
+            }
+            var stream = new MemoryStream(audioData);
 
             var speechApiKey = Environment.GetEnvironmentVariable("SpeechApiKey");
             var speechApiRegion = Environment.GetEnvironmentVariable("SpeechApiRegion");
@@ -23,6 +27,25 @@ namespace Console_Speech.Services.Speech
             var audioFormat = AudioStreamFormat.GetWaveFormatPCM(16000, 16, 1);
             var audioStream = new VoiceAudioStream(stream);
             var audioConfig = AudioConfig.FromStreamInput(audioStream, audioFormat);
+
+            var recognizer = new SpeechRecognizer(speechConfig, audioConfig);
+            var result = await recognizer.RecognizeOnceAsync();
+            return result.Text;
+        }
+
+        public static async Task<string> RecognizeSpeechFromBytesAsync(byte[] bytes, string locale)
+        {
+            MemoryStream stream = new MemoryStream(bytes);
+
+            var speechApiKey = Environment.GetEnvironmentVariable("SpeechApiKey");
+            var speechApiRegion = Environment.GetEnvironmentVariable("SpeechApiRegion");
+
+            var speechConfig = SpeechConfig.FromSubscription(speechApiKey, speechApiRegion);
+            speechConfig.SpeechRecognitionLanguage = locale;
+
+            var audioFormat = AudioStreamFormat.GetWaveFormatPCM(16000, 16, 1);
+            var audioStream = new VoiceAudioStream(stream);
+            var audioConfig = AudioConfig.FromStreamInput(audioStream);
 
             var recognizer = new SpeechRecognizer(speechConfig, audioConfig);
             var result = await recognizer.RecognizeOnceAsync();

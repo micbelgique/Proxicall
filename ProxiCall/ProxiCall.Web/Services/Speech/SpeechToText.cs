@@ -10,10 +10,33 @@ namespace ProxiCall.Web.Services.Speech
     class SpeechToText
     {
 
+        public static async Task<string> RecognizeSpeechFromUrlAsync(string url, string locale)
+        {
+            byte[] audioData = null;
+            using (var wc = new System.Net.WebClient())
+            {
+                audioData = wc.DownloadData(url);
+            }
+            var stream = new MemoryStream(audioData);
+
+            var speechApiKey = Environment.GetEnvironmentVariable("SpeechApiKey");
+            var speechApiRegion = Environment.GetEnvironmentVariable("SpeechApiRegion");
+
+            var speechConfig = SpeechConfig.FromSubscription(speechApiKey, speechApiRegion);
+            speechConfig.SpeechRecognitionLanguage = locale;
+
+            var audioFormat = AudioStreamFormat.GetWaveFormatPCM(16000, 16, 1);
+            var audioStream = new VoiceAudioInputStream(stream);
+            var audioConfig = AudioConfig.FromStreamInput(audioStream, audioFormat);
+
+            var recognizer = new SpeechRecognizer(speechConfig, audioConfig);
+            var result = await recognizer.RecognizeOnceAsync();
+            return result.Text;
+        }
+
         public static async Task<string> RecognizeSpeechFromBytesAsync(byte[] bytes, string locale = "fr-FR")
         {
-            // TEST Console.WriteLine("Processing .wav file to text");
-            MemoryStream stream = new MemoryStream(bytes);
+            var stream = new MemoryStream(bytes);
 
             var speechApiKey = Environment.GetEnvironmentVariable("SpeechApiKey");
             var speechApiRegion = Environment.GetEnvironmentVariable("SpeechApiRegion");

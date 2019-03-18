@@ -1,20 +1,20 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.Bot.Connector.DirectLine;
+using Microsoft.AspNetCore.Hosting;
 using ProxiCall.Web.Services;
 using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
+using System.IO;
+using System.Text;
 using Twilio.AspNet.Core;
+using System.Threading.Tasks;
 using Twilio.TwiML;
 using Twilio.TwiML.Voice;
 using Twilio;
 using Twilio.Rest.Api.V2010.Account;
-using Microsoft.AspNetCore.Hosting;
-using System.IO;
-using System.Text;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
+using Twilio.Http;
+using ProxiCall.Web.Services.Speech;
 
 namespace ProxiCall.Web.Controllers.Api
 {
@@ -77,12 +77,16 @@ namespace ProxiCall.Web.Controllers.Api
             else
             {
                 voiceResponse.Gather(
-                input: new List<Gather.InputEnum> { Gather.InputEnum.Speech },
-                language: Gather.LanguageEnum.FrFr,
-                action: new Uri($"{Environment.GetEnvironmentVariable("Host")}/api/voice/send"),
-                method: Twilio.Http.HttpMethod.Get,
-                speechTimeout: "auto"
-            );
+                    input: new List<Gather.InputEnum> { Gather.InputEnum.Speech },
+                    language: Gather.LanguageEnum.FrFr,
+                    action: new Uri($"{Environment.GetEnvironmentVariable("Host")}/api/voice/send"),
+                    method: Twilio.Http.HttpMethod.Get,
+                    speechTimeout: "auto"
+                );
+                //var uriAction = new Uri($"{Environment.GetEnvironmentVariable("Host")}/api/voice/record");
+                //voiceResponse.Record(action: uriAction, method: HttpMethod.Get, timeout: 2, transcribe: false, playBeep: true);
+                ////Any TwiML verbs occurring after a <Record> are unreachable
+                //voiceResponse.Say("Enregistrement non-effectué par Twilio", voice: "alice", language: Say.LanguageEnum.FrFr);
             }
 
             var xmlFileName = Guid.NewGuid();
@@ -125,10 +129,35 @@ namespace ProxiCall.Web.Controllers.Api
             return TwiML(response);
         }
 
-        [HttpGet]
-        public IActionResult GetTest()
+        [HttpGet("record")]
+        public async Task<IActionResult> RecordVoiceOfUserAsync([FromQuery] string RecordingUrl)
         {
-            return new ObjectResult("Chuck Norris");
+            var resultSTT = await SpeechToText.RecognizeSpeechFromUrlAsync(RecordingUrl,"fr-FR");
+
+            var filesToDelete = Directory.GetFiles(_hostingEnvironment.WebRootPath + "/xml");
+            foreach (var file in filesToDelete)
+            {
+                System.IO.File.Delete(file);
+            }
+
+            var activityToSend = new Activity
+            {
+                From = new ChannelAccount("TwilioUserId", "TwilioUser"),
+                Type = "message",
+                Text = resultSTT
+            };
+
+            //TODO : async not as async?
+            _botConnector.SendMessageToBotAsync(activityToSend);
+
+            //Preventing the call from hanging up
+            var response = new VoiceResponse();
+            response.Pause(31);
+
+            //DEBUG
+            response.Say("Le botte ne répond pas.", voice: "alice", language: Say.LanguageEnum.FrFr); //Bot is mispelled for phonetic purpose
+
+            return TwiML(response);
         }
     }
 }
