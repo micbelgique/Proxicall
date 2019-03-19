@@ -58,7 +58,13 @@ namespace ProxiCall.Web.Services
                         if (isFromBot)
                         {
                             activities.Add(activity);
-                            var isForwardingMessage = activity.Entities[0].Properties.ContainsKey("forward");
+                            var isForwardingMessage = false;
+
+                            if(activity.Entities.Count != 0)
+                            {
+                                isForwardingMessage = activity.Entities[0].Properties.ContainsKey("forward");
+                            }
+
                             if ( isForwardingMessage || (activity.InputHint != InputHints.IgnoringInput) )
                             {
                                 await SendActivitiesToUser(activities, _callSid);
