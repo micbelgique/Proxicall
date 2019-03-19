@@ -161,6 +161,12 @@ namespace ProxiCall.Dialogs.TelExchange
                 var forward = (bool) stepContext.Result;
                 if(!forward)
                 {
+                    var message = Properties.strings.welcome_2;
+                    await stepContext.Context.SendActivityAsync(MessageFactory
+                        .Text(message, message, InputHints.AcceptingInput)
+                        , cancellationToken
+                    );
+
                     searchedRecipient.Reset(true);
                     await TelExchangeStateAccessor.SetAsync(stepContext.Context, searchedRecipient);
                     return await stepContext.EndDialogAsync();

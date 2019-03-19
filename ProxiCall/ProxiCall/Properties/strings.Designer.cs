@@ -149,5 +149,14 @@ namespace ProxiCall.Properties {
                 return ResourceManager.GetString("welcome", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Que puis-je faire pour vous?.
+        /// </summary>
+        public static string welcome_2 {
+            get {
+                return ResourceManager.GetString("welcome_2", resourceCulture);
+            }
+        }
     }
 }
