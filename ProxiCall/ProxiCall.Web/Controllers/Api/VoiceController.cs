@@ -13,6 +13,7 @@ using Twilio.TwiML;
 using Twilio.TwiML.Voice;
 using Twilio;
 using Twilio.Rest.Api.V2010.Account;
+using ProxiCall.Web.Services.Speech;
 
 namespace ProxiCall.Web.Controllers.Api
 {
@@ -38,7 +39,7 @@ namespace ProxiCall.Web.Controllers.Api
         {
             _botConnector = new BotConnector(CallSid);
             
-            System.Threading.Tasks.Task.Run(() => _botConnector.ReceiveMessagesFromBotAsync(ReceiveMessageFromBot));
+            System.Threading.Tasks.Task.Run(() => _botConnector.ReceiveMessagesFromBotAsync(HandleIncomingBotMessagesAsync));
             
             //Preventing the call from hanging up (/receive needs to return a TwiML)
             var response = new VoiceResponse();
@@ -48,7 +49,7 @@ namespace ProxiCall.Web.Controllers.Api
             return TwiML(response);
         }
 
-        private async System.Threading.Tasks.Task ReceiveMessageFromBot(IList<Activity> botReplies, string callSid)
+        private async System.Threading.Tasks.Task HandleIncomingBotMessagesAsync(IList<Activity> botReplies, string callSid)
         {
             var voiceResponse = new VoiceResponse();
             var says = new StringBuilder();
