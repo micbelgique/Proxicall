@@ -101,19 +101,6 @@ namespace ProxiCall
 
                 var topIntent = topScoringIntent.Value.intent;
 
-
-                //TODO 
-                //// Handle conversation interrupts first.
-                //var interrupted = await IsTurnInterruptedAsync(dialogContext, topIntent);
-                //if (interrupted)
-                //{
-                //    // Bypass the dialog.
-                //    // Save state before the next turn.
-                //    await _conversationState.SaveChangesAsync(turnContext);
-                //    await _userState.SaveChangesAsync(turnContext);
-                //    return;
-                //}
-
                 // Continue the current dialog
                 var dialogResult = await dialogContext.ContinueDialogAsync();
 
@@ -184,7 +171,7 @@ namespace ProxiCall
         {
             if (luisResult.Entities != null && luisResult.Entities.HasValues)
             {
-                // Get latest GreetingState
+                // Get latest TelExchangeState
                 var telExchangeState = await _telExchangeStateAccessor.GetAsync(turnContext, () => new TelExchangeState());
                 var entities = luisResult.Entities;
 
@@ -198,52 +185,17 @@ namespace ProxiCall
                     // Check if we found valid slot values in entities returned from LUIS.
                     if (entities[entity] != null)
                     {
-                        // Capitalize and set new user name.
+                        // Set new user name.
                         var fullName = (string)entities[entity][0];
                         telExchangeState.RecipientFullName = fullName;
                         break;
                     }
                 }
 
-                telExchangeState.IntentName = intentName;
-
                 // Set the new values into state.
+                telExchangeState.IntentName = intentName;
                 await _telExchangeStateAccessor.SetAsync(turnContext, telExchangeState);
             }
         }
-
-        //// Determine if an interruption has occurred before we dispatch to any active dialog.
-        //private async Task<bool> IsTurnInterruptedAsync(DialogContext dc, string topIntent)
-        //{
-        //    // See if there are any conversation interrupts we need to handle.
-        //    if (topIntent.Equals(CancelIntent))
-        //    {
-        //        if (dc.ActiveDialog != null)
-        //        {
-        //            await dc.CancelAllDialogsAsync();
-        //            await dc.Context.SendActivityAsync("Ok. I've canceled our last activity.");
-        //        }
-        //        else
-        //        {
-        //            await dc.Context.SendActivityAsync("I don't have anything to cancel.");
-        //        }
-
-        //        return true;        // Handled the interrupt.
-        //    }
-
-        //    if (topIntent.Equals(HelpIntent))
-        //    {
-        //        await dc.Context.SendActivityAsync("Let me try to provide some help.");
-        //        await dc.Context.SendActivityAsync("I understand greetings, being asked for help, or being asked to cancel what I am doing.");
-        //        if (dc.ActiveDialog != null)
-        //        {
-        //            await dc.RepromptDialogAsync();
-        //        }
-
-        //        return true;        // Handled the interrupt.
-        //    }
-
-        //    return false;           // Did not handle the interrupt.
-        //}
     }
 }

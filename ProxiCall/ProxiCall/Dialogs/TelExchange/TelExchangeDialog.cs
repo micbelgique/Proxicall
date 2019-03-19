@@ -5,9 +5,6 @@ using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
 using ProxiCall.Models.Intents;
 using ProxiCall.Services;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -98,7 +95,6 @@ namespace ProxiCall.Dialogs.TelExchange
             }
 
             searchedRecipient.PhoneNumber = phoneNumber;
-            
             await TelExchangeStateAccessor.SetAsync(stepContext.Context, searchedRecipient);
 
             return await stepContext.NextAsync();
@@ -119,13 +115,13 @@ namespace ProxiCall.Dialogs.TelExchange
                 var retry = (bool) stepContext.Result;
                 if(retry)
                 {
-                    searchedRecipient.Reset(true);
+                    searchedRecipient.Reset(keepIntent: true);
                     await TelExchangeStateAccessor.SetAsync(stepContext.Context, searchedRecipient);
                     return await stepContext.ReplaceDialogAsync(TelExchangeWaterfall, cancellationToken);
                 }
                 else
                 {
-                    searchedRecipient.Reset(true);
+                    searchedRecipient.Reset();
                     await TelExchangeStateAccessor.SetAsync(stepContext.Context, searchedRecipient);
                     return await stepContext.EndDialogAsync();
                 }
@@ -167,7 +163,7 @@ namespace ProxiCall.Dialogs.TelExchange
                         , cancellationToken
                     );
 
-                    searchedRecipient.Reset(true);
+                    searchedRecipient.Reset();
                     await TelExchangeStateAccessor.SetAsync(stepContext.Context, searchedRecipient);
                     return await stepContext.EndDialogAsync();
                 }
@@ -175,14 +171,13 @@ namespace ProxiCall.Dialogs.TelExchange
 
             var textMessage = Properties.strings.callForwardingConfirmed;
             Activity activity = MessageFactory.Text(textMessage, textMessage, InputHints.AcceptingInput);
-            //activity.Label = searchedRecipient.PhoneNumber; //TODO entities //no label in directline activities
             var entity = new Entity();
             entity.Properties.Add("forward", JToken.Parse(searchedRecipient.PhoneNumber));
             activity.Entities.Add(entity);
 
             await stepContext.Context.SendActivityAsync(activity, cancellationToken);
 
-            searchedRecipient.Reset(true);
+            searchedRecipient.Reset();
             await TelExchangeStateAccessor.SetAsync(stepContext.Context, searchedRecipient);
             return await stepContext.EndDialogAsync();
         }
