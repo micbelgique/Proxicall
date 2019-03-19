@@ -170,7 +170,7 @@ namespace ProxiCall.Dialogs.TelExchange
             }
 
             var textMessage = Properties.strings.callForwardingConfirmed;
-            Activity activity = MessageFactory.Text(textMessage, textMessage, InputHints.AcceptingInput);
+            Activity activity = MessageFactory.Text(textMessage, textMessage, InputHints.IgnoringInput);
             var entity = new Entity();
             entity.Properties.Add("forward", JToken.Parse(searchedRecipient.PhoneNumber));
             activity.Entities.Add(entity);

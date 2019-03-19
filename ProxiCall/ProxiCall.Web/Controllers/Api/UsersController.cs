@@ -1,13 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Newtonsoft.Json.Linq;
 using ProxiCall.Web.Models;
-using ProxiCall.Web.Models.DTO;
 
 namespace ProxiCall.Web.Controllers.Api
 {
@@ -25,6 +21,7 @@ namespace ProxiCall.Web.Controllers.Api
         [HttpGet("phonenumber/{firstname}")]
         public IActionResult GetPhoneNumber(string firstname)
         {
+            //TODO normalize strings
             var foundUser = _context.Users.FirstOrDefault((user) => user.FirstName == firstname );
 
             if(foundUser != null)
