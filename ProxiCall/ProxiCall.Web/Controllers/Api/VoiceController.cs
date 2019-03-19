@@ -37,11 +37,10 @@ namespace ProxiCall.Web.Controllers.Api
         public IActionResult ReceiveCall([FromQuery] string CallSid)
         {
             _botConnector = new BotConnector(CallSid);
-
+            
             System.Threading.Tasks.Task.Run(() => _botConnector.ReceiveMessagesFromBotAsync(ReceiveMessageFromBot));
             
             //Preventing the call from hanging up (/receive needs to return a TwiML)
-            //TODO : search for another solution?
             var response = new VoiceResponse();
             response.Say("", voice: "alice", language: Say.LanguageEnum.FrFr);
             response.Pause(15);
@@ -49,18 +48,33 @@ namespace ProxiCall.Web.Controllers.Api
             return TwiML(response);
         }
 
-        private void ReceiveMessageFromBot(IList<Activity> botReplies, string callSid)
+        private async System.Threading.Tasks.Task ReceiveMessageFromBot(IList<Activity> botReplies, string callSid)
         {
             var voiceResponse = new VoiceResponse();
             var says = new StringBuilder();
             var forwardingNumber = string.Empty;
             var forward = false;
 
+            var filesToDelete = Directory.GetFiles(_hostingEnvironment.WebRootPath + "/audio");
+            foreach (var file in filesToDelete)
+            {
+                System.IO.File.Delete(file);
+            }
+
             foreach (var activity in botReplies)
             {
-                voiceResponse.Say(activity.Text, voice: "alice", language: Say.LanguageEnum.FrFr);
+                var ttsResponse = await System.Threading.Tasks.Task.Run(() =>
+                TextToSpeech.TransformTextToSpeechAsync(activity.Text, "fr-FR"));
 
-                foreach(var entity in activity.Entities)
+                var wavGuid = Guid.NewGuid();
+                var pathToAudioDirectory = _hostingEnvironment.WebRootPath + "/audio";
+                var pathCombined = Path.Combine(pathToAudioDirectory, $"{ wavGuid }.wav");
+
+                await FormatConvertor.TurnAudioStreamToFile(ttsResponse, pathCombined);
+
+                voiceResponse.Play(new Uri($"{Environment.GetEnvironmentVariable("Host")}/audio/{wavGuid}.wav"));
+
+                foreach (var entity in activity.Entities)
                 {
                     forward = entity.Properties.TryGetValue("forward", out var jtoken);
                     forwardingNumber = forward ? jtoken.ToString() : string.Empty;
@@ -116,7 +130,9 @@ namespace ProxiCall.Web.Controllers.Api
             response.Pause(31);
 
             //DEBUG
-            response.Say("Le botte ne répond pas.", voice: "alice", language : Say.LanguageEnum.FrFr); //Bot is mispelled for phonetic purpose
+            response.Say("Le", voice: "alice", language : Say.LanguageEnum.FrFr);
+            response.Say("bot");
+            response.Say("ne répond pas.", voice: "alice", language: Say.LanguageEnum.FrFr);
 
             return TwiML(response);
         }

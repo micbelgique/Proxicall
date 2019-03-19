@@ -17,7 +17,7 @@ namespace ProxiCall.Web.Services
         private readonly string _streamUrl;
         private readonly string _callSid;
 
-        public delegate void OnReplyHandler(IList<Activity> botReplies, string callSid);
+        public delegate Task OnReplyHandler(IList<Activity> botReplies, string callSid);
 
         public BotConnector(string callSid)
         {
@@ -60,7 +60,7 @@ namespace ProxiCall.Web.Services
                             activities.Add(activity);
                             if(activity.InputHint != InputHints.IgnoringInput)
                             {
-                                SendActivitiesToUser(activities, _callSid);
+                                await SendActivitiesToUser(activities, _callSid);
                                 activities.Clear();
                             }
                         }
