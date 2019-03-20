@@ -9,7 +9,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ProxiCall", "ProxiCall\Prox
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ProxiCall.Web", "ProxiCall.Web\ProxiCall.Web.csproj", "{4070AF1A-AB55-4130-99C2-CF79230C5C57}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Proxicall.CRM", "Proxicall.CRM\Proxicall.CRM.csproj", "{7B7EB646-6B5A-4183-A58A-8953C49C469E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProxiCall.CRM", "ProxiCall.CRM\ProxiCall.CRM.csproj", "{1B9FF263-02E2-465A-A082-76987BBF77C7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -29,10 +29,10 @@ Global
 		{4070AF1A-AB55-4130-99C2-CF79230C5C57}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4070AF1A-AB55-4130-99C2-CF79230C5C57}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4070AF1A-AB55-4130-99C2-CF79230C5C57}.Release|Any CPU.Build.0 = Release|Any CPU
-		{7B7EB646-6B5A-4183-A58A-8953C49C469E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{7B7EB646-6B5A-4183-A58A-8953C49C469E}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{7B7EB646-6B5A-4183-A58A-8953C49C469E}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{7B7EB646-6B5A-4183-A58A-8953C49C469E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1B9FF263-02E2-465A-A082-76987BBF77C7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1B9FF263-02E2-465A-A082-76987BBF77C7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1B9FF263-02E2-465A-A082-76987BBF77C7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1B9FF263-02E2-465A-A082-76987BBF77C7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
