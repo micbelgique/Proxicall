@@ -1,16 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Builder;
+﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.HttpsPolicy;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Proxicall.CRM.Models;
+using System;
+using System.Threading.Tasks;
 
 namespace Proxicall.CRM
 {
@@ -35,12 +33,16 @@ namespace Proxicall.CRM
             
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
 
-            var connectionString = Configuration.GetConnectionString("ProxicallCRMContextConnection");
-            services.AddDbContext<ProxicallCRMContext>(options => options.UseSqlServer(connectionString));
+            services.AddDbContext<ProxicallCRMContext>(options =>
+                    options.UseSqlServer(
+                        Configuration.GetConnectionString("ProxicallCRMContextConnection")));
+
+            services.AddDefaultIdentity<IdentityUser>()
+                .AddEntityFrameworkStores<ProxicallCRMContext>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        public async void Configure(IApplicationBuilder app, IHostingEnvironment env, IServiceProvider serviceProvider)
         {
             if (env.IsDevelopment())
             {
@@ -55,6 +57,7 @@ namespace Proxicall.CRM
 
             app.UseHttpsRedirection();
             app.UseStaticFiles();
+            app.UseAuthentication();
             app.UseCookiePolicy();
 
             app.UseMvc(routes =>
@@ -63,6 +66,45 @@ namespace Proxicall.CRM
                     name: "default",
                     template: "{controller=Home}/{action=Index}/{id?}");
             });
+
+            await CreateRolesAsync(serviceProvider);
+        }
+
+        private async Task CreateRolesAsync(IServiceProvider serviceProvider)
+        {
+            var userManager = serviceProvider.GetRequiredService<UserManager<IdentityUser>>();
+            var roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+
+            string[] roleNames = { "Admin", "User" };
+
+            IdentityResult roleResult;
+
+            foreach (var role in roleNames)
+            {
+                var roleExist = await roleManager.RoleExistsAsync(role);
+                if (!roleExist)
+                {
+                    roleResult = await roleManager.CreateAsync(new IdentityRole(role));
+                }
+            }
+
+            var admin = new IdentityUser
+            {
+                UserName = Configuration.GetSection("UserSettings")["UserName"],
+                Email = Configuration.GetSection("UserSettings")["Email"]
+            };
+
+            var userPassword = Configuration.GetSection("UserSettings")["Password"];
+
+            var _user = await userManager.FindByEmailAsync(admin.Email);
+            if(_user == null)
+            {
+                var createAdmin = await userManager.CreateAsync(admin, userPassword);
+                if(createAdmin.Succeeded)
+                {
+                    await userManager.AddToRolesAsync(admin, roleNames);
+                }
+            }
         }
     }
 }
