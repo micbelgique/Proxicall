@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using ProxiCall.CRM.Models;
 
 namespace Proxicall.CRM.Models
 {
@@ -22,5 +23,7 @@ namespace Proxicall.CRM.Models
             // For example, you can rename the ASP.NET Identity table names and more.
             // Add your customizations after calling base.OnModelCreating(builder);
         }
+
+        public DbSet<Lead> Leads { get; set; }
     }
 }
