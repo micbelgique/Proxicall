@@ -1,6 +1,6 @@
 using System;
 
-namespace ProxiCall.CRM.Models
+namespace Proxicall.CRM.Models
 {
     public class ErrorViewModel
     {

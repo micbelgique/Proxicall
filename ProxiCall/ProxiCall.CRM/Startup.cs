@@ -10,9 +10,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using ProxiCall.CRM.Models;
+using Proxicall.CRM.Models;
 
-namespace ProxiCall.CRM
+namespace Proxicall.CRM
 {
     public class Startup
     {
@@ -32,12 +32,11 @@ namespace ProxiCall.CRM
                 options.CheckConsentNeeded = context => true;
                 options.MinimumSameSitePolicy = SameSiteMode.None;
             });
-
-
+            
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
 
-            var connection = "Server=tcp:proxicall.database.windows.net,1433;Initial Catalog=proxicall_crm;Persist Security Info=False;User ID=proxicall_admin;Password=L1B0EDz8V1HUT24y;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;";
-            services.AddDbContext<DatabaseContext>(options => options.UseSqlServer(connection));
+            var connectionString = Configuration.GetConnectionString("ProxicallCRMContextConnection");
+            services.AddDbContext<ProxicallCRMContext>(options => options.UseSqlServer(connectionString));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
