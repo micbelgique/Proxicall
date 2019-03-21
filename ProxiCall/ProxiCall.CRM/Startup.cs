@@ -40,6 +40,7 @@ namespace Proxicall.CRM
                         Configuration.GetConnectionString("ProxicallCRMContextConnection")));
 
             services.AddIdentity<IdentityUser, IdentityRole>()
+                .AddDefaultUI()
                 .AddEntityFrameworkStores<ProxicallCRMContext>();
 
             services.AddScoped<IRolesInitializer, RolesInitializer>();
