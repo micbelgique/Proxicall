@@ -7,9 +7,11 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using ProxiCall.CRM.Models;
 using Proxicall.CRM.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace ProxiCall.CRM.Controllers
 {
+    [Authorize(Roles = "Admin, User")]
     public class CompaniesController : Controller
     {
         private readonly ProxicallCRMContext _context;

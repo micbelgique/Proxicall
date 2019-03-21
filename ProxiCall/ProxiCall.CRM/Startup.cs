@@ -11,6 +11,8 @@ using Proxicall.CRM.Models;
 using System;
 using System.Threading.Tasks;
 using Proxicall.CRM.Areas.Identity.Data;
+using Microsoft.AspNetCore.Identity.UI.Services;
+using Proxicall.CRM.Services;
 
 namespace Proxicall.CRM
 {
@@ -58,6 +60,8 @@ namespace Proxicall.CRM
                 options.LogoutPath = $"/Identity/Account/Logout";
                 options.AccessDeniedPath = $"/Identity/Account/AccessDenied";
             });
+
+            services.AddSingleton<IEmailSender, EmailSender>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
