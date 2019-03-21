@@ -21,8 +21,10 @@ namespace Proxicall.CRM.Models
             base.OnModelCreating(modelBuilder);
         }
 
-        public DbSet<Lead> Leads { get; set; }
+        public DbSet<Lead> Lead { get; set; }
 
-        public DbSet<ProxiCall.CRM.Models.Company> Company { get; set; }
+        public DbSet<Company> Company { get; set; }
+
+        public DbSet<Product> Product { get; set; }
     }
 }

@@ -5,30 +5,26 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using ProxiCall.CRM.Models;
 using Proxicall.CRM.Models;
-using Microsoft.AspNetCore.Authorization;
 
-namespace ProxiCall.CRM.Controllers
+namespace Proxicall.CRM.Controllers
 {
-    [Authorize(Roles = "Admin, User")]
-    public class LeadsController : Controller
+    public class ProductsController : Controller
     {
         private readonly ProxicallCRMContext _context;
 
-        public LeadsController(ProxicallCRMContext context)
+        public ProductsController(ProxicallCRMContext context)
         {
             _context = context;
         }
 
-        // GET: Leads
+        // GET: Products
         public async Task<IActionResult> Index()
         {
-            var proxicallCRMContext = _context.Lead.Include(l => l.Company);
-            return View(await proxicallCRMContext.ToListAsync());
+            return View(await _context.Product.ToListAsync());
         }
 
-        // GET: Leads/Details/5
+        // GET: Products/Details/5
         public async Task<IActionResult> Details(string id)
         {
             if (id == null)
@@ -36,42 +32,39 @@ namespace ProxiCall.CRM.Controllers
                 return NotFound();
             }
 
-            var lead = await _context.Lead
-                .Include(l => l.Company)
+            var product = await _context.Product
                 .FirstOrDefaultAsync(m => m.Id == id);
-            if (lead == null)
+            if (product == null)
             {
                 return NotFound();
             }
 
-            return View(lead);
+            return View(product);
         }
 
-        // GET: Leads/Create
+        // GET: Products/Create
         public IActionResult Create()
         {
-            ViewData["CompanyId"] = new SelectList(_context.Company, "Id", "Name");
             return View();
         }
 
-        // POST: Leads/Create
+        // POST: Products/Create
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,FirstName,LastName,PhoneNumber,Email,Address,CompanyId")] Lead lead)
+        public async Task<IActionResult> Create([Bind("Id,Title,Description")] Product product)
         {
             if (ModelState.IsValid)
             {
-                _context.Add(lead);
+                _context.Add(product);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["CompanyId"] = new SelectList(_context.Company, "Id", "Name", lead.CompanyId);
-            return View(lead);
+            return View(product);
         }
 
-        // GET: Leads/Edit/5
+        // GET: Products/Edit/5
         public async Task<IActionResult> Edit(string id)
         {
             if (id == null)
@@ -79,23 +72,22 @@ namespace ProxiCall.CRM.Controllers
                 return NotFound();
             }
 
-            var lead = await _context.Lead.FindAsync(id);
-            if (lead == null)
+            var product = await _context.Product.FindAsync(id);
+            if (product == null)
             {
                 return NotFound();
             }
-            ViewData["CompanyId"] = new SelectList(_context.Company, "Id", "Name", lead.CompanyId);
-            return View(lead);
+            return View(product);
         }
 
-        // POST: Leads/Edit/5
+        // POST: Products/Edit/5
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(string id, [Bind("Id,FirstName,LastName,PhoneNumber,Email,Address,CompanyId")] Lead lead)
+        public async Task<IActionResult> Edit(string id, [Bind("Id,Title,Description")] Product product)
         {
-            if (id != lead.Id)
+            if (id != product.Id)
             {
                 return NotFound();
             }
@@ -104,12 +96,12 @@ namespace ProxiCall.CRM.Controllers
             {
                 try
                 {
-                    _context.Update(lead);
+                    _context.Update(product);
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!LeadExists(lead.Id))
+                    if (!ProductExists(product.Id))
                     {
                         return NotFound();
                     }
@@ -120,11 +112,10 @@ namespace ProxiCall.CRM.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["CompanyId"] = new SelectList(_context.Company, "Id", "Name", lead.CompanyId);
-            return View(lead);
+            return View(product);
         }
 
-        // GET: Leads/Delete/5
+        // GET: Products/Delete/5
         public async Task<IActionResult> Delete(string id)
         {
             if (id == null)
@@ -132,31 +123,30 @@ namespace ProxiCall.CRM.Controllers
                 return NotFound();
             }
 
-            var lead = await _context.Lead
-                .Include(l => l.Company)
+            var product = await _context.Product
                 .FirstOrDefaultAsync(m => m.Id == id);
-            if (lead == null)
+            if (product == null)
             {
                 return NotFound();
             }
 
-            return View(lead);
+            return View(product);
         }
 
-        // POST: Leads/Delete/5
+        // POST: Products/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(string id)
         {
-            var lead = await _context.Lead.FindAsync(id);
-            _context.Lead.Remove(lead);
+            var product = await _context.Product.FindAsync(id);
+            _context.Product.Remove(product);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
-        private bool LeadExists(string id)
+        private bool ProductExists(string id)
         {
-            return _context.Lead.Any(e => e.Id == id);
+            return _context.Product.Any(e => e.Id == id);
         }
     }
 }
