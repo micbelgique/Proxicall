@@ -1,30 +1,32 @@
-﻿using System.Linq;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using ProxiCall.CRM.Models;
-using Proxicall.CRM.Models;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
+using Proxicall.CRM.Models;
 
-namespace ProxiCall.CRM.Controllers
+namespace Proxicall.CRM.Controllers
 {
     [Authorize(Roles = "Admin, User")]
-    public class CompaniesController : Controller
+    public class ProductsController : Controller
     {
         private readonly ProxicallCRMContext _context;
 
-        public CompaniesController(ProxicallCRMContext context)
+        public ProductsController(ProxicallCRMContext context)
         {
             _context = context;
         }
 
-        // GET: Companies
+        // GET: Products
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Company.ToListAsync());
+            return View(await _context.Product.ToListAsync());
         }
 
-        // GET: Companies/Details/5
+        // GET: Products/Details/5
         public async Task<IActionResult> Details(string id)
         {
             if (id == null)
@@ -32,39 +34,39 @@ namespace ProxiCall.CRM.Controllers
                 return NotFound();
             }
 
-            var company = await _context.Company
+            var product = await _context.Product
                 .FirstOrDefaultAsync(m => m.Id == id);
-            if (company == null)
+            if (product == null)
             {
                 return NotFound();
             }
 
-            return View(company);
+            return View(product);
         }
 
-        // GET: Companies/Create
+        // GET: Products/Create
         public IActionResult Create()
         {
             return View();
         }
 
-        // POST: Companies/Create
+        // POST: Products/Create
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Name,Address")] Company company)
+        public async Task<IActionResult> Create([Bind("Id,Title,Description")] Product product)
         {
             if (ModelState.IsValid)
             {
-                _context.Add(company);
+                _context.Add(product);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            return View(company);
+            return View(product);
         }
 
-        // GET: Companies/Edit/5
+        // GET: Products/Edit/5
         public async Task<IActionResult> Edit(string id)
         {
             if (id == null)
@@ -72,22 +74,22 @@ namespace ProxiCall.CRM.Controllers
                 return NotFound();
             }
 
-            var company = await _context.Company.FindAsync(id);
-            if (company == null)
+            var product = await _context.Product.FindAsync(id);
+            if (product == null)
             {
                 return NotFound();
             }
-            return View(company);
+            return View(product);
         }
 
-        // POST: Companies/Edit/5
+        // POST: Products/Edit/5
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(string id, [Bind("Id,Name,Address")] Company company)
+        public async Task<IActionResult> Edit(string id, [Bind("Id,Title,Description")] Product product)
         {
-            if (id != company.Id)
+            if (id != product.Id)
             {
                 return NotFound();
             }
@@ -96,12 +98,12 @@ namespace ProxiCall.CRM.Controllers
             {
                 try
                 {
-                    _context.Update(company);
+                    _context.Update(product);
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!CompanyExists(company.Id))
+                    if (!ProductExists(product.Id))
                     {
                         return NotFound();
                     }
@@ -112,10 +114,10 @@ namespace ProxiCall.CRM.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            return View(company);
+            return View(product);
         }
 
-        // GET: Companies/Delete/5
+        // GET: Products/Delete/5
         public async Task<IActionResult> Delete(string id)
         {
             if (id == null)
@@ -123,30 +125,30 @@ namespace ProxiCall.CRM.Controllers
                 return NotFound();
             }
 
-            var company = await _context.Company
+            var product = await _context.Product
                 .FirstOrDefaultAsync(m => m.Id == id);
-            if (company == null)
+            if (product == null)
             {
                 return NotFound();
             }
 
-            return View(company);
+            return View(product);
         }
 
-        // POST: Companies/Delete/5
+        // POST: Products/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(string id)
         {
-            var company = await _context.Company.FindAsync(id);
-            _context.Company.Remove(company);
+            var product = await _context.Product.FindAsync(id);
+            _context.Product.Remove(product);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
-        private bool CompanyExists(string id)
+        private bool ProductExists(string id)
         {
-            return _context.Company.Any(e => e.Id == id);
+            return _context.Product.Any(e => e.Id == id);
         }
     }
 }
