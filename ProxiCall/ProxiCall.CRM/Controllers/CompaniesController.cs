@@ -10,6 +10,7 @@ using Proxicall.CRM.Models;
 
 namespace ProxiCall.CRM.Controllers
 {
+    [Authorize(Roles = "Admin, User")]
     public class CompaniesController : Controller
     {
         private readonly ProxicallCRMContext _context;
