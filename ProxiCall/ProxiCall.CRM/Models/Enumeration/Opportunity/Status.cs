@@ -11,6 +11,13 @@ namespace Proxicall.CRM.Models.Enumeration.Opportunity
         public static Status Closed = new ClosedStatus();
         public static Status Canceled = new CanceledStatus();
 
+        public static IList<string> AllStatusDisplay = new List<string>
+        {
+            Open.Name,
+            Closed.Name,
+            Canceled.Name
+        };
+
         protected Status(int id, string name)
         : base(id, name)
         { }

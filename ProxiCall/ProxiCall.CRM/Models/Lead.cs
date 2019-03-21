@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace ProxiCall.CRM.Models
 {
@@ -17,6 +18,15 @@ namespace ProxiCall.CRM.Models
 
         [Display(Name = "Company")]
         public string CompanyId { get; set; }
-        public Company Company { get; set; }      
+        public Company Company { get; set; }    
+        
+        [NotMapped]
+        public string FullName
+        {
+            get
+            {
+                return $"{FirstName} {LastName}";
+            }
+        }
     }
 }
