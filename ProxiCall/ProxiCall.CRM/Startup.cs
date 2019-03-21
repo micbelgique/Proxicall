@@ -10,6 +10,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Proxicall.CRM.Models;
 using System;
 using System.Threading.Tasks;
+using Proxicall.CRM.Areas.Identity.Data;
 
 namespace Proxicall.CRM
 {
@@ -38,12 +39,14 @@ namespace Proxicall.CRM
                     options.UseSqlServer(
                         Configuration.GetConnectionString("ProxicallCRMContextConnection")));
 
-            services.AddDefaultIdentity<IdentityUser>()
+            services.AddIdentity<IdentityUser, IdentityRole>()
                 .AddEntityFrameworkStores<ProxicallCRMContext>();
+
+            services.AddScoped<IRolesInitializer, RolesInitializer>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public async void Configure(IApplicationBuilder app, IHostingEnvironment env, IServiceProvider serviceProvider)
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env, IRolesInitializer rolesInitializer)
         {
             if (env.IsDevelopment())
             {
@@ -68,44 +71,7 @@ namespace Proxicall.CRM
                     template: "{controller=Home}/{action=Index}/{id?}");
             });
 
-            await CreateRolesAsync(serviceProvider);
-        }
-
-        private async Task CreateRolesAsync(IServiceProvider serviceProvider)
-        {
-            var userManager = serviceProvider.GetRequiredService<UserManager<IdentityUser>>();
-            var roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
-
-            string[] roleNames = { "Admin", "User" };
-
-            IdentityResult roleResult;
-
-            foreach (var role in roleNames)
-            {
-                var roleExist = await roleManager.RoleExistsAsync(role);
-                if (!roleExist)
-                {
-                    roleResult = await roleManager.CreateAsync(new IdentityRole(role));
-                }
-            }
-
-            var admin = new IdentityUser
-            {
-                UserName = Configuration.GetSection("UserSettings")["UserName"],
-                Email = Configuration.GetSection("UserSettings")["Email"]
-            };
-
-            var userPassword = Configuration.GetSection("UserSettings")["Password"];
-
-            var _user = await userManager.FindByEmailAsync(admin.Email);
-            if(_user == null)
-            {
-                var createAdmin = await userManager.CreateAsync(admin, userPassword);
-                if(createAdmin.Succeeded)
-                {
-                    await userManager.AddToRolesAsync(admin, roleNames);
-                }
-            }
+            rolesInitializer.Initialize();
         }
     }
 }
