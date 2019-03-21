@@ -10,8 +10,8 @@ using Proxicall.CRM.Models;
 namespace Proxicall.CRM.Migrations
 {
     [DbContext(typeof(ProxicallCRMContext))]
-    [Migration("20190321083338_leadOneToManyCompany")]
-    partial class leadOneToManyCompany
+    [Migration("20190321091950_leadOTMcompany")]
+    partial class leadOTMcompany
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {

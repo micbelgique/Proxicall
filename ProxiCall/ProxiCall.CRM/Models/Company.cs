@@ -15,5 +15,10 @@ namespace ProxiCall.CRM.Models
         public string Address { get; set; }
 
         public ICollection<Lead> Leads { get; set; }
+
+        public override string ToString()
+        {
+            return Name;
+        }
     }
 }
