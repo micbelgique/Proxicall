@@ -38,13 +38,14 @@ namespace Proxicall.CRM.Controllers
         {
             if(ModelState.IsValid)
             {
-                var user = new IdentityUser { UserName = userForm.UserName, Email = userForm.Email };
+                var user = new IdentityUser { UserName = userForm.Email, Email = userForm.Email };
                 var result = await _userManager.CreateAsync(user, userForm.Password);
                 if (result.Succeeded)
                 {
-                    //TODO add role combobox in view
-                    await _userManager.AddToRoleAsync(user, "User");
+                    var role = userForm.IsAdmin ? "Admin" : "User";
+                    await _userManager.AddToRoleAsync(user, role);
                     //TODO send email to user
+                    await _emailSender.SendEmailAsync(userForm.Email, "Finish creating your account", "Welcome to Proxicall CRM, the best CRM of all");
                 }
                 foreach (var error in result.Errors)
                 {
