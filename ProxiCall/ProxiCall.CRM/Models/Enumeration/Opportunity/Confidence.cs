@@ -11,6 +11,13 @@ namespace Proxicall.CRM.Models.Enumeration.Opportunity
         public static Confidence Average = new AverageConfidence();
         public static Confidence Low = new LowConfidence();
 
+        public static IList<string> AllConfidenceDisplay = new List<string>
+        {
+            High.Name,
+            Average.Name,
+            Low.Name
+        };
+
         protected Confidence(int id, string name)
         : base(id, name)
         { }

@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using ProxiCall.CRM.Models;
@@ -26,5 +22,7 @@ namespace Proxicall.CRM.Models
         public DbSet<Company> Company { get; set; }
 
         public DbSet<Product> Product { get; set; }
+
+        public DbSet<Opportunity> Opportunity { get; set; }
     }
 }
