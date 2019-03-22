@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.Bot.Connector.DirectLine;
 using Microsoft.AspNetCore.Hosting;
@@ -14,6 +14,7 @@ using Twilio.TwiML.Voice;
 using Twilio;
 using Twilio.Rest.Api.V2010.Account;
 using ProxiCall.Web.Services.Speech;
+using Twilio.Http;
 
 namespace ProxiCall.Web.Controllers.Api
 {
@@ -64,6 +65,7 @@ namespace ProxiCall.Web.Controllers.Api
 
             foreach (var activity in botReplies)
             {
+                //Using TTS to repond to the caller
                 var ttsResponse = await System.Threading.Tasks.Task.Run(() =>
                 TextToSpeech.TransformTextToSpeechAsync(activity.Text, "fr-FR"));
 
@@ -75,10 +77,13 @@ namespace ProxiCall.Web.Controllers.Api
 
                 voiceResponse.Play(new Uri($"{Environment.GetEnvironmentVariable("Host")}/audio/{wavGuid}.wav"));
 
-                foreach (var entity in activity.Entities)
+                if (activity.Entities != null)
                 {
-                    forward = entity.Properties.TryGetValue("forward", out var jtoken);
-                    forwardingNumber = forward ? jtoken.ToString() : string.Empty;
+                    foreach (var entity in activity.Entities)
+                    {
+                        forward = entity.Properties.TryGetValue("forward", out var jtoken);
+                        forwardingNumber = forward ? jtoken.ToString() : string.Empty;
+                    }
                 }
             }
             
@@ -128,12 +133,41 @@ namespace ProxiCall.Web.Controllers.Api
 
             //Preventing the call from hanging up
             var response = new VoiceResponse();
-            response.Pause(31);
+            response.Pause(15);
 
             //DEBUG
-            response.Say("Le", voice: "alice", language : Say.LanguageEnum.FrFr);
-            response.Say("bot");
-            response.Say("ne répond pas.", voice: "alice", language: Say.LanguageEnum.FrFr);
+            response.Say("Aucune réponse de ProxiCall", voice: "alice", language: Say.LanguageEnum.FrFr);
+
+            return TwiML(response);
+        }
+
+        [HttpGet("record")]
+        public async Task<IActionResult> RecordVoiceOfUserAsync([FromQuery] string RecordingUrl)
+        {
+            var resultSTT = await SpeechToText.RecognizeSpeechFromUrlAsync(RecordingUrl, "fr-FR");
+
+            var filesToDelete = Directory.GetFiles(_hostingEnvironment.WebRootPath + "/xml");
+            foreach (var file in filesToDelete)
+            {
+                System.IO.File.Delete(file);
+            }
+
+            var activityToSend = new Activity
+            {
+                From = new ChannelAccount("TwilioUserId", "TwilioUser"),
+                Type = "message",
+                Text = resultSTT
+            };
+
+            //TODO : async not as async?
+            await _botConnector.SendMessageToBotAsync(activityToSend);
+
+            //Preventing the call from hanging up
+            var response = new VoiceResponse();
+            response.Pause(15);
+
+            //DEBUG
+            response.Say("Aucune réponse de ProxiCall", voice: "alice", language: Say.LanguageEnum.FrFr);
 
             return TwiML(response);
         }
