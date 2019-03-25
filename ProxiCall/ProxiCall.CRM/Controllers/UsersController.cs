@@ -70,11 +70,6 @@ namespace Proxicall.CRM.Controllers
             // visit https://go.microsoft.com/fwlink/?LinkID=532713
             var code = await _userManager.GeneratePasswordResetTokenAsync(user);
             var callbackUrl = new Uri($"{Request.Scheme}://{Request.Host}/Identity/Account/ResetPassword?code={Uri.EscapeDataString(code)}").ToString();
-            var callbackUrlOld = Url.Page(
-                   "/Account/ResetPassword",
-                   pageHandler: null,
-                   values: new { code },
-                   protocol: Request.Scheme);
             await _emailSender.SendEmailAsync(
                 user.Email,
                 "Welcome",
