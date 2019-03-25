@@ -1,9 +1,5 @@
 ﻿using Google.Cloud.Speech.V1;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using static Google.Cloud.Speech.V1.RecognitionConfig.Types;
 
 namespace ProxiCall.Web.Services.Speech
@@ -18,7 +14,8 @@ namespace ProxiCall.Web.Services.Speech
             {
                 Encoding = AudioEncoding.Linear16,
                 SampleRateHertz = 8000,
-                LanguageCode = LanguageCodes.French.France
+                LanguageCode = LanguageCodes.French.France,
+                Model = "phone_call"
             };
             RecognizeResponse response = client.Recognize(config, audio);
             var sttResult = new StringBuilder(string.Empty);
