@@ -15,9 +15,10 @@ namespace Console_Speech
             //}
 
             var path = new DirectoryInfo(Environment.CurrentDirectory).Parent.Parent.Parent.FullName;
-
-            var wav = File.ReadAllBytes(Path.Combine(path, $"Resources", $"twiliorecord_numeroquelquun.wav"));
-            Console.WriteLine(SpeechToText.RecognizeSpeechFromBytesAsync(wav, "fr-FR").Result);
+            var pathCombined = Path.Combine(path, $"Resources", $"recorddepuisappel.wav");
+            var wav = File.ReadAllBytes(pathCombined);
+            //Console.WriteLine(SpeechToText.RecognizeSpeechFromBytesAsync(wav, "fr-FR").Result);
+            Console.WriteLine(CloudSTT.RecognizeSpeechFromWav(pathCombined));
 
             //byte[] result_tts = TextToSpeech.TransformTextToSpeechAsync("This is a test in english.", "en-US").Result;
             //FormatConvertor.TurnAudioStreamToFile(result_tts, path).Wait();
