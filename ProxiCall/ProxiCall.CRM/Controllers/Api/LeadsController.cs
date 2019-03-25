@@ -28,6 +28,18 @@ namespace Proxicall.CRM.Controllers.Api
             return await _context.Lead.ToListAsync();
         }
 
+        [HttpGet("GetAllNames")]
+        public async Task<ActionResult<IEnumerable<string>>> GetLeads()
+        {
+            var leads = await _context.Lead.ToListAsync();
+            var fullnames = new List<string>();
+            foreach(var lead in leads)
+            {
+                fullnames.Add(lead.FullName);
+            }
+            return fullnames;
+        }
+
         // GET: api/Leads/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Lead>> GetLead(string id)
