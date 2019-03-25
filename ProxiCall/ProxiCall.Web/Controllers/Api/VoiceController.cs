@@ -93,13 +93,17 @@ namespace ProxiCall.Web.Controllers.Api
             }
             else
             {
-                voiceResponse.Gather(
-                    input: new List<Gather.InputEnum> { Gather.InputEnum.Speech },
-                    language: Gather.LanguageEnum.FrFr,
-                    action: new Uri($"{Environment.GetEnvironmentVariable("Host")}/api/voice/send"),
-                    method: Twilio.Http.HttpMethod.Get,
-                    speechTimeout: "auto"
-                );
+                //voiceResponse.Gather(
+                //    input: new List<Gather.InputEnum> { Gather.InputEnum.Speech },
+                //    language: Gather.LanguageEnum.FrFr,
+                //    action: new Uri($"{Environment.GetEnvironmentVariable("Host")}/api/voice/send"),
+                //    method: Twilio.Http.HttpMethod.Get,
+                //    speechTimeout: "auto"
+                //);
+                var uriAction = new Uri($"{Environment.GetEnvironmentVariable("Host")}/api/voice/record");
+                voiceResponse.Record(action: uriAction, method: HttpMethod.Get, timeout: 2, transcribe: false, playBeep: true);
+                //Any TwiML verbs occurring after a <Record> are unreachable
+                voiceResponse.Say("Enregistrement non-effectué par Twilio", voice: "alice", language: Say.LanguageEnum.FrFr);
             }
 
             var xmlFileName = Guid.NewGuid();
@@ -144,13 +148,8 @@ namespace ProxiCall.Web.Controllers.Api
         [HttpGet("record")]
         public async Task<IActionResult> RecordVoiceOfUserAsync([FromQuery] string RecordingUrl)
         {
-            var resultSTT = await SpeechToText.RecognizeSpeechFromUrlAsync(RecordingUrl, "fr-FR");
-
-            var filesToDelete = Directory.GetFiles(_hostingEnvironment.WebRootPath + "/xml");
-            foreach (var file in filesToDelete)
-            {
-                System.IO.File.Delete(file);
-            }
+            //var resultSTT = await SpeechToText.RecognizeSpeechFromUrlAsync(RecordingUrl, "fr-FR");
+            var resultSTT = CloudSpeechToText.RecognizeSpeechFromUrl(RecordingUrl); 
 
             var activityToSend = new Activity
             {
@@ -158,8 +157,7 @@ namespace ProxiCall.Web.Controllers.Api
                 Type = "message",
                 Text = resultSTT
             };
-
-            //TODO : async not as async?
+            
             await _botConnector.SendMessageToBotAsync(activityToSend);
 
             //Preventing the call from hanging up
