@@ -9,7 +9,7 @@ using ProxiCall.Web.Models;
 namespace ProxiCall.Web.Migrations
 {
     [DbContext(typeof(AzureContext))]
-    [Migration("20190315132752_InitialCreate")]
+    [Migration("20190322085448_InitialCreate")]
     partial class InitialCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

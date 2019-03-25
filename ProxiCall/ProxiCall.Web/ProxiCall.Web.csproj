@@ -20,6 +20,7 @@
 
   <ItemGroup>
     <Folder Include="wwwroot\audio\" />
+    <Folder Include="wwwroot\stt\" />
     <Folder Include="wwwroot\xml\" />
   </ItemGroup>
 

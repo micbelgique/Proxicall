@@ -52,20 +52,21 @@ namespace ProxiCall.Web.Services
                     botReply = Encoding.UTF8.GetString(replyBuffer.ToArray(), 0, websocketReceivedResult.Count);
                     var activitySet = JsonConvert.DeserializeObject<ActivitySet>(botReply);
                     var isFromBot = true;
+                    var isIgnoringInput = true;
                     foreach (Activity activity in activitySet.Activities)
                     {
                         isFromBot = activity.From.Name == "ProxiCallBot";
+                        isIgnoringInput = activity.InputHint == InputHints.IgnoringInput;
                         if (isFromBot)
                         {
                             activities.Add(activity);
                             var isForwardingMessage = false;
 
-                            if(activity.Entities.Count != 0)
+                            if(activity.Entities != null && activity.Entities.Count != 0)
                             {
                                 isForwardingMessage = activity.Entities[0].Properties.ContainsKey("forward");
                             }
-
-                            if ( isForwardingMessage || (activity.InputHint != InputHints.IgnoringInput) )
+                            if ( !isIgnoringInput || isForwardingMessage )
                             {
                                 await SendActivitiesToUser(activities, _callSid);
                                 activities.Clear();
