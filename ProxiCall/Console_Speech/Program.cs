@@ -9,15 +9,16 @@ namespace Console_Speech
     {
         static void Main(string[] args)
         {
-            while(true)
-            {
-                Console.WriteLine(SpeechToText.RecognizeSpeechFromMicInputAsync("fr-FR").Result);
-            }
+            //while(true)
+            //{
+            //    Console.WriteLine(SpeechToText.RecognizeSpeechFromMicInputAsync("fr-FR").Result);
+            //}
 
             var path = new DirectoryInfo(Environment.CurrentDirectory).Parent.Parent.Parent.FullName;
-
-            //wav = File.ReadAllBytes(Path.Combine(path, $"Resources", $"whatstheweatherlike.wav"));
-            //Console.WriteLine(SpeechToText.RecognizeSpeechFromBytesAsync(wav, "en-US").Result);
+            var pathCombined = Path.Combine(path, $"Resources", $"recorddepuisappel.wav");
+            var wav = File.ReadAllBytes(pathCombined);
+            //Console.WriteLine(SpeechToText.RecognizeSpeechFromBytesAsync(wav, "fr-FR").Result);
+            Console.WriteLine(CloudSTT.RecognizeSpeechFromWav(pathCombined));
 
             //byte[] result_tts = TextToSpeech.TransformTextToSpeechAsync("This is a test in english.", "en-US").Result;
             //FormatConvertor.TurnAudioStreamToFile(result_tts, path).Wait();
