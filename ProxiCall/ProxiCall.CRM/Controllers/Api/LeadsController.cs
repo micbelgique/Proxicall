@@ -21,6 +21,23 @@ namespace Proxicall.CRM.Controllers.Api
             _context = context;
         }
 
+        [HttpGet("bycompanyref")]
+        public async Task<ActionResult<Lead>> GetRefLead(string companyName)
+        {
+            var company = await _context.Company.Where(c => c.Name == companyName).FirstOrDefaultAsync();
+            if(company == null)
+            {
+                return BadRequest();
+            }
+
+            if(company.RefLeadId == null)
+            {
+                return NotFound();
+            }
+
+            return await _context.Lead.FirstOrDefaultAsync(l => l.Id == company.RefLeadId);
+        } 
+
         // GET: api/Leads
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Lead>>> GetLead()
@@ -28,7 +45,7 @@ namespace Proxicall.CRM.Controllers.Api
             return await _context.Lead.ToListAsync();
         }
 
-        [HttpGet("GetAllNames")]
+        [HttpGet("allnames")]
         public async Task<ActionResult<IEnumerable<string>>> GetLeads()
         {
             var leads = await _context.Lead.ToListAsync();

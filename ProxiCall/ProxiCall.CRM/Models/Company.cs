@@ -12,6 +12,7 @@ namespace ProxiCall.CRM.Models
         public string Name { get; set; }
         public string Address { get; set; }
         [Display(Name="Reference lead")]
+        [ForeignKey("RefLead")]
         public string RefLeadId { get; set; }
         [ForeignKey("RefLeadId")]
         public Lead RefLead { get; set; }
