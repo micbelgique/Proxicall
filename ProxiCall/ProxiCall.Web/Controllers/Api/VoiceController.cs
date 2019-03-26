@@ -27,12 +27,26 @@ namespace ProxiCall.Web.Controllers.Api
         private static BotConnector _botConnector;
         private readonly IActionContextAccessor _actionContextAccessor;
         private readonly IHostingEnvironment _hostingEnvironment;
+        private readonly string[] _names = new string[] {"Mélissa Fontesse","Arthur Grailet","Stéphanie Bémelmans","Renaud Dumont","Vivien Preser","Massimo Gentile","Thomas D'Hollander","Simon Gauthier","Laura Lieu","Tinaël Devresse",
+                                                        "Andy Dautricourt","Julien Dendauw","Martine Meunier","Nathan Pire","Maxime Hempte","Victor Pastorani","Tobias Jetzen","Xavier Tordoir","Loris Rossi","Jessy Delhaye","Sylvain Duhant",
+                                                        "David Vanni","Simon Fauconnier","Chloé Michaux","Xavier Vercruysse","Xavier Bastin","Guillaume Rigaux","Romain Blondeau","Laïla Valenti","Ryan Büttner","Pierre Mayeur","Guillaume Servais",
+                                                        "Frédéric Carbonnelle","Valentin Chevalier","Alain Musoni"};
+
+        private readonly string _hints;
 
         public VoiceController(IActionContextAccessor actionContextAccessor, IHostingEnvironment hostingEnvironment)
         {
             _actionContextAccessor = actionContextAccessor;
             _hostingEnvironment = hostingEnvironment;
             TwilioClient.Init(Sid, Token);
+            var sb = new StringBuilder();
+            foreach (var name in _names)
+            {
+                sb.Append(name);
+                sb.Append(",");
+            }
+            sb.Remove(sb.Length - 1, 1);
+            _hints = sb.ToString();
         }
 
         [HttpGet("receive")]
@@ -93,17 +107,18 @@ namespace ProxiCall.Web.Controllers.Api
             }
             else
             {
-                //voiceResponse.Gather(
-                //    input: new List<Gather.InputEnum> { Gather.InputEnum.Speech },
-                //    language: Gather.LanguageEnum.FrFr,
-                //    action: new Uri($"{Environment.GetEnvironmentVariable("Host")}/api/voice/send"),
-                //    method: Twilio.Http.HttpMethod.Get,
-                //    speechTimeout: "auto"
-                //);
-                var uriAction = new Uri($"{Environment.GetEnvironmentVariable("Host")}/api/voice/record");
-                voiceResponse.Record(action: uriAction, method: HttpMethod.Get, timeout: 2, transcribe: false, playBeep: true);
-                //Any TwiML verbs occurring after a <Record> are unreachable
-                voiceResponse.Say("Enregistrement non-effectué par Twilio", voice: "alice", language: Say.LanguageEnum.FrFr);
+                voiceResponse.Gather(
+                    input: new List<Gather.InputEnum> { Gather.InputEnum.Speech },
+                    language: Gather.LanguageEnum.FrFr,
+                    action: new Uri($"{Environment.GetEnvironmentVariable("Host")}/api/voice/send"),
+                    method: Twilio.Http.HttpMethod.Get,
+                    speechTimeout: "auto",
+                    hints: _hints
+                );
+                //var uriAction = new Uri($"{Environment.GetEnvironmentVariable("Host")}/api/voice/record");
+                //voiceResponse.Record(action: uriAction, method: HttpMethod.Get, timeout: 2, transcribe: false, playBeep: true);
+                ////Any TwiML verbs occurring after a <Record> are unreachable
+                //voiceResponse.Say("Enregistrement non-effectué par Twilio", voice: "alice", language: Say.LanguageEnum.FrFr);
             }
 
             var xmlFileName = Guid.NewGuid();
