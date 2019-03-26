@@ -28,5 +28,10 @@ namespace ProxiCall.CRM.Models
                 return $"{FirstName} {LastName}";
             }
         }
+
+        public override string ToString()
+        {
+            return FullName;
+        }
     }
 }
