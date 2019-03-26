@@ -11,6 +11,8 @@ using Microsoft.Extensions.Logging;
 using System.Linq;
 using ProxiCall.Dialogs.TelExchange;
 using ProxiCall.Models.Intents;
+using ProxiCall.Dialogs.SearchData;
+using ProxiCall.Dialogs.Shared;
 
 namespace ProxiCall
 {
@@ -39,6 +41,8 @@ namespace ProxiCall
         public DialogSet Dialogs { get; private set; }
 
         private readonly IStatePropertyAccessor<TelExchangeState> _telExchangeStateAccessor;
+        private readonly IStatePropertyAccessor<LeadState> _leadStateAccessor;
+        private readonly IStatePropertyAccessor<LuisState> _luisStateAccessor;
 
         /// <summary>
         /// Initializes a new instance of the class.
@@ -60,9 +64,12 @@ namespace ProxiCall
             _conversationState = conversationState ?? throw new ArgumentNullException(nameof(conversationState));
 
             _telExchangeStateAccessor = _userState.CreateProperty<TelExchangeState>(nameof(TelExchangeState));
+            _leadStateAccessor = _userState.CreateProperty<LeadState>(nameof(LeadState));
+            _luisStateAccessor = _userState.CreateProperty<LuisState>(nameof(LuisState));
             _dialogStateAccessor = _conversationState.CreateProperty<DialogState>(nameof(DialogState));
             Dialogs = new DialogSet(_dialogStateAccessor);
             Dialogs.Add(new TelExchangeDialog(_telExchangeStateAccessor, _loggerFactory, _services));
+            Dialogs.Add(new SearchDataDialog(_leadStateAccessor,_luisStateAccessor, _loggerFactory, _services));
         }
 
         /// <summary>
@@ -113,12 +120,18 @@ namespace ProxiCall
                         case DialogTurnStatus.Empty:
                             switch (topIntent)
                             {
+                                case Intents.SearchData:
                                 case Intents.TelephoneExchange:
                                 case Intents.MakeACall:
                                     // update call state with any entities captured
-                                    await UpdateCallStateAsync(luisResults, topIntent, dialogContext.Context);
+                                    //await UpdateCallStateAsync(luisResults, topIntent, dialogContext.Context);
 
-                                    await dialogContext.BeginDialogAsync(nameof(TelExchangeDialog));
+                                    //await dialogContext.BeginDialogAsync(nameof(TelExchangeDialog));
+                                    //break;
+
+                                    await UpdateDialogStatesAsync(luisResults, topIntent, dialogContext.Context);
+
+                                    await dialogContext.BeginDialogAsync(nameof(SearchDataDialog));
                                     break;
 
                                 case Intents.None:
@@ -195,6 +208,80 @@ namespace ProxiCall
                 // Set the new values into state.
                 telExchangeState.IntentName = intentName;
                 await _telExchangeStateAccessor.SetAsync(turnContext, telExchangeState);
+            }
+        }
+
+        private async Task UpdateDialogStatesAsync(RecognizerResult luisResult, string intentName, ITurnContext turnContext)
+        {
+            if (luisResult.Entities != null && luisResult.Entities.HasValues)
+            {
+                // Get latest States
+                var leadState = await _leadStateAccessor.GetAsync(turnContext, () => new LeadState());
+                var luisState = await _luisStateAccessor.GetAsync(turnContext, () => new LuisState());
+
+                var entities = luisResult.Entities;
+
+                // Supported LUIS Entities
+                string[] luisExpectingLeadName =
+                {
+                    "dataSeached::lead"
+                };
+                string[] luisHintSearchAddress =
+                {
+                    "dataSeached::address"
+                };
+                string[] luisHintSearchCompany =
+                {
+                    "dataSeached::company"
+                };
+                string[] luisHintSearchPhone =
+                {
+                    "dataSeached::phone"
+                };
+
+                // Update any entities
+                // Note: Consider a confirm dialog, instead of just updating.
+                foreach (var name in luisExpectingLeadName)
+                {
+                    if (entities[name] != null)
+                    {
+                        var fullName = (string)entities[name][0];
+                        leadState.LeadFullName = fullName;
+                        break;
+                    }
+                }
+
+                foreach (var address in luisHintSearchAddress)
+                {
+                    if (entities[address] != null)
+                    {
+                        luisState.AddDetectedEntity(LuisState.SEARCH_ADDRESS_ENTITYNAME);
+                        break;
+                    }
+                }
+
+                foreach (var company in luisHintSearchCompany)
+                {
+                    if (entities[company] != null)
+                    {
+                        luisState.AddDetectedEntity(LuisState.SEARCH_COMPANY_ENTITYNAME);
+                        break;
+                    }
+                }
+
+                foreach (var phone in luisHintSearchPhone)
+                {
+                    if (entities[phone] != null)
+                    {
+                        luisState.AddDetectedEntity(LuisState.SEARCH_PHONENUMBER_ENTITYNAME);
+                        break;
+                    }
+                }
+
+                // Set the new values into state.
+                luisState.IntentName = intentName;
+                await _leadStateAccessor.SetAsync(turnContext, leadState);
+                await _luisStateAccessor.SetAsync(turnContext, luisState);
             }
         }
     }
