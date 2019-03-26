@@ -15,8 +15,6 @@ namespace ProxiCall.CRM.Models
         public string PhoneNumber { get; set; }
         public string Email { get; set; }
         public string Address { get; set; }
-
-        [Display(Name = "Company")]
         public string CompanyId { get; set; }
         public Company Company { get; set; }    
         

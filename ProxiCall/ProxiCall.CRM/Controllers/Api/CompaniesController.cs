@@ -32,13 +32,14 @@ namespace Proxicall.CRM.Controllers.Api
         [HttpGet("{id}")]
         public async Task<ActionResult<Company>> GetCompany(string id)
         {
-            var company = await _context.Company.FindAsync(id);
+            var company = await _context.Company
+                .Include(c => c.RefLead)
+                .FirstOrDefaultAsync(c => c.Id == id);
 
             if (company == null)
             {
                 return NotFound();
             }
-
             return company;
         }
 

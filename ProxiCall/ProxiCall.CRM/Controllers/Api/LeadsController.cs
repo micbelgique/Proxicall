@@ -77,10 +77,11 @@ namespace Proxicall.CRM.Controllers.Api
             firstName = char.ToLower(firstName[0]) + firstName.Substring(1).ToLower();
             lastName = char.ToLower(lastName[0]) + lastName.Substring(1).ToLower();
             var lead = await _context.Lead.Where(l =>
-            l.FirstName == firstName && l.LastName == lastName
-            ||
-            l.FirstName == lastName && l.LastName == firstName
-            ).FirstOrDefaultAsync();
+                l.FirstName == firstName && l.LastName == lastName
+                ||
+                l.FirstName == lastName && l.LastName == firstName)
+            .Include(l => l.Company)
+            .FirstOrDefaultAsync();
 
             if (lead == null)
             {

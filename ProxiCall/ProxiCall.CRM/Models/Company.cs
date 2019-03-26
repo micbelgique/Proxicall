@@ -11,13 +11,9 @@ namespace ProxiCall.CRM.Models
         [Required]
         public string Name { get; set; }
         public string Address { get; set; }
-        [Display(Name="Reference lead")]
         [ForeignKey("RefLead")]
         public string RefLeadId { get; set; }
-        [ForeignKey("RefLeadId")]
         public Lead RefLead { get; set; }
-        [NotMapped]
-        public ICollection<Lead> Leads { get; set; }
 
         public override string ToString()
         {
