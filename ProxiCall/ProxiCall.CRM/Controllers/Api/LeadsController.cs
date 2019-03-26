@@ -57,6 +57,8 @@ namespace Proxicall.CRM.Controllers.Api
         [HttpGet("byName")]
         public async Task<ActionResult<Lead>> GetLead(string firstName, string lastName)
         {
+            firstName = char.ToLower(firstName[0]) + firstName.Substring(1).ToLower();
+            lastName = char.ToLower(lastName[0]) + lastName.Substring(1).ToLower();
             var lead = await _context.Lead.Where(l =>
             l.FirstName == firstName && l.LastName == lastName
             ||
