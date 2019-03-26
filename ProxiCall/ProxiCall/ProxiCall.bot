@@ -29,8 +29,8 @@
     },
     {
       "appId": "fb433c90-d8af-477a-8fc9-6d7ca5813d3c",
-      "authoringKey": "b1f3b511b6bb449bacb84cc6e8c0ebc6",
-      "version": "0.1",
+      "authoringKey": "f5da09b674b1485198bf38d31d4c2e36",
+      "version": "0.2",
       "region": "westeurope",
       "type": "luis",
       "name": "proxicall-luis",

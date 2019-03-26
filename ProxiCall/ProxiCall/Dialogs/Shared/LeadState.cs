@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using ProxiCall.Models;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace ProxiCall.Dialogs.Shared
 {
@@ -14,6 +11,8 @@ namespace ProxiCall.Dialogs.Shared
         public string Address { get; set; }
         public string Company { get; set; }
 
+        public Lead Lead { get; set; }
+
         private string leadFullname = string.Empty;
 
         public string LeadFullName
@@ -23,26 +22,35 @@ namespace ProxiCall.Dialogs.Shared
             {
                 leadFullname = value;
 
-                var names = leadFullname.Split(new char[0]); //split at each whitespaces
-                var firstName = names[0];
-                var lastName = new StringBuilder();
-
-                for (var i = 1; i < names.Length; i++)
+                if(!string.IsNullOrEmpty(value))
                 {
-                    lastName.Append(names[i] + " ");
-                }
+                    var names = leadFullname.Split(new char[0]); //split at each whitespaces
+                    var firstName = names[0];
+                    var lastName = new StringBuilder();
 
-                LeadFirstName = firstName;
-                LeadLastName = lastName.ToString();
+                    for (var i = 1; i < names.Length; i++)
+                    {
+                        lastName.Append(names[i] + " ");
+                    }
+
+                    LeadFirstName = firstName;
+                    LeadLastName = lastName.ToString();
+                }
+                else
+                {
+                    LeadFirstName = string.Empty;
+                    LeadLastName = string.Empty;
+                }
             }
         }
 
         public void Reset()
         {
-            LeadFirstName = string.Empty;
+            LeadFullName = string.Empty;
             PhoneNumber = string.Empty;
             Address = string.Empty;
             Company = string.Empty;
+            Lead = null;
         }
     }
 }

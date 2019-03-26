@@ -25,7 +25,10 @@ namespace ProxiCall.Dialogs.Shared
                     detectedEntities = new List<string>();
                 return detectedEntities;
             }
-            set { detectedEntities = value; }
+            set
+            {
+                detectedEntities = value;
+            }
         }
 
         public bool AddDetectedEntity(string detectedEntity)

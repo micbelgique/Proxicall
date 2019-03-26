@@ -224,19 +224,19 @@ namespace ProxiCall
                 // Supported LUIS Entities
                 string[] luisExpectingLeadName =
                 {
-                    "dataSeached::lead"
+                    "lead"
                 };
                 string[] luisHintSearchAddress =
                 {
-                    "dataSeached::address"
+                    "address"
                 };
                 string[] luisHintSearchCompany =
                 {
-                    "dataSeached::company"
+                    "company"
                 };
                 string[] luisHintSearchPhone =
                 {
-                    "dataSeached::phone"
+                    "phone"
                 };
 
                 // Update any entities
@@ -277,7 +277,17 @@ namespace ProxiCall
                         break;
                     }
                 }
-
+                
+                //Searching for all info
+                if(intentName == Intents.SearchData)
+                {
+                    if(luisState.DetectedEntities == null ||luisState.DetectedEntities.Count==0)
+                    {
+                        luisState.AddDetectedEntity(LuisState.SEARCH_ADDRESS_ENTITYNAME);
+                        luisState.AddDetectedEntity(LuisState.SEARCH_COMPANY_ENTITYNAME);
+                        luisState.AddDetectedEntity(LuisState.SEARCH_PHONENUMBER_ENTITYNAME);
+                    }
+                }
                 // Set the new values into state.
                 luisState.IntentName = intentName;
                 await _leadStateAccessor.SetAsync(turnContext, leadState);
