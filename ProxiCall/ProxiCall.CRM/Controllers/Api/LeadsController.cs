@@ -24,18 +24,20 @@ namespace Proxicall.CRM.Controllers.Api
         [HttpGet("bycompanyref")]
         public async Task<ActionResult<Lead>> GetRefLead(string companyName)
         {
-            var company = await _context.Company.Where(c => c.Name == companyName).FirstOrDefaultAsync();
-            if(company == null)
+            var company = await _context.Company.Where(c => c.Name == companyName)
+                .Include(c => c.RefLead)
+                .FirstOrDefaultAsync();
+            if (company == null)
             {
                 return BadRequest();
             }
 
-            if(company.RefLeadId == null)
+            if (company.RefLead == null)
             {
                 return NotFound();
             }
 
-            return await _context.Lead.FirstOrDefaultAsync(l => l.Id == company.RefLeadId);
+            return company.RefLead;
         } 
 
         // GET: api/Leads
@@ -43,18 +45,6 @@ namespace Proxicall.CRM.Controllers.Api
         public async Task<ActionResult<IEnumerable<Lead>>> GetLead()
         {
             return await _context.Lead.ToListAsync();
-        }
-
-        [HttpGet("allnames")]
-        public async Task<ActionResult<IEnumerable<string>>> GetLeads()
-        {
-            var leads = await _context.Lead.ToListAsync();
-            var fullnames = new List<string>();
-            foreach(var lead in leads)
-            {
-                fullnames.Add(lead.FullName);
-            }
-            return fullnames;
         }
 
         // GET: api/Leads/5
@@ -70,27 +60,6 @@ namespace Proxicall.CRM.Controllers.Api
 
             return lead;
         }
-
-        [HttpGet("byName")]
-        public async Task<ActionResult<Lead>> GetLead(string firstName, string lastName)
-        {
-            firstName = char.ToLower(firstName[0]) + firstName.Substring(1).ToLower();
-            lastName = char.ToLower(lastName[0]) + lastName.Substring(1).ToLower();
-            var lead = await _context.Lead.Where(l =>
-                l.FirstName == firstName && l.LastName == lastName
-                ||
-                l.FirstName == lastName && l.LastName == firstName)
-            .Include(l => l.Company)
-            .FirstOrDefaultAsync();
-
-            if (lead == null)
-            {
-                return NotFound();
-            }
-
-            return lead;
-        }
-
 
         // PUT: api/Leads/5
         [HttpPut("{id}")]

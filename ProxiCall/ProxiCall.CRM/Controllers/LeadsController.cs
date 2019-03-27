@@ -1,4 +1,6 @@
-﻿using System.Linq;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -7,7 +9,7 @@ using ProxiCall.CRM.Models;
 using Proxicall.CRM.Models;
 using Microsoft.AspNetCore.Authorization;
 
-namespace ProxiCall.CRM.Controllers
+namespace Proxicall.CRM.Controllers
 {
     [Authorize(Roles = "Admin, User")]
     public class LeadsController : Controller
@@ -22,7 +24,7 @@ namespace ProxiCall.CRM.Controllers
         // GET: Leads
         public async Task<IActionResult> Index()
         {
-            var proxicallCRMContext = _context.Lead.Include(l => l.Company);
+            var proxicallCRMContext = _context.Lead.Include(l => l.Employer);
             return View(await proxicallCRMContext.ToListAsync());
         }
 
@@ -35,7 +37,7 @@ namespace ProxiCall.CRM.Controllers
             }
 
             var lead = await _context.Lead
-                .Include(l => l.Company)
+                .Include(l => l.Employer)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (lead == null)
             {
@@ -131,7 +133,7 @@ namespace ProxiCall.CRM.Controllers
             }
 
             var lead = await _context.Lead
-                .Include(l => l.Company)
+                .Include(l => l.Employer)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (lead == null)
             {

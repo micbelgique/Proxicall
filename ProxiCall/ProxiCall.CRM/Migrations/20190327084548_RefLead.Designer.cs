@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Proxicall.CRM.Models;
 
 namespace Proxicall.CRM.Migrations
 {
     [DbContext(typeof(ProxicallCRMContext))]
-    partial class ProxicallCRMContextModelSnapshot : ModelSnapshot
+    [Migration("20190327084548_RefLead")]
+    partial class RefLead
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -329,7 +331,7 @@ namespace Proxicall.CRM.Migrations
 
             modelBuilder.Entity("ProxiCall.CRM.Models.Lead", b =>
                 {
-                    b.HasOne("ProxiCall.CRM.Models.Company", "Employer")
+                    b.HasOne("ProxiCall.CRM.Models.Company", "Enterprise")
                         .WithMany()
                         .HasForeignKey("CompanyId");
                 });
