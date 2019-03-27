@@ -7,6 +7,7 @@ using ProxiCall.Dialogs.Shared;
 using ProxiCall.Models;
 using ProxiCall.Models.Intents;
 using ProxiCall.Services.ProxiCallCRM;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -175,100 +176,11 @@ namespace ProxiCall.Dialogs.SearchData
             //Giving informations to User
             if (luisState.IntentName == Intents.SearchData)
             {
-                //Creating adapted response
                 var wantPhone = luisState.Entities.Contains(LuisState.SEARCH_PHONENUMBER_ENTITYNAME);
-                var wantAddress = luisState.Entities.Contains(LuisState.SEARCH_ADDRESS_ENTITYNAME);
-                var wantCompany = luisState.Entities.Contains(LuisState.SEARCH_COMPANY_ENTITYNAME);
-                var wantEmail = luisState.Entities.Contains(LuisState.SEARCH_EMAIL_ENTITYNAME);
-
-                var textMessage = string.Empty;
-                var phoneFragment = string.Empty;
-                var addressFragment = string.Empty;
-                var companyFragment = string.Empty;
-                var emailFragment = string.Empty;
                 var hasOnlyOneEntity = luisState.Entities.Count == 1;
 
-                if (wantCompany)
-                {
-                    if (string.IsNullOrEmpty(crmState.Lead.Company))
-                    {
-                        companyFragment = "ne semble pas avoir de compagnie répertoriée";
-                    }
-                    else if (hasOnlyOneEntity)
-                    {
-                        companyFragment = $"travaille pour {crmState.Lead.Company}";
-                    }
-                    else
-                    {
-                        companyFragment = $"de {crmState.Lead.Company}";
-                    }
-                }
-
-                if (wantPhone)
-                {
-                    if (string.IsNullOrEmpty(crmState.Lead.PhoneNumber))
-                    {
-                        phoneFragment = "ne semble pas avoir de numéro répertorié";
-                    }
-                    else if (wantCompany)
-                    {
-                        var hasCompany = !string.IsNullOrEmpty(crmState.Lead.Company);
-                        if (hasCompany)
-                        {
-                            phoneFragment = $"a pour numéro de téléphone le {crmState.Lead.PhoneNumber}";
-                        }
-                        else
-                        {
-                            phoneFragment = $", son numéro de téléphone est le {crmState.Lead.PhoneNumber}";
-                        }
-                    }
-                    else 
-                    {
-                        if (wantAddress)
-                        {
-                            phoneFragment = "et ";
-                        }
-                        if (wantEmail)
-                        {
-                            phoneFragment = ", ";
-                        }
-                        phoneFragment += $"a pour numéro de téléphone le {crmState.Lead.PhoneNumber}";
-                    }
-                }
-
-                if (wantAddress)
-                {
-                    if (string.IsNullOrEmpty(crmState.Lead.Address))
-                    {
-                        addressFragment = "ne semble pas avoir d'adresse répertoriée";
-                    }
-                    else
-                    {
-                        if(luisState.Entities.Count>1)
-                        {
-                            addressFragment = ", ";
-                        }
-                        addressFragment += $"habite {crmState.Lead.Address}";
-                    }
-                }
-
-                if(wantEmail)
-                {
-                    if (string.IsNullOrEmpty(crmState.Lead.Email))
-                    {
-                        emailFragment = "Aucune adresse email n'a été trouvée.";
-                    }
-                    else if (hasOnlyOneEntity || wantCompany)
-                    {
-                        emailFragment = $"a comme adresse email {crmState.Lead.Email}";
-                    }
-                    else
-                    {
-                        emailFragment = $"et a pour adresse email {crmState.Lead.Email}.";
-                    }
-                }
-
-                textMessage = $"{crmState.Lead.FullName} {companyFragment} {addressFragment} {phoneFragment} {emailFragment}";
+                //Creating adapted response
+                var textMessage = await FormatMessageWithWantedData(stepContext);
 
                 //Sending response
                 await stepContext.Context
@@ -291,6 +203,91 @@ namespace ProxiCall.Dialogs.SearchData
             }
 
             return await stepContext.NextAsync();
+        }
+
+        private async Task<string> FormatMessageWithWantedData(WaterfallStepContext stepContext)
+        {
+            var crmState = await CRMStateAccessor.GetAsync(stepContext.Context);
+            var luisState = await LuisStateAccessor.GetAsync(stepContext.Context);
+
+            var wantPhone = luisState.Entities.Contains(LuisState.SEARCH_PHONENUMBER_ENTITYNAME);
+            var wantAddress = luisState.Entities.Contains(LuisState.SEARCH_ADDRESS_ENTITYNAME);
+            var wantCompany = luisState.Entities.Contains(LuisState.SEARCH_COMPANY_ENTITYNAME);
+            var wantEmail = luisState.Entities.Contains(LuisState.SEARCH_EMAIL_ENTITYNAME);
+
+            var hasPhone = !string.IsNullOrEmpty(crmState.Lead.PhoneNumber);
+            var hasCompany = !string.IsNullOrEmpty(crmState.Lead.Company);
+            var hasEmail = !string.IsNullOrEmpty(crmState.Lead.Email);
+            var hasAddress = !string.IsNullOrEmpty(crmState.Lead.Address);
+
+            var wantedData = new StringBuilder(string.Empty);
+            var missingWantedData = string.Empty;
+
+            var hasOneOrMoreResult =
+                (wantCompany && hasCompany) || (wantAddress && hasAddress)
+                || (wantPhone && hasPhone) || (wantEmail && hasEmail);
+
+            if (hasOneOrMoreResult)
+            {
+                wantedData.AppendLine($"Voici les données demandées pour {crmState.Lead.FullName} : ");
+                if (wantCompany)
+                {
+                    if (!hasCompany)
+                    {
+                        missingWantedData += "compagnie. ";
+                    }
+                    else
+                    {
+                        wantedData.AppendLine($"Compagnie : {crmState.Lead.Company}.");
+                    }
+                }
+
+                if (wantAddress)
+                {
+                    if (!hasAddress)
+                    {
+                        missingWantedData += "adresse du domicile. ";
+                    }
+                    else
+                    {
+                        wantedData.AppendLine($"Adresse du domicile : {crmState.Lead.Address}.");
+                    }
+                }
+
+                if (wantPhone)
+                {
+                    if (!hasPhone)
+                    {
+                        missingWantedData += "numéro de téléphone. ";
+                    }
+                    else
+                    {
+                        wantedData.AppendLine($"Numéro de téléphone : {crmState.Lead.PhoneNumber}.");
+                    }
+                }
+
+                if (wantEmail)
+                {
+                    if (!hasEmail)
+                    {
+                        missingWantedData += "adresse email. ";
+                    }
+                    else
+                    {
+                        wantedData.AppendLine($"Adresse email : {crmState.Lead.Email}.");
+                    }
+                }
+            }
+            else
+            {
+                wantedData.Append($"{crmState.Lead.FullName} est bien référencé dans la base de données mais les informations demandées sont absentes.");
+            }
+            
+            if(!string.IsNullOrEmpty(missingWantedData))
+            {
+                missingWantedData = "Les données suivantes sont manquantes sont absentes de la base de données : " + missingWantedData;
+            }
+            return $"{wantedData.ToString()} {missingWantedData}";
         }
 
         private async Task<DialogTurnResult> EndSearchDialogStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
