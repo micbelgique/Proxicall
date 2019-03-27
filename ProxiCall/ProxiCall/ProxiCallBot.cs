@@ -39,7 +39,7 @@ namespace ProxiCall
 
         public DialogSet Dialogs { get; private set; }
         
-        private readonly IStatePropertyAccessor<LeadState> _leadStateAccessor;
+        private readonly IStatePropertyAccessor<CRMState> _crmStateAccessor;
         private readonly IStatePropertyAccessor<LuisState> _luisStateAccessor;
 
         /// <summary>
@@ -61,11 +61,11 @@ namespace ProxiCall
             _userState = userState ?? throw new ArgumentNullException(nameof(userState));
             _conversationState = conversationState ?? throw new ArgumentNullException(nameof(conversationState));
             
-            _leadStateAccessor = _userState.CreateProperty<LeadState>(nameof(LeadState));
+            _crmStateAccessor = _userState.CreateProperty<CRMState>(nameof(CRMState));
             _luisStateAccessor = _userState.CreateProperty<LuisState>(nameof(LuisState));
             _dialogStateAccessor = _conversationState.CreateProperty<DialogState>(nameof(DialogState));
             Dialogs = new DialogSet(_dialogStateAccessor);
-            Dialogs.Add(new SearchLeadDataDialog(_leadStateAccessor,_luisStateAccessor, _loggerFactory, _services));
+            Dialogs.Add(new SearchLeadDataDialog(_crmStateAccessor,_luisStateAccessor, _loggerFactory, _services));
         }
 
         /// <summary>
@@ -165,7 +165,7 @@ namespace ProxiCall
             if (luisResult.Entities != null && luisResult.Entities.HasValues)
             {
                 // Get latest States
-                var leadState = await _leadStateAccessor.GetAsync(turnContext, () => new LeadState());
+                var crmState = await _crmStateAccessor.GetAsync(turnContext, () => new CRMState());
                 var luisState = await _luisStateAccessor.GetAsync(turnContext, () => new LuisState());
 
                 var entities = luisResult.Entities;
@@ -173,7 +173,8 @@ namespace ProxiCall
                 // Supported LUIS Entities
                 string[] luisExpectedLeadName =
                 {
-                    "lead"
+                    "lead",
+                    "personName"
                 };
                 string[] luisHintSearchAddress =
                 {
@@ -195,7 +196,7 @@ namespace ProxiCall
                     if (entities[name] != null)
                     {
                         var fullName = (string)entities[name][0];
-                        leadState.Lead.FullName = fullName;
+                        crmState.Lead.FullName = fullName;
                         break;
                     }
                 }
@@ -230,7 +231,7 @@ namespace ProxiCall
                 //Searching for all info
                 if(intentName == Intents.SearchData)
                 {
-                    if(luisState.DetectedEntities == null ||luisState.DetectedEntities.Count==0)
+                    if(luisState.Entities == null ||luisState.Entities.Count==0)
                     {
                         luisState.AddDetectedEntity(LuisState.SEARCH_ADDRESS_ENTITYNAME);
                         luisState.AddDetectedEntity(LuisState.SEARCH_COMPANY_ENTITYNAME);
@@ -239,7 +240,7 @@ namespace ProxiCall
                 }
                 // Set the new values into state.
                 luisState.IntentName = intentName;
-                await _leadStateAccessor.SetAsync(turnContext, leadState);
+                await _crmStateAccessor.SetAsync(turnContext, crmState);
                 await _luisStateAccessor.SetAsync(turnContext, luisState);
             }
         }

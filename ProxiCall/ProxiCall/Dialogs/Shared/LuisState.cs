@@ -13,29 +13,27 @@ namespace ProxiCall.Dialogs.Shared
 
         public string IntentName { get; set; }
 
-        public bool userWantsAllInformations { get; set; }
+        private IList<string> entities;
 
-        private IList<string> detectedEntities;
-
-        public IList<string> DetectedEntities
+        public IList<string> Entities
         {
             get
             {
-                if (detectedEntities == null)
-                    detectedEntities = new List<string>();
-                return detectedEntities;
+                if (entities == null)
+                    entities = new List<string>();
+                return entities;
             }
             set
             {
-                detectedEntities = value;
+                entities = value;
             }
         }
 
         public bool AddDetectedEntity(string detectedEntity)
         {
-            if(!DetectedEntities.Contains(detectedEntity))
+            if(!Entities.Contains(detectedEntity))
             {
-                DetectedEntities.Add(detectedEntity);
+                Entities.Add(detectedEntity);
                 return true;
             }
             return false;
@@ -43,12 +41,12 @@ namespace ProxiCall.Dialogs.Shared
 
         public bool RemoveDetectedEntity(string removedDetectedEntity)
         {
-            return DetectedEntities.Remove(removedDetectedEntity);
+            return Entities.Remove(removedDetectedEntity);
         }
 
         public void ResetIntentIfNoEntities()
         {
-            if(DetectedEntities.Count == 0)
+            if(Entities.Count == 0)
             {
                 IntentName = string.Empty;
             }
@@ -57,8 +55,7 @@ namespace ProxiCall.Dialogs.Shared
         public void ResetAll()
         {
             IntentName = string.Empty;
-            DetectedEntities.Clear();
-            userWantsAllInformations = false;
+            Entities.Clear();
         }
     }
 }

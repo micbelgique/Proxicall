@@ -1,15 +1,16 @@
 ﻿using ProxiCall.Models;
-using System.Text;
 
 namespace ProxiCall.Dialogs.Shared
 {
-    public class LeadState
+    public class CRMState
     {
         public Lead Lead { get; set; }
 
-        public LeadState()
+        public CRMState()
         {
             Lead = new Lead();
         }
+
+        public bool WantsToCallButNoNumberFound { get; set; }
     }
 }

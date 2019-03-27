@@ -7,9 +7,6 @@ using ProxiCall.Dialogs.Shared;
 using ProxiCall.Models;
 using ProxiCall.Models.Intents;
 using ProxiCall.Services.ProxiCallCRM;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -17,20 +14,20 @@ namespace ProxiCall.Dialogs.SearchData
 {
     public class SearchLeadDataDialog : ComponentDialog
     {
-        public IStatePropertyAccessor<LeadState> LeadStateAccessor { get; }
+        public IStatePropertyAccessor<CRMState> CRMStateAccessor { get; }
         public IStatePropertyAccessor<LuisState> LuisStateAccessor { get; }
         public ILoggerFactory LoggerFactory { get; }
         public BotServices BotServices { get; }
 
         private const string _searchLeadDataWaterfall = "searchLeadDataWaterfall";
         private const string _leadFullNamePrompt = "leadFullNamePrompt";
-        private const string _retryNumberSearchPrompt = "retryNumberSearchPrompt";
+        private const string _retryFetchingMinimumDataFromUserPrompt = "retryFetchingMinimumDataFromUserPrompt";
         private const string _confirmForwardingPrompt = "confirmForwardingPrompt";
 
-        public SearchLeadDataDialog(IStatePropertyAccessor<LeadState> leadStateAccessor, IStatePropertyAccessor<LuisState> luisStateAccessor,
+        public SearchLeadDataDialog(IStatePropertyAccessor<CRMState> crmStateAccessor, IStatePropertyAccessor<LuisState> luisStateAccessor,
             ILoggerFactory loggerFactory, BotServices botServices) : base(nameof(SearchLeadDataDialog))
         {
-            LeadStateAccessor = leadStateAccessor;
+            CRMStateAccessor = crmStateAccessor;
             LuisStateAccessor = luisStateAccessor;
             LoggerFactory = loggerFactory;
             BotServices = botServices;
@@ -45,23 +42,23 @@ namespace ProxiCall.Dialogs.SearchData
             };
             AddDialog(new WaterfallDialog(_searchLeadDataWaterfall, waterfallSteps));
             AddDialog(new TextPrompt(_leadFullNamePrompt));
-            AddDialog(new ConfirmPrompt(_retryNumberSearchPrompt, defaultLocale: "fr-fr"));
+            AddDialog(new ConfirmPrompt(_retryFetchingMinimumDataFromUserPrompt, defaultLocale: "fr-fr"));
             AddDialog(new ConfirmPrompt(_confirmForwardingPrompt, defaultLocale: "fr-fr"));
         }
 
         private async Task<DialogTurnResult> InitializeStateStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
         {
-            //Initializing LeadStateAccessor
-            var leadState = await LeadStateAccessor.GetAsync(stepContext.Context, () => null);
-            if (leadState == null)
+            //Initializing CRMStateAccessor
+            var crmState = await CRMStateAccessor.GetAsync(stepContext.Context, () => null);
+            if (crmState == null)
             {
-                if (stepContext.Options is LeadState callStateOpt)
+                if (stepContext.Options is CRMState callStateOpt)
                 {
-                    await LeadStateAccessor.SetAsync(stepContext.Context, callStateOpt);
+                    await CRMStateAccessor.SetAsync(stepContext.Context, callStateOpt);
                 }
                 else
                 {
-                    await LeadStateAccessor.SetAsync(stepContext.Context, new LeadState());
+                    await CRMStateAccessor.SetAsync(stepContext.Context, new CRMState());
                 }
             }
 
@@ -84,10 +81,10 @@ namespace ProxiCall.Dialogs.SearchData
 
         private async Task<DialogTurnResult> AskForLeadFullNameStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
         {
-            var leadState = await LeadStateAccessor.GetAsync(stepContext.Context);
+            var crmState = await CRMStateAccessor.GetAsync(stepContext.Context);
 
             //Asking for the name of the lead if not already given
-            if (string.IsNullOrEmpty(leadState.Lead.FullName))
+            if (string.IsNullOrEmpty(crmState.Lead.FullName))
             {
                 return await stepContext.PromptAsync(_leadFullNamePrompt, new PromptOptions { Prompt = MessageFactory.Text(Properties.strings.querySearchPerson) }, cancellationToken);
             }
@@ -96,36 +93,46 @@ namespace ProxiCall.Dialogs.SearchData
 
         private async Task<DialogTurnResult> SearchLeadNumberStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
         {
-            var leadState = await LeadStateAccessor.GetAsync(stepContext.Context);
+            var crmState = await CRMStateAccessor.GetAsync(stepContext.Context);
+            var luisState = await LuisStateAccessor.GetAsync(stepContext.Context);
 
             //Gathering the name of the lead if not already given
-            if (string.IsNullOrEmpty(leadState.Lead.FullName))
+            if (string.IsNullOrEmpty(crmState.Lead.FullName))
             {
-                leadState.Lead.FullName = (string)stepContext.Result;
+                crmState.Lead.FullName = (string)stepContext.Result;
             }
 
             //Searching the lead
-            leadState.Lead = await SearchLeadAsync(leadState.Lead.FirstName, leadState.Lead.LastName);
+            crmState.Lead = await SearchLeadAsync(crmState.Lead.FirstName, crmState.Lead.LastName);
 
-            //Asking for retry if lead not found
-            //TODO : en fonction de si number trouvé ou pas
-            if (leadState.Lead == null)
+            //Asking for retry if necessary
+            crmState.WantsToCallButNoNumberFound = luisState.IntentName == Intents.MakeACall && crmState.Lead.PhoneNumber == null;
+            var promptMessage = "";
+            if (crmState.Lead == null)
             {
-                leadState.Lead.PhoneNumber = "";
-                var promptMessage = $"{leadState.Lead.FullName} {Properties.strings.retryNumberSearchPrompt}";
+                promptMessage = $"{crmState.Lead.FullName} {Properties.strings.retryNumberSearchPrompt}";
+            }
+            else if (crmState.WantsToCallButNoNumberFound)
+            {
+                promptMessage = $"Le numéro de {crmState.Lead.FullName} {Properties.strings.retryNumberSearchPrompt}";
+            }
+            var needsRetry = !string.IsNullOrEmpty(promptMessage);
+            if (needsRetry)
+            {
+                await CRMStateAccessor.SetAsync(stepContext.Context, crmState);
                 var promptOptions = new PromptOptions
                 {
                     Prompt = MessageFactory.Text(promptMessage),
                     RetryPrompt = MessageFactory.Text(Properties.strings.retryPrompt),
                 };
-                return await stepContext.PromptAsync(_retryNumberSearchPrompt, promptOptions, cancellationToken);
+                return await stepContext.PromptAsync(_retryFetchingMinimumDataFromUserPrompt, promptOptions, cancellationToken);
             }
 
             //Moving on to the next step if lead found
-            leadState.Lead.PhoneNumber = leadState.Lead.PhoneNumber;
-            leadState.Lead.Address = leadState.Lead.Address;
-            leadState.Lead.Company = leadState.Lead.Company;
-            await LeadStateAccessor.SetAsync(stepContext.Context, leadState);
+            crmState.Lead.PhoneNumber = crmState.Lead.PhoneNumber;
+            crmState.Lead.Address = crmState.Lead.Address;
+            crmState.Lead.Company = crmState.Lead.Company;
+            await CRMStateAccessor.SetAsync(stepContext.Context, crmState);
 
             return await stepContext.NextAsync();
         }
@@ -139,18 +146,18 @@ namespace ProxiCall.Dialogs.SearchData
 
         private async Task<DialogTurnResult> ResultHandlerStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
         {
-            var leadState = await LeadStateAccessor.GetAsync(stepContext.Context);
+            var crmState = await CRMStateAccessor.GetAsync(stepContext.Context);
             var luisState = await LuisStateAccessor.GetAsync(stepContext.Context);
 
             //Handling when lead not found
-            if (leadState.Lead == null)
+            if (crmState.Lead == null || crmState.WantsToCallButNoNumberFound)
             {
                 var retry = (bool)stepContext.Result;
                 if (retry)
                 {
                     //Restarting dialog if user decides to retry
-                    leadState.Lead.Reset();
-                    await LeadStateAccessor.SetAsync(stepContext.Context, leadState);
+                    crmState.Lead.Reset();
+                    await CRMStateAccessor.SetAsync(stepContext.Context, crmState);
                     return await stepContext.ReplaceDialogAsync(_searchLeadDataWaterfall, cancellationToken);
                 }
                 else
@@ -162,9 +169,9 @@ namespace ProxiCall.Dialogs.SearchData
                         , cancellationToken
                     );
 
-                    leadState.Lead.Reset();
+                    crmState.Lead.Reset();
                     luisState.ResetAll();
-                    await LeadStateAccessor.SetAsync(stepContext.Context, leadState);
+                    await CRMStateAccessor.SetAsync(stepContext.Context, crmState);
                     await LuisStateAccessor.SetAsync(stepContext.Context, luisState);
                     return await stepContext.EndDialogAsync();
                 }
@@ -174,9 +181,9 @@ namespace ProxiCall.Dialogs.SearchData
             if (luisState.IntentName == Intents.SearchData)
             {
                 //Creating adapted response
-                var wantPhone = luisState.DetectedEntities.Contains(LuisState.SEARCH_PHONENUMBER_ENTITYNAME);
-                var wantAddress = luisState.DetectedEntities.Contains(LuisState.SEARCH_ADDRESS_ENTITYNAME);
-                var wantCompany = luisState.DetectedEntities.Contains(LuisState.SEARCH_COMPANY_ENTITYNAME);
+                var wantPhone = luisState.Entities.Contains(LuisState.SEARCH_PHONENUMBER_ENTITYNAME);
+                var wantAddress = luisState.Entities.Contains(LuisState.SEARCH_ADDRESS_ENTITYNAME);
+                var wantCompany = luisState.Entities.Contains(LuisState.SEARCH_COMPANY_ENTITYNAME);
 
                 var textMessage = "";
                 var phoneFragment = "";
@@ -185,36 +192,36 @@ namespace ProxiCall.Dialogs.SearchData
                 
                 if (wantCompany)
                 {
-                    if (string.IsNullOrEmpty(leadState.Lead.Company))
+                    if (string.IsNullOrEmpty(crmState.Lead.Company))
                     {
                         companyFragment = "ne semble pas avoir de compagnie répertoriée";
                     }
-                    else if (luisState.DetectedEntities.Count == 1)
+                    else if (luisState.Entities.Count == 1)
                     {
-                        companyFragment = $"travaille pour {leadState.Lead.Company}";
+                        companyFragment = $"travaille pour {crmState.Lead.Company}";
                     }
                     else
                     {
-                        companyFragment = $"de {leadState.Lead.Company}";
+                        companyFragment = $"de {crmState.Lead.Company}";
                     }
                 }
 
                 if (wantPhone)
                 {
-                    if (string.IsNullOrEmpty(leadState.Lead.PhoneNumber))
+                    if (string.IsNullOrEmpty(crmState.Lead.PhoneNumber))
                     {
                         phoneFragment = "ne semble pas avoir de numéro répertorié";
                     }
                     else if (wantCompany)
                     {
-                        var hasCompany = !string.IsNullOrEmpty(leadState.Lead.Company);
+                        var hasCompany = !string.IsNullOrEmpty(crmState.Lead.Company);
                         if (hasCompany)
                         {
-                            phoneFragment = $"a pour numéro de téléphone le {leadState.Lead.PhoneNumber}";
+                            phoneFragment = $"a pour numéro de téléphone le {crmState.Lead.PhoneNumber}";
                         }
                         else
                         {
-                            phoneFragment = $", son numéro de téléphone est le {leadState.Lead.PhoneNumber}";
+                            phoneFragment = $", son numéro de téléphone est le {crmState.Lead.PhoneNumber}";
                         }
                     }
                     else 
@@ -223,27 +230,27 @@ namespace ProxiCall.Dialogs.SearchData
                         {
                             phoneFragment = "et ";
                         }
-                        phoneFragment += $"a pour numéro de téléphone le {leadState.Lead.PhoneNumber}";
+                        phoneFragment += $"a pour numéro de téléphone le {crmState.Lead.PhoneNumber}";
                     }
                 }
 
                 if (wantAddress)
                 {
-                    if (string.IsNullOrEmpty(leadState.Lead.Address))
+                    if (string.IsNullOrEmpty(crmState.Lead.Address))
                     {
                         addressFragment = "ne semble pas avoir d'adresse répertoriée";
                     }
                     else
                     {
-                        if(luisState.DetectedEntities.Count>1)
+                        if(luisState.Entities.Count>1)
                         {
                             addressFragment = ", ";
                         }
-                        addressFragment += $"habite {leadState.Lead.Address}";
+                        addressFragment += $"habite {crmState.Lead.Address}";
                     }
                 }
 
-                textMessage = $"{leadState.Lead.FullName} {companyFragment} {addressFragment} {phoneFragment}";
+                textMessage = $"{crmState.Lead.FullName} {companyFragment} {addressFragment} {phoneFragment}";
 
                 //Sending response
                 await stepContext.Context
@@ -253,7 +260,7 @@ namespace ProxiCall.Dialogs.SearchData
                 );
 
                 //Asking if user wants to forward the call
-                if(wantPhone && !string.IsNullOrEmpty(leadState.Lead.PhoneNumber))
+                if(wantPhone && !string.IsNullOrEmpty(crmState.Lead.PhoneNumber))
                 {
                     var forwardPromptOptions = new PromptOptions
                     {
@@ -269,12 +276,12 @@ namespace ProxiCall.Dialogs.SearchData
 
         private async Task<DialogTurnResult> EndSearchDialogStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
         {
-            var leadState = await LeadStateAccessor.GetAsync(stepContext.Context);
+            var crmState = await CRMStateAccessor.GetAsync(stepContext.Context);
             var luisState = await LuisStateAccessor.GetAsync(stepContext.Context);
 
             var isSearchData = luisState.IntentName == Intents.SearchData;
-            var wantPhone = luisState.DetectedEntities.Contains(LuisState.SEARCH_PHONENUMBER_ENTITYNAME);
-            var hasPhoneNumber = !string.IsNullOrEmpty(leadState.Lead.PhoneNumber);
+            var wantPhone = luisState.Entities.Contains(LuisState.SEARCH_PHONENUMBER_ENTITYNAME);
+            var hasPhoneNumber = !string.IsNullOrEmpty(crmState.Lead.PhoneNumber);
             var forward = false;
 
             if (isSearchData)
@@ -291,9 +298,9 @@ namespace ProxiCall.Dialogs.SearchData
                         .Text(message, message, InputHints.AcceptingInput)
                         , cancellationToken
                     );
-                    leadState.Lead.Reset();
+                    crmState.Lead.Reset();
                     luisState.ResetAll();
-                    await LeadStateAccessor.SetAsync(stepContext.Context, leadState);
+                    await CRMStateAccessor.SetAsync(stepContext.Context, crmState);
                     await LuisStateAccessor.SetAsync(stepContext.Context, luisState);
                     return await stepContext.EndDialogAsync();
                 }
@@ -303,15 +310,15 @@ namespace ProxiCall.Dialogs.SearchData
             var textMessage = Properties.strings.callForwardingConfirmed;
             Activity activity = MessageFactory.Text(textMessage, textMessage, InputHints.IgnoringInput);
             var entity = new Entity();
-            entity.Properties.Add("forward", JToken.Parse(leadState.Lead.PhoneNumber));
+            entity.Properties.Add("forward", JToken.Parse(crmState.Lead.PhoneNumber));
             activity.Entities.Add(entity);
 
             await stepContext.Context.SendActivityAsync(activity, cancellationToken);
 
-            leadState.Lead.Reset();
+            crmState.Lead.Reset();
             luisState.ResetAll();
             luisState.ResetIntentIfNoEntities();
-            await LeadStateAccessor.SetAsync(stepContext.Context, leadState);
+            await CRMStateAccessor.SetAsync(stepContext.Context, crmState);
             await LuisStateAccessor.SetAsync(stepContext.Context, luisState);
 
             return await stepContext.EndDialogAsync();

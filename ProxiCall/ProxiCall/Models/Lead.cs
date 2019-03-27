@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Text;
 
 namespace ProxiCall.Models
 {
@@ -18,7 +14,7 @@ namespace ProxiCall.Models
 
         public Lead()
         {
-
+            Reset();
         }
 
         public Lead(string firstName, string lastName)
