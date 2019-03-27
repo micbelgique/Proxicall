@@ -18,29 +18,6 @@ namespace Proxicall.CRM.Controllers.Api
             _context = context;
         }
 
-        [HttpGet("bycompany")]
-        public async Task<ActionResult<IEnumerable<Opportunity>>> GetByCompany(string companyId)
-        {
-            var company = await _context.Company.FindAsync(companyId);
-            if (company == null)
-            {
-                return BadRequest();
-            }
-            var opportunities = await _context.Opportunity
-                .Where(o => o.Lead.Company == company)
-                .Include(o => o.Owner)
-                .Include(o => o.Product)
-                .Include(o => o.Lead)
-                .ToListAsync();
-
-            if (opportunities == null)
-            {
-                return NotFound();
-            }
-
-            return opportunities;
-        }
-
         // GET: api/Opportunities
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Opportunity>>> GetOpportunity()

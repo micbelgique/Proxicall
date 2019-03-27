@@ -21,12 +21,10 @@ namespace Proxicall.CRM.Controllers.Api
             _context = context;
         }
 
-        [HttpGet("bycompanyref")]
-        public async Task<ActionResult<Lead>> GetRefLead(string companyName)
+        [HttpGet("getcontact")]
+        public async Task<ActionResult<Lead>> GetContact(string name)
         {
-            var company = await _context.Company.Where(c => c.Name == companyName)
-                .Include(c => c.Contact)
-                .FirstOrDefaultAsync();
+            var company = await GetCompanyByName(name);
             if (company == null)
             {
                 return BadRequest();
@@ -37,6 +35,42 @@ namespace Proxicall.CRM.Controllers.Api
                 return NotFound();
             }
             return company.Contact;
+        }
+
+        [HttpGet("getopportunities")]
+        public async Task<ActionResult<IEnumerable<Opportunity>>> GetByCompany(string name)
+        {
+            var company = await GetCompanyByName(name);
+            if (company == null)
+            {
+                return BadRequest();
+            }
+            var opportunities = await _context.Opportunity
+                .Where(o => o.Lead.Company == company)
+                .Include(o => o.Owner)
+                .Include(o => o.Product)
+                .Include(o => o.Lead)
+                .ToListAsync();
+
+            if (opportunities == null)
+            {
+                return NotFound();
+            }
+
+            return opportunities;
+        }
+
+        private async Task<Company> GetCompanyByName(string name)
+        {
+            var company = await _context.Company.Where(c => c.Name == name)
+                .Include(c => c.Contact)
+                .FirstOrDefaultAsync();
+            if (company == null)
+            {
+                return null;
+            }
+
+            return company;
         }
 
         // GET: api/Companies

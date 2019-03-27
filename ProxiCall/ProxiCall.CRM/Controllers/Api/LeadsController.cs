@@ -19,7 +19,7 @@ namespace Proxicall.CRM.Controllers.Api
             _context = context;
         }
 
-        [HttpGet("allOpportunities")]
+        [HttpGet("getopportunities")]
         public async Task<ActionResult<IEnumerable<Opportunity>>> GetAllOpportunitiesByLead(string firstname, string lastname)
         {
             var lead = await GetLeadByName(firstname, lastname);
@@ -45,7 +45,13 @@ namespace Proxicall.CRM.Controllers.Api
         [HttpGet("byName")]
         public async Task<ActionResult<Lead>> GetLead(string firstName, string lastName)
         {
-            
+            var lead = await GetLeadByName(firstName, lastName);
+            if (lead == null)
+            {
+                return NotFound();
+            }
+
+            return lead;
         }
 
         private async Task<Lead> GetLeadByName(string firstName, string lastName)
