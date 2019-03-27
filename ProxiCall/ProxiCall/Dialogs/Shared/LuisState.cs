@@ -10,6 +10,7 @@ namespace ProxiCall.Dialogs.Shared
         public static readonly string SEARCH_PHONENUMBER_ENTITYNAME = "searchPhoneNumber";
         public static readonly string SEARCH_ADDRESS_ENTITYNAME = "searchAddress";
         public static readonly string SEARCH_COMPANY_ENTITYNAME = "searchCompany";
+        public static readonly string SEARCH_EMAIL_ENTITYNAME = "searchEmail";
 
         public string IntentName { get; set; }
 

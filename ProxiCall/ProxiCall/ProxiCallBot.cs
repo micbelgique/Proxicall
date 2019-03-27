@@ -173,20 +173,25 @@ namespace ProxiCall
                 // Supported LUIS Entities
                 string[] luisExpectedLeadName =
                 {
-                    "lead",
+                    "searchlead",
                     "personName"
                 };
+                //TODO : no need for array + rename into search_ (ex : searchaddress)
                 string[] luisHintSearchAddress =
                 {
-                    "address"
+                    "searchaddress"
                 };
                 string[] luisHintSearchCompany =
                 {
-                    "company"
+                    "searchcompany"
                 };
                 string[] luisHintSearchPhone =
                 {
-                    "phone"
+                    "searchphone"
+                };
+                string[] luisHintSearchEmail =
+                {
+                    "searchemail"
                 };
 
                 // Update every entities
@@ -227,9 +232,17 @@ namespace ProxiCall
                         break;
                     }
                 }
-                
-                //Searching for all info
-                if(intentName == Intents.SearchData)
+                foreach (var email in luisHintSearchEmail)
+                {
+                    if (entities[email] != null)
+                    {
+                        luisState.AddDetectedEntity(LuisState.SEARCH_EMAIL_ENTITYNAME);
+                        break;
+                    }
+                }
+
+                //Searching for "informations"
+                if (intentName == Intents.SearchData)
                 {
                     if(luisState.Entities == null ||luisState.Entities.Count==0)
                     {

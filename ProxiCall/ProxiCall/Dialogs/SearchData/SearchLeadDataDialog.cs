@@ -36,7 +36,7 @@ namespace ProxiCall.Dialogs.SearchData
             {
                 InitializeStateStepAsync,
                 AskForLeadFullNameStepAsync,
-                SearchLeadNumberStepAsync,
+                SearchLeadStepAsync,
                 ResultHandlerStepAsync,
                 EndSearchDialogStepAsync
             };
@@ -91,7 +91,7 @@ namespace ProxiCall.Dialogs.SearchData
             return await stepContext.NextAsync();
         }
 
-        private async Task<DialogTurnResult> SearchLeadNumberStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
+        private async Task<DialogTurnResult> SearchLeadStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
         {
             var crmState = await CRMStateAccessor.GetAsync(stepContext.Context);
             var luisState = await LuisStateAccessor.GetAsync(stepContext.Context);
@@ -128,12 +128,7 @@ namespace ProxiCall.Dialogs.SearchData
                 return await stepContext.PromptAsync(_retryFetchingMinimumDataFromUserPrompt, promptOptions, cancellationToken);
             }
 
-            //Moving on to the next step if lead found
-            crmState.Lead.PhoneNumber = crmState.Lead.PhoneNumber;
-            crmState.Lead.Address = crmState.Lead.Address;
-            crmState.Lead.Company = crmState.Lead.Company;
             await CRMStateAccessor.SetAsync(stepContext.Context, crmState);
-
             return await stepContext.NextAsync();
         }
 
@@ -184,19 +179,22 @@ namespace ProxiCall.Dialogs.SearchData
                 var wantPhone = luisState.Entities.Contains(LuisState.SEARCH_PHONENUMBER_ENTITYNAME);
                 var wantAddress = luisState.Entities.Contains(LuisState.SEARCH_ADDRESS_ENTITYNAME);
                 var wantCompany = luisState.Entities.Contains(LuisState.SEARCH_COMPANY_ENTITYNAME);
+                var wantEmail = luisState.Entities.Contains(LuisState.SEARCH_EMAIL_ENTITYNAME);
 
-                var textMessage = "";
-                var phoneFragment = "";
-                var addressFragment = "";
-                var companyFragment = "";
-                
+                var textMessage = string.Empty;
+                var phoneFragment = string.Empty;
+                var addressFragment = string.Empty;
+                var companyFragment = string.Empty;
+                var emailFragment = string.Empty;
+                var hasOnlyOneEntity = luisState.Entities.Count == 1;
+
                 if (wantCompany)
                 {
                     if (string.IsNullOrEmpty(crmState.Lead.Company))
                     {
                         companyFragment = "ne semble pas avoir de compagnie répertoriée";
                     }
-                    else if (luisState.Entities.Count == 1)
+                    else if (hasOnlyOneEntity)
                     {
                         companyFragment = $"travaille pour {crmState.Lead.Company}";
                     }
@@ -230,6 +228,10 @@ namespace ProxiCall.Dialogs.SearchData
                         {
                             phoneFragment = "et ";
                         }
+                        if (wantEmail)
+                        {
+                            phoneFragment = ", ";
+                        }
                         phoneFragment += $"a pour numéro de téléphone le {crmState.Lead.PhoneNumber}";
                     }
                 }
@@ -250,7 +252,23 @@ namespace ProxiCall.Dialogs.SearchData
                     }
                 }
 
-                textMessage = $"{crmState.Lead.FullName} {companyFragment} {addressFragment} {phoneFragment}";
+                if(wantEmail)
+                {
+                    if (string.IsNullOrEmpty(crmState.Lead.Email))
+                    {
+                        emailFragment = "Aucune adresse email n'a été trouvée.";
+                    }
+                    else if (hasOnlyOneEntity || wantCompany)
+                    {
+                        emailFragment = $"a comme adresse email {crmState.Lead.Email}";
+                    }
+                    else
+                    {
+                        emailFragment = $"et a pour adresse email {crmState.Lead.Email}.";
+                    }
+                }
+
+                textMessage = $"{crmState.Lead.FullName} {companyFragment} {addressFragment} {phoneFragment} {emailFragment}";
 
                 //Sending response
                 await stepContext.Context
@@ -259,8 +277,9 @@ namespace ProxiCall.Dialogs.SearchData
                         , cancellationToken
                 );
 
+                var wantPhoneOnly = wantPhone && hasOnlyOneEntity;
                 //Asking if user wants to forward the call
-                if(wantPhone && !string.IsNullOrEmpty(crmState.Lead.PhoneNumber))
+                if (wantPhoneOnly && !string.IsNullOrEmpty(crmState.Lead.PhoneNumber))
                 {
                     var forwardPromptOptions = new PromptOptions
                     {
@@ -286,13 +305,13 @@ namespace ProxiCall.Dialogs.SearchData
 
             if (isSearchData)
             {
-                if(wantPhone && hasPhoneNumber)
+                if(wantPhone && hasPhoneNumber && luisState.Entities.Count==1)
                 {
                     forward = (bool)stepContext.Result;
                 }
                 if (!forward)
                 {
-                    //Ending PhoneNumberDialog
+                    //Ending Dialog
                     var message = Properties.strings.welcome_2;
                     await stepContext.Context.SendActivityAsync(MessageFactory
                         .Text(message, message, InputHints.AcceptingInput)
