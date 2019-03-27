@@ -9,7 +9,6 @@ using Microsoft.Bot.Schema;
 using Microsoft.Bot.Builder.Dialogs;
 using Microsoft.Extensions.Logging;
 using System.Linq;
-using ProxiCall.Dialogs.TelExchange;
 using ProxiCall.Models.Intents;
 using ProxiCall.Dialogs.SearchData;
 using ProxiCall.Dialogs.Shared;
@@ -39,8 +38,7 @@ namespace ProxiCall
         private readonly IStatePropertyAccessor<DialogState> _dialogStateAccessor;
 
         public DialogSet Dialogs { get; private set; }
-
-        private readonly IStatePropertyAccessor<TelExchangeState> _telExchangeStateAccessor;
+        
         private readonly IStatePropertyAccessor<LeadState> _leadStateAccessor;
         private readonly IStatePropertyAccessor<LuisState> _luisStateAccessor;
 
@@ -62,14 +60,12 @@ namespace ProxiCall
 
             _userState = userState ?? throw new ArgumentNullException(nameof(userState));
             _conversationState = conversationState ?? throw new ArgumentNullException(nameof(conversationState));
-
-            _telExchangeStateAccessor = _userState.CreateProperty<TelExchangeState>(nameof(TelExchangeState));
+            
             _leadStateAccessor = _userState.CreateProperty<LeadState>(nameof(LeadState));
             _luisStateAccessor = _userState.CreateProperty<LuisState>(nameof(LuisState));
             _dialogStateAccessor = _conversationState.CreateProperty<DialogState>(nameof(DialogState));
             Dialogs = new DialogSet(_dialogStateAccessor);
-            Dialogs.Add(new TelExchangeDialog(_telExchangeStateAccessor, _loggerFactory, _services));
-            Dialogs.Add(new SearchDataDialog(_leadStateAccessor,_luisStateAccessor, _loggerFactory, _services));
+            Dialogs.Add(new SearchLeadDataDialog(_leadStateAccessor,_luisStateAccessor, _loggerFactory, _services));
         }
 
         /// <summary>
@@ -121,7 +117,6 @@ namespace ProxiCall
                             switch (topIntent)
                             {
                                 case Intents.SearchData:
-                                case Intents.TelephoneExchange:
                                 case Intents.MakeACall:
                                     // update call state with any entities captured
                                     //await UpdateCallStateAsync(luisResults, topIntent, dialogContext.Context);
@@ -131,7 +126,7 @@ namespace ProxiCall
 
                                     await UpdateDialogStatesAsync(luisResults, topIntent, dialogContext.Context);
 
-                                    await dialogContext.BeginDialogAsync(nameof(SearchDataDialog));
+                                    await dialogContext.BeginDialogAsync(nameof(SearchLeadDataDialog));
                                     break;
 
                                 case Intents.None:
@@ -172,45 +167,7 @@ namespace ProxiCall
             // Save the user profile updates into the user state.
             await _userState.SaveChangesAsync(turnContext, false, cancellationToken);
         }
-
-        /// <summary>
-        /// Helper function to update greeting state with entities returned by LUIS.
-        /// <param name="luisResult">LUIS recognizer <see cref="RecognizerResult"/>.</param>
-        /// <param name="turnContext">A <see cref="ITurnContext"/> containing all the data needed
-        /// for processing this conversation turn.</param>
-        /// <returns>A task that represents the work queued to execute.</returns>
-        /// </summary>
-        private async Task UpdateCallStateAsync(RecognizerResult luisResult, string intentName, ITurnContext turnContext)
-        {
-            if (luisResult.Entities != null && luisResult.Entities.HasValues)
-            {
-                // Get latest TelExchangeState
-                var telExchangeState = await _telExchangeStateAccessor.GetAsync(turnContext, () => new TelExchangeState());
-                var entities = luisResult.Entities;
-
-                // Supported LUIS Entities
-                string[] personNameEntities = { "personName" };
-
-                // Update any entities
-                // Note: Consider a confirm dialog, instead of just updating.
-                foreach (var entity in personNameEntities)
-                {
-                    // Check if we found valid slot values in entities returned from LUIS.
-                    if (entities[entity] != null)
-                    {
-                        // Set new user name.
-                        var fullName = (string)entities[entity][0];
-                        telExchangeState.RecipientFullName = fullName;
-                        break;
-                    }
-                }
-
-                // Set the new values into state.
-                telExchangeState.IntentName = intentName;
-                await _telExchangeStateAccessor.SetAsync(turnContext, telExchangeState);
-            }
-        }
-
+        
         private async Task UpdateDialogStatesAsync(RecognizerResult luisResult, string intentName, ITurnContext turnContext)
         {
             if (luisResult.Entities != null && luisResult.Entities.HasValues)

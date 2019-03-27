@@ -15,20 +15,20 @@ using System.Threading.Tasks;
 
 namespace ProxiCall.Dialogs.SearchData
 {
-    public class SearchDataDialog : ComponentDialog
+    public class SearchLeadDataDialog : ComponentDialog
     {
         public IStatePropertyAccessor<LeadState> LeadStateAccessor { get; }
         public IStatePropertyAccessor<LuisState> LuisStateAccessor { get; }
         public ILoggerFactory LoggerFactory { get; }
         public BotServices BotServices { get; }
 
-        private const string SearchDataWaterfall = "searchDataWaterfall";
-        private const string LeadFullNamePrompt = "leadFullNamePrompt";
-        private const string RetryNumberSearchPrompt = "retryNumberSearchPrompt";
-        private const string ConfirmForwardingPrompt = "confirmForwardingPrompt";
+        private const string _searchLeadDataWaterfall = "searchLeadDataWaterfall";
+        private const string _leadFullNamePrompt = "leadFullNamePrompt";
+        private const string _retryNumberSearchPrompt = "retryNumberSearchPrompt";
+        private const string _confirmForwardingPrompt = "confirmForwardingPrompt";
 
-        public SearchDataDialog(IStatePropertyAccessor<LeadState> leadStateAccessor, IStatePropertyAccessor<LuisState> luisStateAccessor,
-            ILoggerFactory loggerFactory, BotServices botServices) : base(nameof(SearchDataDialog))
+        public SearchLeadDataDialog(IStatePropertyAccessor<LeadState> leadStateAccessor, IStatePropertyAccessor<LuisState> luisStateAccessor,
+            ILoggerFactory loggerFactory, BotServices botServices) : base(nameof(SearchLeadDataDialog))
         {
             LeadStateAccessor = leadStateAccessor;
             LuisStateAccessor = luisStateAccessor;
@@ -41,12 +41,12 @@ namespace ProxiCall.Dialogs.SearchData
                 AskForLeadFullNameStepAsync,
                 SearchLeadNumberStepAsync,
                 ResultHandlerStepAsync,
-                EndTelExchangeDialogStepAsync
+                EndSearchDialogStepAsync
             };
-            AddDialog(new WaterfallDialog(SearchDataWaterfall, waterfallSteps));
-            AddDialog(new TextPrompt(LeadFullNamePrompt));
-            AddDialog(new ConfirmPrompt(RetryNumberSearchPrompt, defaultLocale: "fr-fr"));
-            AddDialog(new ConfirmPrompt(ConfirmForwardingPrompt, defaultLocale: "fr-fr"));
+            AddDialog(new WaterfallDialog(_searchLeadDataWaterfall, waterfallSteps));
+            AddDialog(new TextPrompt(_leadFullNamePrompt));
+            AddDialog(new ConfirmPrompt(_retryNumberSearchPrompt, defaultLocale: "fr-fr"));
+            AddDialog(new ConfirmPrompt(_confirmForwardingPrompt, defaultLocale: "fr-fr"));
         }
 
         private async Task<DialogTurnResult> InitializeStateStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
@@ -89,7 +89,7 @@ namespace ProxiCall.Dialogs.SearchData
             //Asking for the name of the lead if not already given
             if (string.IsNullOrEmpty(leadState.LeadFullName))
             {
-                return await stepContext.PromptAsync(LeadFullNamePrompt, new PromptOptions { Prompt = MessageFactory.Text(Properties.strings.querySearchPerson) }, cancellationToken);
+                return await stepContext.PromptAsync(_leadFullNamePrompt, new PromptOptions { Prompt = MessageFactory.Text(Properties.strings.querySearchPerson) }, cancellationToken);
             }
             return await stepContext.NextAsync();
         }
@@ -118,7 +118,7 @@ namespace ProxiCall.Dialogs.SearchData
                     Prompt = MessageFactory.Text(promptMessage),
                     RetryPrompt = MessageFactory.Text(Properties.strings.retryPrompt),
                 };
-                return await stepContext.PromptAsync(RetryNumberSearchPrompt, promptOptions, cancellationToken);
+                return await stepContext.PromptAsync(_retryNumberSearchPrompt, promptOptions, cancellationToken);
             }
 
             //Moving on to the next step if lead found
@@ -151,7 +151,7 @@ namespace ProxiCall.Dialogs.SearchData
                     //Restarting dialog if user decides to retry
                     leadState.Reset();
                     await LeadStateAccessor.SetAsync(stepContext.Context, leadState);
-                    return await stepContext.ReplaceDialogAsync(SearchDataWaterfall, cancellationToken);
+                    return await stepContext.ReplaceDialogAsync(_searchLeadDataWaterfall, cancellationToken);
                 }
                 else
                 {
@@ -260,14 +260,14 @@ namespace ProxiCall.Dialogs.SearchData
                         Prompt = MessageFactory.Text(Properties.strings.forwardCallPrompt),
                         RetryPrompt = MessageFactory.Text(Properties.strings.retryPrompt),
                     };
-                    return await stepContext.PromptAsync(ConfirmForwardingPrompt, forwardPromptOptions, cancellationToken);
+                    return await stepContext.PromptAsync(_confirmForwardingPrompt, forwardPromptOptions, cancellationToken);
                 }
             }
 
             return await stepContext.NextAsync();
         }
 
-        private async Task<DialogTurnResult> EndTelExchangeDialogStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
+        private async Task<DialogTurnResult> EndSearchDialogStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
         {
             var leadState = await LeadStateAccessor.GetAsync(stepContext.Context);
             var luisState = await LuisStateAccessor.GetAsync(stepContext.Context);
