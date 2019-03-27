@@ -104,6 +104,7 @@ namespace ProxiCall.Dialogs.SearchData
             }
 
             //Searching the lead
+            var fullName = crmState.Lead.FullName;
             crmState.Lead = await SearchLeadAsync(crmState.Lead.FirstName, crmState.Lead.LastName);
 
             //Asking for retry if necessary
@@ -111,7 +112,7 @@ namespace ProxiCall.Dialogs.SearchData
             var promptMessage = "";
             if (crmState.Lead == null)
             {
-                promptMessage = $"{crmState.Lead.FullName} {Properties.strings.retryNumberSearchPrompt}";
+                promptMessage = $"{fullName} {Properties.strings.retryNumberSearchPrompt}";
             }
             else if (crmState.WantsToCallButNoNumberFound)
             {
@@ -152,7 +153,7 @@ namespace ProxiCall.Dialogs.SearchData
                 if (retry)
                 {
                     //Restarting dialog if user decides to retry
-                    crmState.Lead.Reset();
+                    crmState.ResetLead();
                     await CRMStateAccessor.SetAsync(stepContext.Context, crmState);
                     return await stepContext.ReplaceDialogAsync(_searchLeadDataWaterfall, cancellationToken);
                 }
@@ -164,8 +165,8 @@ namespace ProxiCall.Dialogs.SearchData
                         .Text(message, message, InputHints.AcceptingInput)
                         , cancellationToken
                     );
-
-                    crmState.Lead.Reset();
+                    
+                    crmState.ResetLead();
                     luisState.ResetAll();
                     await CRMStateAccessor.SetAsync(stepContext.Context, crmState);
                     await LuisStateAccessor.SetAsync(stepContext.Context, luisState);
@@ -285,7 +286,7 @@ namespace ProxiCall.Dialogs.SearchData
             
             if(!string.IsNullOrEmpty(missingWantedData))
             {
-                missingWantedData = "Les données suivantes sont manquantes sont absentes de la base de données : " + missingWantedData;
+                missingWantedData = "Les données suivantes sont absentes de la base de données : " + missingWantedData;
             }
             return $"{wantedData.ToString()} {missingWantedData}";
         }
@@ -314,7 +315,8 @@ namespace ProxiCall.Dialogs.SearchData
                         .Text(message, message, InputHints.AcceptingInput)
                         , cancellationToken
                     );
-                    crmState.Lead.Reset();
+
+                    crmState.ResetLead();
                     luisState.ResetAll();
                     await CRMStateAccessor.SetAsync(stepContext.Context, crmState);
                     await LuisStateAccessor.SetAsync(stepContext.Context, luisState);
@@ -330,8 +332,8 @@ namespace ProxiCall.Dialogs.SearchData
             activity.Entities.Add(entity);
 
             await stepContext.Context.SendActivityAsync(activity, cancellationToken);
-
-            crmState.Lead.Reset();
+            
+            crmState.ResetLead();
             luisState.ResetAll();
             luisState.ResetIntentIfNoEntities();
             await CRMStateAccessor.SetAsync(stepContext.Context, crmState);
