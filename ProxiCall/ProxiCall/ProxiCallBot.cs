@@ -107,10 +107,10 @@ namespace ProxiCall
                 // Continue the current dialog
                 var dialogResult = await dialogContext.ContinueDialogAsync();
 
-                // if no one has responded,
+                // If no one has responded,
                 if (!dialogContext.Context.Responded)
                 {
-                    // examine results from active dialog
+                    // Examine results from active dialog
                     switch (dialogResult.Status)
                     {
                         case DialogTurnStatus.Empty:
@@ -118,12 +118,6 @@ namespace ProxiCall
                             {
                                 case Intents.SearchData:
                                 case Intents.MakeACall:
-                                    // update call state with any entities captured
-                                    //await UpdateCallStateAsync(luisResults, topIntent, dialogContext.Context);
-
-                                    //await dialogContext.BeginDialogAsync(nameof(TelExchangeDialog));
-                                    //break;
-
                                     await UpdateDialogStatesAsync(luisResults, topIntent, dialogContext.Context);
 
                                     await dialogContext.BeginDialogAsync(nameof(SearchLeadDataDialog));
@@ -131,8 +125,6 @@ namespace ProxiCall
 
                                 case Intents.None:
                                 default:
-                                    // Help or no intent identified, either way, let's provide some help.
-                                    // to the user
                                     await dialogContext.Context.SendActivityAsync(Properties.strings.noIntentError);
                                     break;
                             }
@@ -179,7 +171,7 @@ namespace ProxiCall
                 var entities = luisResult.Entities;
 
                 // Supported LUIS Entities
-                string[] luisExpectingLeadName =
+                string[] luisExpectedLeadName =
                 {
                     "lead"
                 };
@@ -196,14 +188,14 @@ namespace ProxiCall
                     "phone"
                 };
 
-                // Update any entities
-                // Note: Consider a confirm dialog, instead of just updating.
-                foreach (var name in luisExpectingLeadName)
+                // Update every entities
+                // TODO Consider a confirm dialog, instead of just updating.
+                foreach (var name in luisExpectedLeadName)
                 {
                     if (entities[name] != null)
                     {
                         var fullName = (string)entities[name][0];
-                        leadState.LeadFullName = fullName;
+                        leadState.Lead.FullName = fullName;
                         break;
                     }
                 }

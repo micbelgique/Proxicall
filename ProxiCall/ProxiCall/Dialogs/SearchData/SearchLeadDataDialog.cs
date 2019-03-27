@@ -87,7 +87,7 @@ namespace ProxiCall.Dialogs.SearchData
             var leadState = await LeadStateAccessor.GetAsync(stepContext.Context);
 
             //Asking for the name of the lead if not already given
-            if (string.IsNullOrEmpty(leadState.LeadFullName))
+            if (string.IsNullOrEmpty(leadState.Lead.FullName))
             {
                 return await stepContext.PromptAsync(_leadFullNamePrompt, new PromptOptions { Prompt = MessageFactory.Text(Properties.strings.querySearchPerson) }, cancellationToken);
             }
@@ -99,20 +99,20 @@ namespace ProxiCall.Dialogs.SearchData
             var leadState = await LeadStateAccessor.GetAsync(stepContext.Context);
 
             //Gathering the name of the lead if not already given
-            if (string.IsNullOrEmpty(leadState.LeadFullName))
+            if (string.IsNullOrEmpty(leadState.Lead.FullName))
             {
-                leadState.LeadFullName = (string)stepContext.Result;
+                leadState.Lead.FullName = (string)stepContext.Result;
             }
 
             //Searching the lead
-            leadState.Lead = await SearchLeadAsync(leadState.LeadFirstName, leadState.LeadLastName);
+            leadState.Lead = await SearchLeadAsync(leadState.Lead.FirstName, leadState.Lead.LastName);
 
             //Asking for retry if lead not found
             //TODO : en fonction de si number trouvé ou pas
             if (leadState.Lead == null)
             {
-                leadState.PhoneNumber = "";
-                var promptMessage = $"{leadState.LeadFullName} {Properties.strings.retryNumberSearchPrompt}";
+                leadState.Lead.PhoneNumber = "";
+                var promptMessage = $"{leadState.Lead.FullName} {Properties.strings.retryNumberSearchPrompt}";
                 var promptOptions = new PromptOptions
                 {
                     Prompt = MessageFactory.Text(promptMessage),
@@ -122,9 +122,9 @@ namespace ProxiCall.Dialogs.SearchData
             }
 
             //Moving on to the next step if lead found
-            leadState.PhoneNumber = leadState.Lead.PhoneNumber;
-            leadState.Address = leadState.Lead.Address;
-            leadState.Company = leadState.Lead.Company;
+            leadState.Lead.PhoneNumber = leadState.Lead.PhoneNumber;
+            leadState.Lead.Address = leadState.Lead.Address;
+            leadState.Lead.Company = leadState.Lead.Company;
             await LeadStateAccessor.SetAsync(stepContext.Context, leadState);
 
             return await stepContext.NextAsync();
@@ -149,7 +149,7 @@ namespace ProxiCall.Dialogs.SearchData
                 if (retry)
                 {
                     //Restarting dialog if user decides to retry
-                    leadState.Reset();
+                    leadState.Lead.Reset();
                     await LeadStateAccessor.SetAsync(stepContext.Context, leadState);
                     return await stepContext.ReplaceDialogAsync(_searchLeadDataWaterfall, cancellationToken);
                 }
@@ -162,7 +162,7 @@ namespace ProxiCall.Dialogs.SearchData
                         , cancellationToken
                     );
 
-                    leadState.Reset();
+                    leadState.Lead.Reset();
                     luisState.ResetAll();
                     await LeadStateAccessor.SetAsync(stepContext.Context, leadState);
                     await LuisStateAccessor.SetAsync(stepContext.Context, luisState);
@@ -185,36 +185,36 @@ namespace ProxiCall.Dialogs.SearchData
                 
                 if (wantCompany)
                 {
-                    if (string.IsNullOrEmpty(leadState.Company))
+                    if (string.IsNullOrEmpty(leadState.Lead.Company))
                     {
                         companyFragment = "ne semble pas avoir de compagnie répertoriée";
                     }
                     else if (luisState.DetectedEntities.Count == 1)
                     {
-                        companyFragment = $"travaille pour {leadState.Company}";
+                        companyFragment = $"travaille pour {leadState.Lead.Company}";
                     }
                     else
                     {
-                        companyFragment = $"de {leadState.Company}";
+                        companyFragment = $"de {leadState.Lead.Company}";
                     }
                 }
 
                 if (wantPhone)
                 {
-                    if (string.IsNullOrEmpty(leadState.PhoneNumber))
+                    if (string.IsNullOrEmpty(leadState.Lead.PhoneNumber))
                     {
                         phoneFragment = "ne semble pas avoir de numéro répertorié";
                     }
                     else if (wantCompany)
                     {
-                        var hasCompany = !string.IsNullOrEmpty(leadState.Company);
+                        var hasCompany = !string.IsNullOrEmpty(leadState.Lead.Company);
                         if (hasCompany)
                         {
-                            phoneFragment = $"a pour numéro de téléphone le {leadState.PhoneNumber}";
+                            phoneFragment = $"a pour numéro de téléphone le {leadState.Lead.PhoneNumber}";
                         }
                         else
                         {
-                            phoneFragment = $", son numéro de téléphone est le {leadState.PhoneNumber}";
+                            phoneFragment = $", son numéro de téléphone est le {leadState.Lead.PhoneNumber}";
                         }
                     }
                     else 
@@ -223,13 +223,13 @@ namespace ProxiCall.Dialogs.SearchData
                         {
                             phoneFragment = "et ";
                         }
-                        phoneFragment += $"a pour numéro de téléphone le {leadState.PhoneNumber}";
+                        phoneFragment += $"a pour numéro de téléphone le {leadState.Lead.PhoneNumber}";
                     }
                 }
 
                 if (wantAddress)
                 {
-                    if (string.IsNullOrEmpty(leadState.Address))
+                    if (string.IsNullOrEmpty(leadState.Lead.Address))
                     {
                         addressFragment = "ne semble pas avoir d'adresse répertoriée";
                     }
@@ -239,11 +239,11 @@ namespace ProxiCall.Dialogs.SearchData
                         {
                             addressFragment = ", ";
                         }
-                        addressFragment += $"habite {leadState.Address}";
+                        addressFragment += $"habite {leadState.Lead.Address}";
                     }
                 }
 
-                textMessage = $"{leadState.LeadFullName} {companyFragment} {addressFragment} {phoneFragment}";
+                textMessage = $"{leadState.Lead.FullName} {companyFragment} {addressFragment} {phoneFragment}";
 
                 //Sending response
                 await stepContext.Context
@@ -253,7 +253,7 @@ namespace ProxiCall.Dialogs.SearchData
                 );
 
                 //Asking if user wants to forward the call
-                if(wantPhone && !string.IsNullOrEmpty(leadState.PhoneNumber))
+                if(wantPhone && !string.IsNullOrEmpty(leadState.Lead.PhoneNumber))
                 {
                     var forwardPromptOptions = new PromptOptions
                     {
@@ -274,7 +274,7 @@ namespace ProxiCall.Dialogs.SearchData
 
             var isSearchData = luisState.IntentName == Intents.SearchData;
             var wantPhone = luisState.DetectedEntities.Contains(LuisState.SEARCH_PHONENUMBER_ENTITYNAME);
-            var hasPhoneNumber = !string.IsNullOrEmpty(leadState.PhoneNumber);
+            var hasPhoneNumber = !string.IsNullOrEmpty(leadState.Lead.PhoneNumber);
             var forward = false;
 
             if (isSearchData)
@@ -291,7 +291,7 @@ namespace ProxiCall.Dialogs.SearchData
                         .Text(message, message, InputHints.AcceptingInput)
                         , cancellationToken
                     );
-                    leadState.Reset();
+                    leadState.Lead.Reset();
                     luisState.ResetAll();
                     await LeadStateAccessor.SetAsync(stepContext.Context, leadState);
                     await LuisStateAccessor.SetAsync(stepContext.Context, luisState);
@@ -303,12 +303,12 @@ namespace ProxiCall.Dialogs.SearchData
             var textMessage = Properties.strings.callForwardingConfirmed;
             Activity activity = MessageFactory.Text(textMessage, textMessage, InputHints.IgnoringInput);
             var entity = new Entity();
-            entity.Properties.Add("forward", JToken.Parse(leadState.PhoneNumber));
+            entity.Properties.Add("forward", JToken.Parse(leadState.Lead.PhoneNumber));
             activity.Entities.Add(entity);
 
             await stepContext.Context.SendActivityAsync(activity, cancellationToken);
 
-            leadState.Reset();
+            leadState.Lead.Reset();
             luisState.ResetAll();
             luisState.ResetIntentIfNoEntities();
             await LeadStateAccessor.SetAsync(stepContext.Context, leadState);

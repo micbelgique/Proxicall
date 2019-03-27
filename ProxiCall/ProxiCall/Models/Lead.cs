@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace ProxiCall.Models
@@ -15,9 +16,56 @@ namespace ProxiCall.Models
         public string Address { get; set; }
         public string Company { get; set; }
 
-        public Lead(string firstName, string lastName)
+        public Lead()
         {
 
+        }
+
+        public Lead(string firstName, string lastName)
+        {
+            FirstName = firstName;
+            LastName = lastName;
+        }
+
+        private string fullname = string.Empty;
+
+        public string FullName
+        {
+            get { return fullname; }
+            set
+            {
+                fullname = value;
+
+                if (!string.IsNullOrEmpty(value))
+                {
+                    var names = fullname.Split(new char[0]); //split at each whitespaces
+                    var firstName = names[0];
+                    var lastName = new StringBuilder();
+
+                    for (var i = 1; i < names.Length; i++)
+                    {
+                        lastName.Append(names[i] + " ");
+                    }
+
+                    FirstName = firstName;
+                    LastName = lastName.ToString();
+                }
+                else
+                {
+                    FirstName = string.Empty;
+                    LastName = string.Empty;
+                }
+            }
+        }
+
+        public void Reset()
+        {
+            Id = string.Empty;
+            FullName = string.Empty;
+            PhoneNumber = string.Empty;
+            Email = string.Empty;
+            Address = string.Empty;
+            Company = string.Empty;
         }
     }
 }
