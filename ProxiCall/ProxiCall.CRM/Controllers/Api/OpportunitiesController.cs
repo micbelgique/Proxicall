@@ -1,8 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Proxicall.CRM.Models;
@@ -20,18 +18,41 @@ namespace Proxicall.CRM.Controllers.Api
             _context = context;
         }
 
+        [HttpGet("bycompany")]
+        public async Task<ActionResult<IEnumerable<Opportunity>>> GetByCompany(string companyId)
+        {
+            var company = await _context.Company.FindAsync(companyId);
+            if (company == null)
+            {
+                return BadRequest();
+            }
+            var opportunities = await _context.Opportunity
+                .Where(o => o.Lead.Company == company)
+                .Include(o => o.Owner)
+                .Include(o => o.Product)
+                .Include(o => o.Lead)
+                .ToListAsync();
+
+            if (opportunities == null)
+            {
+                return NotFound();
+            }
+
+            return opportunities;
+        }
+
         // GET: api/Opportunities
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Opportunity>>> GetOpportunity()
         {
-            return await _context.Opportunity.ToListAsync();
+            return await _context.Opportunity.Include(o => o.Owner).Include(o => o.Product).Include(o => o.Lead).ToListAsync();
         }
 
         // GET: api/Opportunities/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Opportunity>> GetOpportunity(string id)
         {
-            var opportunity = await _context.Opportunity.FindAsync(id);
+            var opportunity = await _context.Opportunity.Include(o => o.Owner).Include(o => o.Product).Include(o => o.Lead).FirstOrDefaultAsync(o => o.Id == id);
 
             if (opportunity == null)
             {
@@ -85,7 +106,7 @@ namespace Proxicall.CRM.Controllers.Api
         [HttpDelete("{id}")]
         public async Task<ActionResult<Opportunity>> DeleteOpportunity(string id)
         {
-            var opportunity = await _context.Opportunity.FindAsync(id);
+            var opportunity = await _context.Opportunity.Include(o => o.Owner).Include(o => o.Product).Include(o => o.Lead).FirstOrDefaultAsync(o => o.Id == id);
             if (opportunity == null)
             {
                 return NotFound();

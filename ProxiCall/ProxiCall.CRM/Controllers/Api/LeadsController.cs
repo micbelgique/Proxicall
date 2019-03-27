@@ -1,8 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ProxiCall.CRM.Models;
@@ -21,37 +19,66 @@ namespace Proxicall.CRM.Controllers.Api
             _context = context;
         }
 
-        [HttpGet("bycompanyref")]
-        public async Task<ActionResult<Lead>> GetRefLead(string companyName)
+        [HttpGet("allOpportunities")]
+        public async Task<ActionResult<IEnumerable<Opportunity>>> GetAllOpportunitiesByLead(string firstname, string lastname)
         {
-            var company = await _context.Company.Where(c => c.Name == companyName)
-                .Include(c => c.RefLead)
-                .FirstOrDefaultAsync();
-            if (company == null)
+            var lead = await GetLeadByName(firstname, lastname);
+            if (lead == null)
             {
                 return BadRequest();
             }
+            var opportunities = await _context.Opportunity
+                .Where(o => o.Lead == lead)
+                .Include(o => o.Owner)
+                .Include(o => o.Product)
+                .Include(o => o.Lead)
+                .ToListAsync();
 
-            if (company.RefLead == null)
+            if (opportunities == null)
             {
                 return NotFound();
             }
 
-            return company.RefLead;
-        } 
+            return opportunities;
+        }
+
+        [HttpGet("byName")]
+        public async Task<ActionResult<Lead>> GetLead(string firstName, string lastName)
+        {
+            
+        }
+
+        private async Task<Lead> GetLeadByName(string firstName, string lastName)
+        {
+            firstName = char.ToLower(firstName[0]) + firstName.Substring(1).ToLower();
+            lastName = char.ToLower(lastName[0]) + lastName.Substring(1).ToLower();
+            var lead = await _context.Lead.Where(l =>
+                l.FirstName == firstName && l.LastName == lastName
+                ||
+                l.FirstName == lastName && l.LastName == firstName)
+            .Include(l => l.Company)
+            .FirstOrDefaultAsync();
+
+            if (lead == null)
+            {
+                return null;
+            }
+
+            return lead;
+        }
 
         // GET: api/Leads
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Lead>>> GetLead()
         {
-            return await _context.Lead.ToListAsync();
+            return await _context.Lead.Include(l => l.Company).ToListAsync();
         }
 
         // GET: api/Leads/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Lead>> GetLead(string id)
         {
-            var lead = await _context.Lead.FindAsync(id);
+            var lead = await _context.Lead.Include(l => l.Company).FirstOrDefaultAsync(l => l.Id == id);
 
             if (lead == null)
             {
@@ -105,7 +132,7 @@ namespace Proxicall.CRM.Controllers.Api
         [HttpDelete("{id}")]
         public async Task<ActionResult<Lead>> DeleteLead(string id)
         {
-            var lead = await _context.Lead.FindAsync(id);
+            var lead = await _context.Lead.Include(l => l.Company).FirstOrDefaultAsync(l => l.Id == id);
             if (lead == null)
             {
                 return NotFound();

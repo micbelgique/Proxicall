@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Proxicall.CRM.Models;
 
 namespace Proxicall.CRM.Migrations
 {
     [DbContext(typeof(ProxicallCRMContext))]
-    partial class ProxicallCRMContextModelSnapshot : ModelSnapshot
+    [Migration("20190327141358_LeadCompany")]
+    partial class LeadCompany
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -187,14 +189,14 @@ namespace Proxicall.CRM.Migrations
 
                     b.Property<string>("Address");
 
-                    b.Property<string>("ContactId");
-
                     b.Property<string>("Name")
                         .IsRequired();
 
+                    b.Property<string>("RefLeadId");
+
                     b.HasKey("Id");
 
-                    b.HasIndex("ContactId");
+                    b.HasIndex("RefLeadId");
 
                     b.ToTable("Company");
                 });
@@ -322,9 +324,9 @@ namespace Proxicall.CRM.Migrations
 
             modelBuilder.Entity("ProxiCall.CRM.Models.Company", b =>
                 {
-                    b.HasOne("ProxiCall.CRM.Models.Lead", "Contact")
+                    b.HasOne("ProxiCall.CRM.Models.Lead", "RefLead")
                         .WithMany()
-                        .HasForeignKey("ContactId");
+                        .HasForeignKey("RefLeadId");
                 });
 
             modelBuilder.Entity("ProxiCall.CRM.Models.Lead", b =>

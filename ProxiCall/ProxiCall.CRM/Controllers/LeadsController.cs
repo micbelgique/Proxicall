@@ -24,7 +24,7 @@ namespace Proxicall.CRM.Controllers
         // GET: Leads
         public async Task<IActionResult> Index()
         {
-            var proxicallCRMContext = _context.Lead.Include(l => l.Employer);
+            var proxicallCRMContext = _context.Lead.Include(l => l.Company);
             return View(await proxicallCRMContext.ToListAsync());
         }
 
@@ -37,7 +37,7 @@ namespace Proxicall.CRM.Controllers
             }
 
             var lead = await _context.Lead
-                .Include(l => l.Employer)
+                .Include(l => l.Company)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (lead == null)
             {
@@ -133,7 +133,7 @@ namespace Proxicall.CRM.Controllers
             }
 
             var lead = await _context.Lead
-                .Include(l => l.Employer)
+                .Include(l => l.Company)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (lead == null)
             {

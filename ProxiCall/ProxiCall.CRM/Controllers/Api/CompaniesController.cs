@@ -21,18 +21,36 @@ namespace Proxicall.CRM.Controllers.Api
             _context = context;
         }
 
+        [HttpGet("bycompanyref")]
+        public async Task<ActionResult<Lead>> GetRefLead(string companyName)
+        {
+            var company = await _context.Company.Where(c => c.Name == companyName)
+                .Include(c => c.Contact)
+                .FirstOrDefaultAsync();
+            if (company == null)
+            {
+                return BadRequest();
+            }
+
+            if (company.Contact == null)
+            {
+                return NotFound();
+            }
+            return company.Contact;
+        }
+
         // GET: api/Companies
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Company>>> GetCompany()
         {
-            return await _context.Company.ToListAsync();
+            return await _context.Company.Include(c => c.Contact).ToListAsync();
         }
 
         // GET: api/Companies/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Company>> GetCompany(string id)
         {
-            var company = await _context.Company.FindAsync(id);
+            var company = await _context.Company.Include(c => c.Contact).FirstOrDefaultAsync(c => c.Id == id);
 
             if (company == null)
             {
@@ -86,7 +104,7 @@ namespace Proxicall.CRM.Controllers.Api
         [HttpDelete("{id}")]
         public async Task<ActionResult<Company>> DeleteCompany(string id)
         {
-            var company = await _context.Company.FindAsync(id);
+            var company = await _context.Company.Include(c => c.Contact).FirstOrDefaultAsync(c => c.Id == id);
             if (company == null)
             {
                 return NotFound();

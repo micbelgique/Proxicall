@@ -19,13 +19,11 @@ namespace ProxiCall.CRM.Models
         public string PhoneNumber { get; set; }
         public string Email { get; set; }
         public string Address { get; set; }
-
-        [ForeignKey("Employer")]
+        
         [Display(Name = "Company")]
+        [ForeignKey("Company")]
         public string CompanyId { get; set; }
-        [Display(Name = "Company")]
-        [JsonIgnore]
-        public Company Employer { get; set; }    
+        public Company Company { get; set; }    
         
         [NotMapped]
         [Display(Name = "Full name")]

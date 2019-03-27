@@ -24,7 +24,7 @@ namespace Proxicall.CRM.Controllers
         // GET: Companies
         public async Task<IActionResult> Index()
         {
-            var proxicallCRMContext = _context.Company.Include(c => c.RefLead);
+            var proxicallCRMContext = _context.Company.Include(c => c.Contact);
             return View(await proxicallCRMContext.ToListAsync());
         }
 
@@ -37,7 +37,7 @@ namespace Proxicall.CRM.Controllers
             }
 
             var company = await _context.Company
-                .Include(c => c.RefLead)
+                .Include(c => c.Contact)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (company == null)
             {
@@ -67,7 +67,7 @@ namespace Proxicall.CRM.Controllers
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["RefLeadId"] = new SelectList(_context.Lead, "Id", "FullName", company.RefLeadId);
+            ViewData["RefLeadId"] = new SelectList(_context.Lead, "Id", "FullName", company.ContactId);
             return View(company);
         }
 
@@ -84,7 +84,7 @@ namespace Proxicall.CRM.Controllers
             {
                 return NotFound();
             }
-            ViewData["RefLeadId"] = new SelectList(_context.Lead, "Id", "FullName", company.RefLeadId);
+            ViewData["RefLeadId"] = new SelectList(_context.Lead, "Id", "FullName", company.ContactId);
             return View(company);
         }
 
@@ -120,7 +120,7 @@ namespace Proxicall.CRM.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["RefLeadId"] = new SelectList(_context.Lead, "Id", "FullName", company.RefLeadId);
+            ViewData["RefLeadId"] = new SelectList(_context.Lead, "Id", "FullName", company.ContactId);
             return View(company);
         }
 
@@ -133,7 +133,7 @@ namespace Proxicall.CRM.Controllers
             }
 
             var company = await _context.Company
-                .Include(c => c.RefLead)
+                .Include(c => c.Contact)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (company == null)
             {
