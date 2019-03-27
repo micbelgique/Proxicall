@@ -6,6 +6,7 @@ using Newtonsoft.Json.Linq;
 using ProxiCall.Dialogs.Shared;
 using ProxiCall.Models;
 using ProxiCall.Models.Intents;
+using ProxiCall.Resources;
 using ProxiCall.Services.ProxiCallCRM;
 using System.Text;
 using System.Threading;
@@ -87,7 +88,8 @@ namespace ProxiCall.Dialogs.SearchData
             //Asking for the name of the lead if not already given
             if (string.IsNullOrEmpty(crmState.Lead.FullName))
             {
-                return await stepContext.PromptAsync(_leadFullNamePrompt, new PromptOptions { Prompt = MessageFactory.Text(Properties.strings.querySearchPerson) }, cancellationToken);
+                return await stepContext.PromptAsync(_leadFullNamePrompt, new PromptOptions {
+                    Prompt = MessageFactory.Text(Localization.AskSearchedPersonFullName) }, cancellationToken);
             }
             return await stepContext.NextAsync();
         }
@@ -217,7 +219,7 @@ namespace ProxiCall.Dialogs.SearchData
             var wantEmail = luisState.Entities.Contains(LuisState.SEARCH_EMAIL_ENTITYNAME);
 
             var hasPhone = !string.IsNullOrEmpty(crmState.Lead.PhoneNumber);
-            var hasCompany = !string.IsNullOrEmpty(crmState.Lead.Company);
+            var hasCompany = !string.IsNullOrEmpty(crmState.Lead.Company.Name);
             var hasEmail = !string.IsNullOrEmpty(crmState.Lead.Email);
             var hasAddress = !string.IsNullOrEmpty(crmState.Lead.Address);
 

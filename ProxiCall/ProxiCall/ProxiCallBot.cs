@@ -12,6 +12,7 @@ using System.Linq;
 using ProxiCall.Models.Intents;
 using ProxiCall.Dialogs.SearchData;
 using ProxiCall.Dialogs.Shared;
+using ProxiCall.Resources;
 
 namespace ProxiCall
 {
@@ -125,7 +126,7 @@ namespace ProxiCall
 
                                 case Intents.None:
                                 default:
-                                    await dialogContext.Context.SendActivityAsync(Properties.strings.noIntentError);
+                                    await dialogContext.Context.SendActivityAsync(Localization.NoIntentFound);
                                     break;
                             }
 
@@ -147,8 +148,9 @@ namespace ProxiCall
             }
             else if (turnContext.Activity.Type == ActivityTypes.ConversationUpdate && turnContext.Activity.MembersAdded.FirstOrDefault()?.Id == turnContext.Activity.Recipient.Id)
             {
-                var reply = MessageFactory.Text(Properties.strings.welcome,
-                                                Properties.strings.welcome,
+                var welcomingMessage = $"{Localization.Greet} {Localization.AskForRequest}";
+                var reply = MessageFactory.Text(welcomingMessage,
+                                                welcomingMessage,
                                                 InputHints.AcceptingInput);
                 await turnContext.SendActivityAsync(reply, cancellationToken);
             }

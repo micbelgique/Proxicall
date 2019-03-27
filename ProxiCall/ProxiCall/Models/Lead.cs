@@ -10,13 +10,11 @@ namespace ProxiCall.Models
         public string Email { get; set; }
         public string PhoneNumber { get; set; }
         public string Address { get; set; }
-        public string Company { get; set; }
-
+        public Company Company { get; set; }
         public Lead()
         {
-            Reset();
-        }
 
+        }
         public Lead(string firstName, string lastName)
         {
             FirstName = firstName;
@@ -52,16 +50,6 @@ namespace ProxiCall.Models
                     LastName = string.Empty;
                 }
             }
-        }
-
-        public void Reset()
-        {
-            Id = string.Empty;
-            FullName = string.Empty;
-            PhoneNumber = string.Empty;
-            Email = string.Empty;
-            Address = string.Empty;
-            Company = string.Empty;
         }
     }
 }
