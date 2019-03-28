@@ -9,8 +9,10 @@ using Microsoft.Bot.Schema;
 using Microsoft.Bot.Builder.Dialogs;
 using Microsoft.Extensions.Logging;
 using System.Linq;
-using ProxiCall.Dialogs.TelExchange;
 using ProxiCall.Models.Intents;
+using ProxiCall.Dialogs.SearchData;
+using ProxiCall.Dialogs.Shared;
+using ProxiCall.Resources;
 
 namespace ProxiCall
 {
@@ -37,8 +39,9 @@ namespace ProxiCall
         private readonly IStatePropertyAccessor<DialogState> _dialogStateAccessor;
 
         public DialogSet Dialogs { get; private set; }
-
-        private readonly IStatePropertyAccessor<TelExchangeState> _telExchangeStateAccessor;
+        
+        private readonly IStatePropertyAccessor<CRMState> _crmStateAccessor;
+        private readonly IStatePropertyAccessor<LuisState> _luisStateAccessor;
 
         /// <summary>
         /// Initializes a new instance of the class.
@@ -58,11 +61,12 @@ namespace ProxiCall
 
             _userState = userState ?? throw new ArgumentNullException(nameof(userState));
             _conversationState = conversationState ?? throw new ArgumentNullException(nameof(conversationState));
-
-            _telExchangeStateAccessor = _userState.CreateProperty<TelExchangeState>(nameof(TelExchangeState));
+            
+            _crmStateAccessor = _userState.CreateProperty<CRMState>(nameof(CRMState));
+            _luisStateAccessor = _userState.CreateProperty<LuisState>(nameof(LuisState));
             _dialogStateAccessor = _conversationState.CreateProperty<DialogState>(nameof(DialogState));
             Dialogs = new DialogSet(_dialogStateAccessor);
-            Dialogs.Add(new TelExchangeDialog(_telExchangeStateAccessor, _loggerFactory, _services));
+            Dialogs.Add(new SearchLeadDataDialog(_crmStateAccessor,_luisStateAccessor, _loggerFactory, _services));
         }
 
         /// <summary>
@@ -104,28 +108,25 @@ namespace ProxiCall
                 // Continue the current dialog
                 var dialogResult = await dialogContext.ContinueDialogAsync();
 
-                // if no one has responded,
+                // If no one has responded,
                 if (!dialogContext.Context.Responded)
                 {
-                    // examine results from active dialog
+                    // Examine results from active dialog
                     switch (dialogResult.Status)
                     {
                         case DialogTurnStatus.Empty:
                             switch (topIntent)
                             {
-                                case Intents.TelephoneExchange:
+                                case Intents.SearchData:
                                 case Intents.MakeACall:
-                                    // update call state with any entities captured
-                                    await UpdateCallStateAsync(luisResults, topIntent, dialogContext.Context);
+                                    await UpdateDialogStatesAsync(luisResults, topIntent, dialogContext.Context);
 
-                                    await dialogContext.BeginDialogAsync(nameof(TelExchangeDialog));
+                                    await dialogContext.BeginDialogAsync(nameof(SearchLeadDataDialog));
                                     break;
 
                                 case Intents.None:
                                 default:
-                                    // Help or no intent identified, either way, let's provide some help.
-                                    // to the user
-                                    await dialogContext.Context.SendActivityAsync(Properties.strings.noIntentError);
+                                    await dialogContext.Context.SendActivityAsync(Localization.NoIntentFound);
                                     break;
                             }
 
@@ -147,8 +148,9 @@ namespace ProxiCall
             }
             else if (turnContext.Activity.Type == ActivityTypes.ConversationUpdate && turnContext.Activity.MembersAdded.FirstOrDefault()?.Id == turnContext.Activity.Recipient.Id)
             {
-                var reply = MessageFactory.Text(Properties.strings.welcome,
-                                                Properties.strings.welcome,
+                var welcomingMessage = $"{Localization.Greet} {Localization.AskForRequest}";
+                var reply = MessageFactory.Text(welcomingMessage,
+                                                welcomingMessage,
                                                 InputHints.AcceptingInput);
                 await turnContext.SendActivityAsync(reply, cancellationToken);
             }
@@ -159,42 +161,102 @@ namespace ProxiCall
             // Save the user profile updates into the user state.
             await _userState.SaveChangesAsync(turnContext, false, cancellationToken);
         }
-
-        /// <summary>
-        /// Helper function to update greeting state with entities returned by LUIS.
-        /// <param name="luisResult">LUIS recognizer <see cref="RecognizerResult"/>.</param>
-        /// <param name="turnContext">A <see cref="ITurnContext"/> containing all the data needed
-        /// for processing this conversation turn.</param>
-        /// <returns>A task that represents the work queued to execute.</returns>
-        /// </summary>
-        private async Task UpdateCallStateAsync(RecognizerResult luisResult, string intentName, ITurnContext turnContext)
+        
+        private async Task UpdateDialogStatesAsync(RecognizerResult luisResult, string intentName, ITurnContext turnContext)
         {
             if (luisResult.Entities != null && luisResult.Entities.HasValues)
             {
-                // Get latest TelExchangeState
-                var telExchangeState = await _telExchangeStateAccessor.GetAsync(turnContext, () => new TelExchangeState());
+                // Get latest States
+                var crmState = await _crmStateAccessor.GetAsync(turnContext, () => new CRMState());
+                var luisState = await _luisStateAccessor.GetAsync(turnContext, () => new LuisState());
+
                 var entities = luisResult.Entities;
 
                 // Supported LUIS Entities
-                string[] personNameEntities = { "personName" };
-
-                // Update any entities
-                // Note: Consider a confirm dialog, instead of just updating.
-                foreach (var entity in personNameEntities)
+                string[] luisExpectedLeadName =
                 {
-                    // Check if we found valid slot values in entities returned from LUIS.
-                    if (entities[entity] != null)
+                    "searchlead",
+                    "personName"
+                };
+                //TODO : no need for array + rename into search_ (ex : searchaddress)
+                string[] luisHintSearchAddress =
+                {
+                    "searchaddress"
+                };
+                string[] luisHintSearchCompany =
+                {
+                    "searchcompany"
+                };
+                string[] luisHintSearchPhone =
+                {
+                    "searchphone"
+                };
+                string[] luisHintSearchEmail =
+                {
+                    "searchemail"
+                };
+
+                // Update every entities
+                // TODO Consider a confirm dialog, instead of just updating.
+                foreach (var name in luisExpectedLeadName)
+                {
+                    if (entities[name] != null)
                     {
-                        // Set new user name.
-                        var fullName = (string)entities[entity][0];
-                        telExchangeState.RecipientFullName = fullName;
+                        var fullName = (string)entities[name][0];
+                        crmState.Lead.FullName = fullName;
                         break;
                     }
                 }
 
+                foreach (var address in luisHintSearchAddress)
+                {
+                    if (entities[address] != null)
+                    {
+                        luisState.AddDetectedEntity(LuisState.SEARCH_ADDRESS_ENTITYNAME);
+                        break;
+                    }
+                }
+
+                foreach (var company in luisHintSearchCompany)
+                {
+                    if (entities[company] != null)
+                    {
+                        luisState.AddDetectedEntity(LuisState.SEARCH_COMPANY_ENTITYNAME);
+                        break;
+                    }
+                }
+
+                foreach (var phone in luisHintSearchPhone)
+                {
+                    if (entities[phone] != null)
+                    {
+                        luisState.AddDetectedEntity(LuisState.SEARCH_PHONENUMBER_ENTITYNAME);
+                        break;
+                    }
+                }
+                foreach (var email in luisHintSearchEmail)
+                {
+                    if (entities[email] != null)
+                    {
+                        luisState.AddDetectedEntity(LuisState.SEARCH_EMAIL_ENTITYNAME);
+                        break;
+                    }
+                }
+
+                //Searching for "informations"
+                if (intentName == Intents.SearchData)
+                {
+                    if(luisState.Entities == null ||luisState.Entities.Count==0)
+                    {
+                        luisState.AddDetectedEntity(LuisState.SEARCH_ADDRESS_ENTITYNAME);
+                        luisState.AddDetectedEntity(LuisState.SEARCH_COMPANY_ENTITYNAME);
+                        luisState.AddDetectedEntity(LuisState.SEARCH_PHONENUMBER_ENTITYNAME);
+                    }
+                }
                 // Set the new values into state.
-                telExchangeState.IntentName = intentName;
-                await _telExchangeStateAccessor.SetAsync(turnContext, telExchangeState);
+                luisState.IntentName = intentName;
+                await _crmStateAccessor.SetAsync(turnContext, crmState);
+                await _luisStateAccessor.SetAsync(turnContext, luisState);
             }
         }
     }
