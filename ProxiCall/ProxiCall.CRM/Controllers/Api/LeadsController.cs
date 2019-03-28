@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ProxiCall.CRM.Models;
 using Proxicall.CRM.Models;
+using NinjaNye.SearchExtensions.Levenshtein;
 
 namespace Proxicall.CRM.Controllers.Api
 {
@@ -67,6 +68,18 @@ namespace Proxicall.CRM.Controllers.Api
 
             if (lead == null)
             {
+                //Levenshtein on firstame
+                var result = _context.Lead.LevenshteinDistanceOf(x => x.FirstName).ComparedTo(firstName);
+                foreach(var res in result)
+                {
+                    var distance = res;
+                }
+
+                //var allLeads = await _context.Lead.Include(l => l.Company).ToListAsync();
+                //Levenshtein firstname then if ok Levenshtein lastname
+                //if null
+                //Levenshtein firstname=lastname then Levenshtein lastname=firstname
+
                 return null;
             }
 
