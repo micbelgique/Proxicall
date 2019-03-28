@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using ProxiCall.CRM.Models;
+using Proxicall.CRM.Models;
 
 namespace Proxicall.CRM.Models
 {

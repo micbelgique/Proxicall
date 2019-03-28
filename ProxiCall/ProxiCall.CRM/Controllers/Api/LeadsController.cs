@@ -3,9 +3,9 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using ProxiCall.CRM.Models;
 using Proxicall.CRM.Models;
 using NinjaNye.SearchExtensions.Levenshtein;
+using Proxicall.CRM.Models.Enumeration.Levenshtein;
 
 namespace Proxicall.CRM.Controllers.Api
 {
@@ -14,6 +14,8 @@ namespace Proxicall.CRM.Controllers.Api
     public class LeadsController : ControllerBase
     {
         private readonly ProxicallCRMContext _context;
+
+        public int LevenshteinAllowedDistance { get; private set; }
 
         public LeadsController(ProxicallCRMContext context)
         {
@@ -68,22 +70,61 @@ namespace Proxicall.CRM.Controllers.Api
 
             if (lead == null)
             {
-                //Levenshtein on firstame
-                var result = _context.Lead.LevenshteinDistanceOf(x => x.FirstName).ComparedTo(firstName);
-                foreach(var res in result)
-                {
-                    var distance = res;
-                }
-
-                //var allLeads = await _context.Lead.Include(l => l.Company).ToListAsync();
-                //Levenshtein firstname then if ok Levenshtein lastname
-                //if null
-                //Levenshtein firstname=lastname then Levenshtein lastname=firstname
-
-                return null;
+                return FindLeadWithLevenshtein(firstName,lastName);
             }
 
             return lead;
+        }
+
+        private Lead FindLeadWithLevenshtein(string firstName, string lastName)
+        {
+            var resultOfLvsDistanceDB = _context
+                    .Leads
+                    .Include(l => l.Company)
+                    .LevenshteinDistanceOf(leadInDB => leadInDB.FirstName, leadInDB => leadInDB.LastName)
+                    .ComparedTo(firstName, lastName);
+
+            var allowedDistanceForFirstName = CalculateAllowedDistance(firstName);
+            var allowedDistanceForLastName = CalculateAllowedDistance(lastName);
+
+            foreach (var lvsDistance in resultOfLvsDistanceDB)
+            {
+                //"FirstName LastName" compared to "FirstName LastName" in the database
+                var distanceFirstNameToFirstNameDB = lvsDistance.Distances[LevenshteinCompare.FirstNameToFirstNameDB.Id];
+                var distanceLastNameToLastNameDB = lvsDistance.Distances[LevenshteinCompare.LastNameToLastNameDB.Id];
+
+                if (distanceFirstNameToFirstNameDB <= allowedDistanceForFirstName
+                    && distanceLastNameToLastNameDB <= allowedDistanceForLastName)
+                {
+                    return lvsDistance.Item;
+                }
+                //"FirstName LastName" compared to "LastName FirstName" in the database
+                var distanceFirstNametoLastNameDB = lvsDistance.Distances[LevenshteinCompare.FirstNameToLastNameDB.Id];
+                var distanceLastNameToFirstNameDB = lvsDistance.Distances[LevenshteinCompare.LastNameToFirstNameDB.Id];
+
+                if (distanceFirstNametoLastNameDB <= allowedDistanceForFirstName
+                    && distanceLastNameToFirstNameDB <= allowedDistanceForLastName)
+                {
+                    return lvsDistance.Item;
+                }
+            }
+            return null;
+        }
+
+        private int CalculateAllowedDistance(string name)
+        {
+            if(name.Length<3)
+            {
+                return LevenshteinAllowedDistance;
+            }
+            else if (name.Length<8)
+            {
+                return 1;
+            }
+            else
+            {
+                return 2;
+            }
         }
 
         // GET: api/Leads

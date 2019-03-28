@@ -1,6 +1,4 @@
 ﻿using Microsoft.AspNetCore.Identity;
-using Proxicall.CRM.Models.Enumeration.Opportunity;
-using ProxiCall.CRM.Models;
 using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;

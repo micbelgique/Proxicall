@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using ProxiCall.CRM.Models;
 using Proxicall.CRM.Models;
 
 namespace Proxicall.CRM.Controllers.Api
