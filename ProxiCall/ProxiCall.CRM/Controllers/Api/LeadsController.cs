@@ -27,7 +27,7 @@ namespace Proxicall.CRM.Controllers.Api
             {
                 return BadRequest();
             }
-            var opportunities = await _context.Opportunity
+            var opportunities = await _context.Opportunities
                 .Where(o => o.Lead == lead)
                 .Include(o => o.Owner)
                 .Include(o => o.Product)
@@ -58,7 +58,7 @@ namespace Proxicall.CRM.Controllers.Api
         {
             firstName = char.ToLower(firstName[0]) + firstName.Substring(1).ToLower();
             lastName = char.ToLower(lastName[0]) + lastName.Substring(1).ToLower();
-            var lead = await _context.Lead.Where(l =>
+            var lead = await _context.Leads.Where(l =>
                 l.FirstName == firstName && l.LastName == lastName
                 ||
                 l.FirstName == lastName && l.LastName == firstName)
@@ -77,14 +77,14 @@ namespace Proxicall.CRM.Controllers.Api
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Lead>>> GetLead()
         {
-            return await _context.Lead.Include(l => l.Company).ToListAsync();
+            return await _context.Leads.Include(l => l.Company).ToListAsync();
         }
 
         // GET: api/Leads/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Lead>> GetLead(string id)
         {
-            var lead = await _context.Lead.Include(l => l.Company).FirstOrDefaultAsync(l => l.Id == id);
+            var lead = await _context.Leads.Include(l => l.Company).FirstOrDefaultAsync(l => l.Id == id);
 
             if (lead == null)
             {
@@ -128,7 +128,7 @@ namespace Proxicall.CRM.Controllers.Api
         [HttpPost]
         public async Task<ActionResult<Lead>> PostLead(Lead lead)
         {
-            _context.Lead.Add(lead);
+            _context.Leads.Add(lead);
             await _context.SaveChangesAsync();
 
             return CreatedAtAction("GetLead", new { id = lead.Id }, lead);
@@ -138,13 +138,13 @@ namespace Proxicall.CRM.Controllers.Api
         [HttpDelete("{id}")]
         public async Task<ActionResult<Lead>> DeleteLead(string id)
         {
-            var lead = await _context.Lead.Include(l => l.Company).FirstOrDefaultAsync(l => l.Id == id);
+            var lead = await _context.Leads.Include(l => l.Company).FirstOrDefaultAsync(l => l.Id == id);
             if (lead == null)
             {
                 return NotFound();
             }
 
-            _context.Lead.Remove(lead);
+            _context.Leads.Remove(lead);
             await _context.SaveChangesAsync();
 
             return lead;
@@ -152,7 +152,7 @@ namespace Proxicall.CRM.Controllers.Api
 
         private bool LeadExists(string id)
         {
-            return _context.Lead.Any(e => e.Id == id);
+            return _context.Leads.Any(e => e.Id == id);
         }
     }
 }

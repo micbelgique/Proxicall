@@ -45,7 +45,7 @@ namespace Proxicall.CRM.Controllers.Api
             {
                 return BadRequest();
             }
-            var opportunities = await _context.Opportunity
+            var opportunities = await _context.Opportunities
                 .Where(o => o.Lead.Company == company)
                 .Include(o => o.Owner)
                 .Include(o => o.Product)
@@ -62,7 +62,7 @@ namespace Proxicall.CRM.Controllers.Api
 
         private async Task<Company> GetCompanyByName(string name)
         {
-            var company = await _context.Company.Where(c => c.Name == name)
+            var company = await _context.Companies.Where(c => c.Name == name)
                 .Include(c => c.Contact)
                 .FirstOrDefaultAsync();
             if (company == null)
@@ -77,14 +77,14 @@ namespace Proxicall.CRM.Controllers.Api
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Company>>> GetCompany()
         {
-            return await _context.Company.Include(c => c.Contact).ToListAsync();
+            return await _context.Companies.Include(c => c.Contact).ToListAsync();
         }
 
         // GET: api/Companies/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Company>> GetCompany(string id)
         {
-            var company = await _context.Company.Include(c => c.Contact).FirstOrDefaultAsync(c => c.Id == id);
+            var company = await _context.Companies.Include(c => c.Contact).FirstOrDefaultAsync(c => c.Id == id);
 
             if (company == null)
             {
@@ -128,7 +128,7 @@ namespace Proxicall.CRM.Controllers.Api
         [HttpPost]
         public async Task<ActionResult<Company>> PostCompany(Company company)
         {
-            _context.Company.Add(company);
+            _context.Companies.Add(company);
             await _context.SaveChangesAsync();
 
             return CreatedAtAction("GetCompany", new { id = company.Id }, company);
@@ -138,13 +138,13 @@ namespace Proxicall.CRM.Controllers.Api
         [HttpDelete("{id}")]
         public async Task<ActionResult<Company>> DeleteCompany(string id)
         {
-            var company = await _context.Company.Include(c => c.Contact).FirstOrDefaultAsync(c => c.Id == id);
+            var company = await _context.Companies.Include(c => c.Contact).FirstOrDefaultAsync(c => c.Id == id);
             if (company == null)
             {
                 return NotFound();
             }
 
-            _context.Company.Remove(company);
+            _context.Companies.Remove(company);
             await _context.SaveChangesAsync();
 
             return company;
@@ -152,7 +152,7 @@ namespace Proxicall.CRM.Controllers.Api
 
         private bool CompanyExists(string id)
         {
-            return _context.Company.Any(e => e.Id == id);
+            return _context.Companies.Any(e => e.Id == id);
         }
     }
 }

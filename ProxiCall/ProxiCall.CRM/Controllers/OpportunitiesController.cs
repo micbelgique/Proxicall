@@ -23,7 +23,7 @@ namespace Proxicall.CRM.Controllers
         // GET: Opportunities
         public async Task<IActionResult> Index()
         {
-            var proxicallCRMContext = _context.Opportunity.Include(o => o.Lead).Include(o => o.Owner).Include(o => o.Product);
+            var proxicallCRMContext = _context.Opportunities.Include(o => o.Lead).Include(o => o.Owner).Include(o => o.Product);
             return View(await proxicallCRMContext.ToListAsync());
         }
 
@@ -35,7 +35,7 @@ namespace Proxicall.CRM.Controllers
                 return NotFound();
             }
 
-            var opportunity = await _context.Opportunity
+            var opportunity = await _context.Opportunities
                 .Include(o => o.Lead)
                 .Include(o => o.Owner)
                 .Include(o => o.Product)
@@ -51,9 +51,9 @@ namespace Proxicall.CRM.Controllers
         // GET: Opportunities/Create
         public IActionResult Create()
         {
-            ViewData["LeadId"] = new SelectList(_context.Lead, "Id", "FullName");
+            ViewData["LeadId"] = new SelectList(_context.Leads, "Id", "FullName");
             ViewData["OwnerId"] = new SelectList(_context.Users, "Id", "UserName");
-            ViewData["ProductId"] = new SelectList(_context.Product, "Id", "Title");
+            ViewData["ProductId"] = new SelectList(_context.Products, "Id", "Title");
             return View();
         }
 
@@ -70,9 +70,9 @@ namespace Proxicall.CRM.Controllers
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["LeadId"] = new SelectList(_context.Lead, "Id", "FullName", opportunity.LeadId);
+            ViewData["LeadId"] = new SelectList(_context.Leads, "Id", "FullName", opportunity.LeadId);
             ViewData["OwnerId"] = new SelectList(_context.Users, "Id", "UserName", opportunity.OwnerId);
-            ViewData["ProductId"] = new SelectList(_context.Product, "Id", "Title", opportunity.ProductId);
+            ViewData["ProductId"] = new SelectList(_context.Products, "Id", "Title", opportunity.ProductId);
             return View(opportunity);
         }
 
@@ -84,14 +84,14 @@ namespace Proxicall.CRM.Controllers
                 return NotFound();
             }
 
-            var opportunity = await _context.Opportunity.FindAsync(id);
+            var opportunity = await _context.Opportunities.FindAsync(id);
             if (opportunity == null)
             {
                 return NotFound();
             }
-            ViewData["LeadId"] = new SelectList(_context.Lead, "Id", "FullName", opportunity.LeadId);
+            ViewData["LeadId"] = new SelectList(_context.Leads, "Id", "FullName", opportunity.LeadId);
             ViewData["OwnerId"] = new SelectList(_context.Users, "Id", "UserName", opportunity.OwnerId);
-            ViewData["ProductId"] = new SelectList(_context.Product, "Id", "Title", opportunity.ProductId);
+            ViewData["ProductId"] = new SelectList(_context.Products, "Id", "Title", opportunity.ProductId);
             return View(opportunity);
         }
 
@@ -127,9 +127,9 @@ namespace Proxicall.CRM.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["LeadId"] = new SelectList(_context.Lead, "Id", "FullName", opportunity.LeadId);
+            ViewData["LeadId"] = new SelectList(_context.Leads, "Id", "FullName", opportunity.LeadId);
             ViewData["OwnerId"] = new SelectList(_context.Users, "Id", "UserName", opportunity.OwnerId);
-            ViewData["ProductId"] = new SelectList(_context.Product, "Id", "Title", opportunity.ProductId);
+            ViewData["ProductId"] = new SelectList(_context.Products, "Id", "Title", opportunity.ProductId);
             return View(opportunity);
         }
 
@@ -141,7 +141,7 @@ namespace Proxicall.CRM.Controllers
                 return NotFound();
             }
 
-            var opportunity = await _context.Opportunity
+            var opportunity = await _context.Opportunities
                 .Include(o => o.Lead)
                 .Include(o => o.Owner)
                 .Include(o => o.Product)
@@ -159,15 +159,15 @@ namespace Proxicall.CRM.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(string id)
         {
-            var opportunity = await _context.Opportunity.FindAsync(id);
-            _context.Opportunity.Remove(opportunity);
+            var opportunity = await _context.Opportunities.FindAsync(id);
+            _context.Opportunities.Remove(opportunity);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
         private bool OpportunityExists(string id)
         {
-            return _context.Opportunity.Any(e => e.Id == id);
+            return _context.Opportunities.Any(e => e.Id == id);
         }
     }
 }

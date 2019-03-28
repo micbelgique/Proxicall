@@ -24,7 +24,7 @@ namespace Proxicall.CRM.Controllers
         // GET: Companies
         public async Task<IActionResult> Index()
         {
-            var proxicallCRMContext = _context.Company.Include(c => c.Contact);
+            var proxicallCRMContext = _context.Companies.Include(c => c.Contact);
             return View(await proxicallCRMContext.ToListAsync());
         }
 
@@ -36,7 +36,7 @@ namespace Proxicall.CRM.Controllers
                 return NotFound();
             }
 
-            var company = await _context.Company
+            var company = await _context.Companies
                 .Include(c => c.Contact)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (company == null)
@@ -50,7 +50,7 @@ namespace Proxicall.CRM.Controllers
         // GET: Companies/Create
         public IActionResult Create()
         {
-            ViewData["RefLeadId"] = new SelectList(_context.Lead, "Id", "FullName");
+            ViewData["RefLeadId"] = new SelectList(_context.Leads, "Id", "FullName");
             return View();
         }
 
@@ -67,7 +67,7 @@ namespace Proxicall.CRM.Controllers
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["RefLeadId"] = new SelectList(_context.Lead, "Id", "FullName", company.ContactId);
+            ViewData["RefLeadId"] = new SelectList(_context.Leads, "Id", "FullName", company.ContactId);
             return View(company);
         }
 
@@ -79,12 +79,12 @@ namespace Proxicall.CRM.Controllers
                 return NotFound();
             }
 
-            var company = await _context.Company.FindAsync(id);
+            var company = await _context.Companies.FindAsync(id);
             if (company == null)
             {
                 return NotFound();
             }
-            ViewData["RefLeadId"] = new SelectList(_context.Lead, "Id", "FullName", company.ContactId);
+            ViewData["RefLeadId"] = new SelectList(_context.Leads, "Id", "FullName", company.ContactId);
             return View(company);
         }
 
@@ -120,7 +120,7 @@ namespace Proxicall.CRM.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["RefLeadId"] = new SelectList(_context.Lead, "Id", "FullName", company.ContactId);
+            ViewData["RefLeadId"] = new SelectList(_context.Leads, "Id", "FullName", company.ContactId);
             return View(company);
         }
 
@@ -132,7 +132,7 @@ namespace Proxicall.CRM.Controllers
                 return NotFound();
             }
 
-            var company = await _context.Company
+            var company = await _context.Companies
                 .Include(c => c.Contact)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (company == null)
@@ -148,15 +148,15 @@ namespace Proxicall.CRM.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(string id)
         {
-            var company = await _context.Company.FindAsync(id);
-            _context.Company.Remove(company);
+            var company = await _context.Companies.FindAsync(id);
+            _context.Companies.Remove(company);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
         private bool CompanyExists(string id)
         {
-            return _context.Company.Any(e => e.Id == id);
+            return _context.Companies.Any(e => e.Id == id);
         }
     }
 }

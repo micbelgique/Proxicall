@@ -22,14 +22,14 @@ namespace Proxicall.CRM.Controllers.Api
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Opportunity>>> GetOpportunity()
         {
-            return await _context.Opportunity.Include(o => o.Owner).Include(o => o.Product).Include(o => o.Lead).ToListAsync();
+            return await _context.Opportunities.Include(o => o.Owner).Include(o => o.Product).Include(o => o.Lead).ToListAsync();
         }
 
         // GET: api/Opportunities/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Opportunity>> GetOpportunity(string id)
         {
-            var opportunity = await _context.Opportunity.Include(o => o.Owner).Include(o => o.Product).Include(o => o.Lead).FirstOrDefaultAsync(o => o.Id == id);
+            var opportunity = await _context.Opportunities.Include(o => o.Owner).Include(o => o.Product).Include(o => o.Lead).FirstOrDefaultAsync(o => o.Id == id);
 
             if (opportunity == null)
             {
@@ -73,7 +73,7 @@ namespace Proxicall.CRM.Controllers.Api
         [HttpPost]
         public async Task<ActionResult<Opportunity>> PostOpportunity(Opportunity opportunity)
         {
-            _context.Opportunity.Add(opportunity);
+            _context.Opportunities.Add(opportunity);
             await _context.SaveChangesAsync();
 
             return CreatedAtAction("GetOpportunity", new { id = opportunity.Id }, opportunity);
@@ -83,13 +83,13 @@ namespace Proxicall.CRM.Controllers.Api
         [HttpDelete("{id}")]
         public async Task<ActionResult<Opportunity>> DeleteOpportunity(string id)
         {
-            var opportunity = await _context.Opportunity.Include(o => o.Owner).Include(o => o.Product).Include(o => o.Lead).FirstOrDefaultAsync(o => o.Id == id);
+            var opportunity = await _context.Opportunities.Include(o => o.Owner).Include(o => o.Product).Include(o => o.Lead).FirstOrDefaultAsync(o => o.Id == id);
             if (opportunity == null)
             {
                 return NotFound();
             }
 
-            _context.Opportunity.Remove(opportunity);
+            _context.Opportunities.Remove(opportunity);
             await _context.SaveChangesAsync();
 
             return opportunity;
@@ -97,7 +97,7 @@ namespace Proxicall.CRM.Controllers.Api
 
         private bool OpportunityExists(string id)
         {
-            return _context.Opportunity.Any(e => e.Id == id);
+            return _context.Opportunities.Any(e => e.Id == id);
         }
     }
 }
