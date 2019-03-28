@@ -52,7 +52,7 @@ namespace Proxicall.CRM.Controllers.Api
                 .Include(o => o.Lead)
                 .ToListAsync();
 
-            if (opportunities == null)
+            if (opportunities == null || opportunities.Count == 0)
             {
                 return NotFound();
             }
