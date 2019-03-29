@@ -13,6 +13,10 @@ using System.Threading.Tasks;
 using Proxicall.CRM.Areas.Identity.Data;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Proxicall.CRM.Services;
+using System.IdentityModel.Tokens.Jwt;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 namespace Proxicall.CRM
 {
@@ -42,7 +46,7 @@ namespace Proxicall.CRM
             services.AddIdentity<IdentityUser, IdentityRole>()
                 .AddEntityFrameworkStores<ProxicallCRMContext>()
                 .AddDefaultTokenProviders();
-            
+
             services.AddScoped<IRolesInitializer, RolesInitializer>();
 
             services.AddMvc()
@@ -64,6 +68,29 @@ namespace Proxicall.CRM
             });
 
             services.AddSingleton<IEmailSender, EmailSender>();
+
+            // ===== Add Jwt Authentication ========
+            JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear(); // => remove default claims
+            services
+                .AddAuthentication(options =>
+                {
+                    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                    options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+                    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+
+                })
+                .AddJwtBearer(cfg =>
+                {
+                    cfg.RequireHttpsMetadata = false;
+                    cfg.SaveToken = true;
+                    cfg.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        ValidIssuer = Configuration.GetSection("AppSettings")["JwtIssuer"],
+                        ValidAudience = Configuration.GetSection("AppSettings")["JwtIssuer"],
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration.GetSection("AppSettings")["JwtKey"])),
+                        ClockSkew = TimeSpan.Zero // remove delay of token when expire
+                    };
+                });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
