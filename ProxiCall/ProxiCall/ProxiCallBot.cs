@@ -13,6 +13,7 @@ using ProxiCall.Models.Intents;
 using ProxiCall.Dialogs.SearchData;
 using ProxiCall.Dialogs.Shared;
 using ProxiCall.Resources;
+using ProxiCall.Models;
 
 namespace ProxiCall
 {
@@ -203,6 +204,10 @@ namespace ProxiCall
                     if (entities[name] != null)
                     {
                         var fullName = (string)entities[name][0];
+                        //if (crmState.Lead == null)
+                        //{
+                        //    crmState.Lead = new Lead();
+                        //}
                         crmState.Lead.FullName = fullName;
                         break;
                     }

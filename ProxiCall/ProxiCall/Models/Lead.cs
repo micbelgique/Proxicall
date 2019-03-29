@@ -11,10 +11,12 @@ namespace ProxiCall.Models
         public string PhoneNumber { get; set; }
         public string Address { get; set; }
         public Company Company { get; set; }
+
         public Lead()
         {
 
         }
+
         public Lead(string firstName, string lastName)
         {
             FirstName = firstName;

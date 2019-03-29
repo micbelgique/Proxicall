@@ -110,15 +110,18 @@ namespace ProxiCall.Dialogs.SearchData
             crmState.Lead = await SearchLeadAsync(crmState.Lead.FirstName, crmState.Lead.LastName);
 
             //Asking for retry if necessary
-            crmState.WantsToCallButNoNumberFound = luisState.IntentName == Intents.MakeACall && crmState.Lead.PhoneNumber == null;
             var promptMessage = "";
             if (crmState.Lead == null)
             {
                 promptMessage = $"{fullName} {Properties.strings.retryNumberSearchPrompt}";
             }
-            else if (crmState.WantsToCallButNoNumberFound)
+            else if (luisState.IntentName == Intents.MakeACall)
             {
-                promptMessage = $"Le numéro de {crmState.Lead.FullName} {Properties.strings.retryNumberSearchPrompt}";
+                if(crmState.Lead.PhoneNumber == null)
+                {
+                    crmState.WantsToCallButNumberNotFound=true;
+                    promptMessage = $"Le numéro de {crmState.Lead.FullName} {Properties.strings.retryNumberSearchPrompt}";
+                }
             }
             var needsRetry = !string.IsNullOrEmpty(promptMessage);
             if (needsRetry)
@@ -149,7 +152,7 @@ namespace ProxiCall.Dialogs.SearchData
             var luisState = await LuisStateAccessor.GetAsync(stepContext.Context);
 
             //Handling when lead not found
-            if (crmState.Lead == null || crmState.WantsToCallButNoNumberFound)
+            if (crmState.Lead == null || crmState.WantsToCallButNumberNotFound)
             {
                 var retry = (bool)stepContext.Result;
                 if (retry)

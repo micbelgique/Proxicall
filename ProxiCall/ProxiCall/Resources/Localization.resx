@@ -132,6 +132,9 @@
   <data name="AskYesOrNo" xml:space="preserve">
     <value>Veuillez répondre par 'Oui' ou  'Non' pour confirmer.</value>
   </data>
+  <data name="FullNameIncomplete" xml:space="preserve">
+    <value>{0} n'est pas un nom complet.</value>
+  </data>
   <data name="Greet" xml:space="preserve">
     <value>Bienvenue sur ProxiCall.</value>
   </data>

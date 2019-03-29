@@ -106,6 +106,15 @@ namespace ProxiCall.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to {0} n&apos;est pas un nom complet..
+        /// </summary>
+        public static string FullNameIncomplete {
+            get {
+                return ResourceManager.GetString("FullNameIncomplete", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Bienvenue sur ProxiCall..
         /// </summary>
         public static string Greet {

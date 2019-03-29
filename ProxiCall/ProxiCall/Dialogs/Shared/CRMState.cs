@@ -11,7 +11,9 @@ namespace ProxiCall.Dialogs.Shared
             Lead = new Lead();
         }
 
-        public bool WantsToCallButNoNumberFound { get; set; }
+        public bool WantsToCallButNumberNotFound { get; set; }
+
+        public bool FullNameIncomplete { get; set; }
 
         public void ResetLead()
         {
