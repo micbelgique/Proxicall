@@ -10,8 +10,8 @@ using Proxicall.CRM.Models;
 namespace Proxicall.CRM.Migrations
 {
     [DbContext(typeof(ProxicallCRMContext))]
-    [Migration("20190321091950_leadOTMcompany")]
-    partial class leadOTMcompany
+    [Migration("20190327144228_RenamedRefLeadToContact")]
+    partial class RenamedRefLeadToContact
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -138,11 +138,9 @@ namespace Proxicall.CRM.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<string>", b =>
                 {
-                    b.Property<string>("LoginProvider")
-                        .HasMaxLength(128);
+                    b.Property<string>("LoginProvider");
 
-                    b.Property<string>("ProviderKey")
-                        .HasMaxLength(128);
+                    b.Property<string>("ProviderKey");
 
                     b.Property<string>("ProviderDisplayName");
 
@@ -173,11 +171,9 @@ namespace Proxicall.CRM.Migrations
                 {
                     b.Property<string>("UserId");
 
-                    b.Property<string>("LoginProvider")
-                        .HasMaxLength(128);
+                    b.Property<string>("LoginProvider");
 
-                    b.Property<string>("Name")
-                        .HasMaxLength(128);
+                    b.Property<string>("Name");
 
                     b.Property<string>("Value");
 
@@ -193,10 +189,14 @@ namespace Proxicall.CRM.Migrations
 
                     b.Property<string>("Address");
 
+                    b.Property<string>("ContactId");
+
                     b.Property<string>("Name")
                         .IsRequired();
 
                     b.HasKey("Id");
+
+                    b.HasIndex("ContactId");
 
                     b.ToTable("Company");
                 });
@@ -224,7 +224,57 @@ namespace Proxicall.CRM.Migrations
 
                     b.HasIndex("CompanyId");
 
-                    b.ToTable("Leads");
+                    b.ToTable("Lead");
+                });
+
+            modelBuilder.Entity("Proxicall.CRM.Models.Opportunity", b =>
+                {
+                    b.Property<string>("Id")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<string>("Comments");
+
+                    b.Property<string>("Confidence");
+
+                    b.Property<DateTime>("CreationDate");
+
+                    b.Property<DateTime?>("EstimatedCloseDate");
+
+                    b.Property<string>("LeadId")
+                        .IsRequired();
+
+                    b.Property<string>("OwnerId")
+                        .IsRequired();
+
+                    b.Property<string>("ProductId")
+                        .IsRequired();
+
+                    b.Property<string>("Status");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("LeadId");
+
+                    b.HasIndex("OwnerId");
+
+                    b.HasIndex("ProductId");
+
+                    b.ToTable("Opportunity");
+                });
+
+            modelBuilder.Entity("Proxicall.CRM.Models.Product", b =>
+                {
+                    b.Property<string>("Id")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<string>("Description");
+
+                    b.Property<string>("Title")
+                        .IsRequired();
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Product");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -272,11 +322,36 @@ namespace Proxicall.CRM.Migrations
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 
+            modelBuilder.Entity("ProxiCall.CRM.Models.Company", b =>
+                {
+                    b.HasOne("ProxiCall.CRM.Models.Lead", "Contact")
+                        .WithMany()
+                        .HasForeignKey("ContactId");
+                });
+
             modelBuilder.Entity("ProxiCall.CRM.Models.Lead", b =>
                 {
                     b.HasOne("ProxiCall.CRM.Models.Company", "Company")
-                        .WithMany("Leads")
+                        .WithMany()
                         .HasForeignKey("CompanyId");
+                });
+
+            modelBuilder.Entity("Proxicall.CRM.Models.Opportunity", b =>
+                {
+                    b.HasOne("ProxiCall.CRM.Models.Lead", "Lead")
+                        .WithMany()
+                        .HasForeignKey("LeadId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityUser", "Owner")
+                        .WithMany()
+                        .HasForeignKey("OwnerId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("Proxicall.CRM.Models.Product", "Product")
+                        .WithMany()
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade);
                 });
 #pragma warning restore 612, 618
         }

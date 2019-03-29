@@ -3,11 +3,10 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using ProxiCall.CRM.Models;
 using Proxicall.CRM.Models;
 using Microsoft.AspNetCore.Authorization;
 
-namespace ProxiCall.CRM.Controllers
+namespace Proxicall.CRM.Controllers
 {
     [Authorize(Roles = "Admin, User")]
     public class LeadsController : Controller
@@ -22,7 +21,7 @@ namespace ProxiCall.CRM.Controllers
         // GET: Leads
         public async Task<IActionResult> Index()
         {
-            var proxicallCRMContext = _context.Lead.Include(l => l.Company);
+            var proxicallCRMContext = _context.Leads.Include(l => l.Company);
             return View(await proxicallCRMContext.ToListAsync());
         }
 
@@ -34,7 +33,7 @@ namespace ProxiCall.CRM.Controllers
                 return NotFound();
             }
 
-            var lead = await _context.Lead
+            var lead = await _context.Leads
                 .Include(l => l.Company)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (lead == null)
@@ -48,7 +47,7 @@ namespace ProxiCall.CRM.Controllers
         // GET: Leads/Create
         public IActionResult Create()
         {
-            ViewData["CompanyId"] = new SelectList(_context.Company, "Id", "Name");
+            ViewData["CompanyId"] = new SelectList(_context.Companies, "Id", "Name");
             return View();
         }
 
@@ -65,7 +64,7 @@ namespace ProxiCall.CRM.Controllers
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["CompanyId"] = new SelectList(_context.Company, "Id", "Name", lead.CompanyId);
+            ViewData["CompanyId"] = new SelectList(_context.Companies, "Id", "Name", lead.CompanyId);
             return View(lead);
         }
 
@@ -77,12 +76,12 @@ namespace ProxiCall.CRM.Controllers
                 return NotFound();
             }
 
-            var lead = await _context.Lead.FindAsync(id);
+            var lead = await _context.Leads.FindAsync(id);
             if (lead == null)
             {
                 return NotFound();
             }
-            ViewData["CompanyId"] = new SelectList(_context.Company, "Id", "Name", lead.CompanyId);
+            ViewData["CompanyId"] = new SelectList(_context.Companies, "Id", "Name", lead.CompanyId);
             return View(lead);
         }
 
@@ -118,7 +117,7 @@ namespace ProxiCall.CRM.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["CompanyId"] = new SelectList(_context.Company, "Id", "Name", lead.CompanyId);
+            ViewData["CompanyId"] = new SelectList(_context.Companies, "Id", "Name", lead.CompanyId);
             return View(lead);
         }
 
@@ -130,7 +129,7 @@ namespace ProxiCall.CRM.Controllers
                 return NotFound();
             }
 
-            var lead = await _context.Lead
+            var lead = await _context.Leads
                 .Include(l => l.Company)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (lead == null)
@@ -146,15 +145,15 @@ namespace ProxiCall.CRM.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(string id)
         {
-            var lead = await _context.Lead.FindAsync(id);
-            _context.Lead.Remove(lead);
+            var lead = await _context.Leads.FindAsync(id);
+            _context.Leads.Remove(lead);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
         private bool LeadExists(string id)
         {
-            return _context.Lead.Any(e => e.Id == id);
+            return _context.Leads.Any(e => e.Id == id);
         }
     }
 }

@@ -187,12 +187,16 @@ namespace Proxicall.CRM.Migrations
 
                     b.Property<string>("Address");
 
+                    b.Property<string>("ContactId");
+
                     b.Property<string>("Name")
                         .IsRequired();
 
                     b.HasKey("Id");
 
-                    b.ToTable("Company");
+                    b.HasIndex("ContactId");
+
+                    b.ToTable("Companies");
                 });
 
             modelBuilder.Entity("ProxiCall.CRM.Models.Lead", b =>
@@ -218,7 +222,7 @@ namespace Proxicall.CRM.Migrations
 
                     b.HasIndex("CompanyId");
 
-                    b.ToTable("Lead");
+                    b.ToTable("Leads");
                 });
 
             modelBuilder.Entity("Proxicall.CRM.Models.Opportunity", b =>
@@ -253,7 +257,7 @@ namespace Proxicall.CRM.Migrations
 
                     b.HasIndex("ProductId");
 
-                    b.ToTable("Opportunity");
+                    b.ToTable("Opportunities");
                 });
 
             modelBuilder.Entity("Proxicall.CRM.Models.Product", b =>
@@ -268,7 +272,7 @@ namespace Proxicall.CRM.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Product");
+                    b.ToTable("Products");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -316,10 +320,17 @@ namespace Proxicall.CRM.Migrations
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 
+            modelBuilder.Entity("ProxiCall.CRM.Models.Company", b =>
+                {
+                    b.HasOne("ProxiCall.CRM.Models.Lead", "Contact")
+                        .WithMany()
+                        .HasForeignKey("ContactId");
+                });
+
             modelBuilder.Entity("ProxiCall.CRM.Models.Lead", b =>
                 {
                     b.HasOne("ProxiCall.CRM.Models.Company", "Company")
-                        .WithMany("Leads")
+                        .WithMany()
                         .HasForeignKey("CompanyId");
                 });
 

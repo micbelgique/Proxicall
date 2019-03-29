@@ -19,12 +19,12 @@ namespace ProxiCall.Services
 
         public async Task<string> GetPhoneNumberByFirstName(string firstname)
         {
-            User user = null;
+            Lead user = null;
             var path = $"api/users/phonenumber/{firstname}";
             var response = await _httpClient.GetAsync(path);
             if (response.IsSuccessStatusCode)
             {
-                user = await response.Content.ReadAsAsync<User>();
+                user = await response.Content.ReadAsAsync<Lead>();
                 return user.PhoneNumber;
             }
             return null;

@@ -1,12 +1,12 @@
 ﻿using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using ProxiCall.CRM.Models;
 using Proxicall.CRM.Models;
 using Microsoft.AspNetCore.Authorization;
 
-namespace ProxiCall.CRM.Controllers
+namespace Proxicall.CRM.Controllers
 {
     [Authorize(Roles = "Admin, User")]
     public class CompaniesController : Controller
@@ -21,7 +21,8 @@ namespace ProxiCall.CRM.Controllers
         // GET: Companies
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Company.ToListAsync());
+            var proxicallCRMContext = _context.Companies.Include(c => c.Contact);
+            return View(await proxicallCRMContext.ToListAsync());
         }
 
         // GET: Companies/Details/5
@@ -32,7 +33,8 @@ namespace ProxiCall.CRM.Controllers
                 return NotFound();
             }
 
-            var company = await _context.Company
+            var company = await _context.Companies
+                .Include(c => c.Contact)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (company == null)
             {
@@ -45,6 +47,7 @@ namespace ProxiCall.CRM.Controllers
         // GET: Companies/Create
         public IActionResult Create()
         {
+            ViewData["RefLeadId"] = new SelectList(_context.Leads, "Id", "FullName");
             return View();
         }
 
@@ -53,7 +56,7 @@ namespace ProxiCall.CRM.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Name,Address")] Company company)
+        public async Task<IActionResult> Create([Bind("Id,Name,Address,RefLeadId")] Company company)
         {
             if (ModelState.IsValid)
             {
@@ -61,6 +64,7 @@ namespace ProxiCall.CRM.Controllers
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
+            ViewData["RefLeadId"] = new SelectList(_context.Leads, "Id", "FullName", company.ContactId);
             return View(company);
         }
 
@@ -72,11 +76,12 @@ namespace ProxiCall.CRM.Controllers
                 return NotFound();
             }
 
-            var company = await _context.Company.FindAsync(id);
+            var company = await _context.Companies.FindAsync(id);
             if (company == null)
             {
                 return NotFound();
             }
+            ViewData["RefLeadId"] = new SelectList(_context.Leads, "Id", "FullName", company.ContactId);
             return View(company);
         }
 
@@ -85,7 +90,7 @@ namespace ProxiCall.CRM.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(string id, [Bind("Id,Name,Address")] Company company)
+        public async Task<IActionResult> Edit(string id, [Bind("Id,Name,Address,RefLeadId")] Company company)
         {
             if (id != company.Id)
             {
@@ -112,6 +117,7 @@ namespace ProxiCall.CRM.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
+            ViewData["RefLeadId"] = new SelectList(_context.Leads, "Id", "FullName", company.ContactId);
             return View(company);
         }
 
@@ -123,7 +129,8 @@ namespace ProxiCall.CRM.Controllers
                 return NotFound();
             }
 
-            var company = await _context.Company
+            var company = await _context.Companies
+                .Include(c => c.Contact)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (company == null)
             {
@@ -138,15 +145,15 @@ namespace ProxiCall.CRM.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(string id)
         {
-            var company = await _context.Company.FindAsync(id);
-            _context.Company.Remove(company);
+            var company = await _context.Companies.FindAsync(id);
+            _context.Companies.Remove(company);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
         private bool CompanyExists(string id)
         {
-            return _context.Company.Any(e => e.Id == id);
+            return _context.Companies.Any(e => e.Id == id);
         }
     }
 }

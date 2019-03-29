@@ -44,7 +44,7 @@
 @foreach (var item in Model) {
         <tr>
             <td>
-                @Html.DisplayFor(modelItem => item.Owner.Email)
+                @Html.DisplayFor(modelItem => item.Owner.UserName)
             </td>
             <td>
                 @Html.DisplayFor(modelItem => item.Lead.FullName)

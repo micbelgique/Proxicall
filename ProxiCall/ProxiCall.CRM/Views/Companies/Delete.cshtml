@@ -1,4 +1,4 @@
-﻿@model ProxiCall.CRM.Models.Company
+﻿@model Proxicall.CRM.Models.Company
 
 @{
     ViewData["Title"] = "Delete";
@@ -24,6 +24,12 @@
         <dd class = "col-sm-10">
             @Html.DisplayFor(model => model.Address)
         </dd>
+        <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.Contact)
+        </dt>
+        <dd class = "col-sm-10">
+            @Html.DisplayFor(model => model.Contact.FullName)
+        </dd class>
     </dl>
     
     <form asp-action="Delete">

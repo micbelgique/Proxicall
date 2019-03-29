@@ -10,8 +10,8 @@ using Proxicall.CRM.Models;
 namespace Proxicall.CRM.Migrations
 {
     [DbContext(typeof(ProxicallCRMContext))]
-    [Migration("20190321135956_opportunity")]
-    partial class opportunity
+    [Migration("20190327093446_ModelFixes")]
+    partial class ModelFixes
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -192,7 +192,11 @@ namespace Proxicall.CRM.Migrations
                     b.Property<string>("Name")
                         .IsRequired();
 
+                    b.Property<string>("RefLeadId");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("RefLeadId");
 
                     b.ToTable("Company");
                 });
@@ -318,10 +322,17 @@ namespace Proxicall.CRM.Migrations
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 
+            modelBuilder.Entity("ProxiCall.CRM.Models.Company", b =>
+                {
+                    b.HasOne("ProxiCall.CRM.Models.Lead", "RefLead")
+                        .WithMany()
+                        .HasForeignKey("RefLeadId");
+                });
+
             modelBuilder.Entity("ProxiCall.CRM.Models.Lead", b =>
                 {
-                    b.HasOne("ProxiCall.CRM.Models.Company", "Company")
-                        .WithMany("Leads")
+                    b.HasOne("ProxiCall.CRM.Models.Company", "Employer")
+                        .WithMany()
                         .HasForeignKey("CompanyId");
                 });
 

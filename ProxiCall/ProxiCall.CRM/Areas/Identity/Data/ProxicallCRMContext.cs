@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using ProxiCall.CRM.Models;
+using Proxicall.CRM.Models;
 
 namespace Proxicall.CRM.Models
 {
@@ -17,12 +17,12 @@ namespace Proxicall.CRM.Models
             base.OnModelCreating(modelBuilder);
         }
 
-        public DbSet<Lead> Lead { get; set; }
+        public DbSet<Lead> Leads { get; set; }
 
-        public DbSet<Company> Company { get; set; }
+        public DbSet<Company> Companies { get; set; }
 
-        public DbSet<Product> Product { get; set; }
+        public DbSet<Product> Products { get; set; }
 
-        public DbSet<Opportunity> Opportunity { get; set; }
+        public DbSet<Opportunity> Opportunities { get; set; }
     }
 }

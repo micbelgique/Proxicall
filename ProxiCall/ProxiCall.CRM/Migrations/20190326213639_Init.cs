@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace Proxicall.CRM.Migrations
 {
-    public partial class InitIdentity : Migration
+    public partial class Init : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -45,6 +45,36 @@ namespace Proxicall.CRM.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_AspNetUsers", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Lead",
+                columns: table => new
+                {
+                    Id = table.Column<string>(nullable: false),
+                    FirstName = table.Column<string>(nullable: false),
+                    LastName = table.Column<string>(nullable: false),
+                    PhoneNumber = table.Column<string>(nullable: true),
+                    Email = table.Column<string>(nullable: true),
+                    Address = table.Column<string>(nullable: true),
+                    CompanyId = table.Column<string>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Lead", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Product",
+                columns: table => new
+                {
+                    Id = table.Column<string>(nullable: false),
+                    Title = table.Column<string>(nullable: false),
+                    Description = table.Column<string>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Product", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -93,8 +123,8 @@ namespace Proxicall.CRM.Migrations
                 name: "AspNetUserLogins",
                 columns: table => new
                 {
-                    LoginProvider = table.Column<string>(maxLength: 128, nullable: false),
-                    ProviderKey = table.Column<string>(maxLength: 128, nullable: false),
+                    LoginProvider = table.Column<string>(nullable: false),
+                    ProviderKey = table.Column<string>(nullable: false),
                     ProviderDisplayName = table.Column<string>(nullable: true),
                     UserId = table.Column<string>(nullable: false)
                 },
@@ -138,8 +168,8 @@ namespace Proxicall.CRM.Migrations
                 columns: table => new
                 {
                     UserId = table.Column<string>(nullable: false),
-                    LoginProvider = table.Column<string>(maxLength: 128, nullable: false),
-                    Name = table.Column<string>(maxLength: 128, nullable: false),
+                    LoginProvider = table.Column<string>(nullable: false),
+                    Name = table.Column<string>(nullable: false),
                     Value = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
@@ -149,6 +179,63 @@ namespace Proxicall.CRM.Migrations
                         name: "FK_AspNetUserTokens_AspNetUsers_UserId",
                         column: x => x.UserId,
                         principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Company",
+                columns: table => new
+                {
+                    Id = table.Column<string>(nullable: false),
+                    Name = table.Column<string>(nullable: false),
+                    Address = table.Column<string>(nullable: true),
+                    RefLeadId = table.Column<string>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Company", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Company_Lead_RefLeadId",
+                        column: x => x.RefLeadId,
+                        principalTable: "Lead",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Opportunity",
+                columns: table => new
+                {
+                    Id = table.Column<string>(nullable: false),
+                    OwnerId = table.Column<string>(nullable: false),
+                    LeadId = table.Column<string>(nullable: false),
+                    ProductId = table.Column<string>(nullable: false),
+                    CreationDate = table.Column<DateTime>(nullable: false),
+                    EstimatedCloseDate = table.Column<DateTime>(nullable: true),
+                    Comments = table.Column<string>(nullable: true),
+                    Status = table.Column<string>(nullable: true),
+                    Confidence = table.Column<string>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Opportunity", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Opportunity_Lead_LeadId",
+                        column: x => x.LeadId,
+                        principalTable: "Lead",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Opportunity_AspNetUsers_OwnerId",
+                        column: x => x.OwnerId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Opportunity_Product_ProductId",
+                        column: x => x.ProductId,
+                        principalTable: "Product",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -191,6 +278,28 @@ namespace Proxicall.CRM.Migrations
                 column: "NormalizedUserName",
                 unique: true,
                 filter: "[NormalizedUserName] IS NOT NULL");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Company_RefLeadId",
+                table: "Company",
+                column: "RefLeadId",
+                unique: true,
+                filter: "[RefLeadId] IS NOT NULL");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Opportunity_LeadId",
+                table: "Opportunity",
+                column: "LeadId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Opportunity_OwnerId",
+                table: "Opportunity",
+                column: "OwnerId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Opportunity_ProductId",
+                table: "Opportunity",
+                column: "ProductId");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
@@ -211,10 +320,22 @@ namespace Proxicall.CRM.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
+                name: "Company");
+
+            migrationBuilder.DropTable(
+                name: "Opportunity");
+
+            migrationBuilder.DropTable(
                 name: "AspNetRoles");
 
             migrationBuilder.DropTable(
+                name: "Lead");
+
+            migrationBuilder.DropTable(
                 name: "AspNetUsers");
+
+            migrationBuilder.DropTable(
+                name: "Product");
         }
     }
 }

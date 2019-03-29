@@ -8,6 +8,7 @@
 
 
   <ItemGroup>
+    <PackageReference Include="Google.Cloud.Speech.V1" Version="1.1.0" />
     <PackageReference Include="Microsoft.AspNetCore.App" />
     <PackageReference Include="Microsoft.AspNetCore.Razor.Design" Version="2.2.0" PrivateAssets="All" />
     <PackageReference Include="Microsoft.Bot.Connector.DirectLine" Version="3.0.2" />
@@ -20,6 +21,7 @@
 
   <ItemGroup>
     <Folder Include="wwwroot\audio\" />
+    <Folder Include="wwwroot\stt\" />
     <Folder Include="wwwroot\xml\" />
   </ItemGroup>
 

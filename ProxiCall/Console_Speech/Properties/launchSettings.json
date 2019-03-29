@@ -4,6 +4,7 @@
       "commandName": "Project",
       "environmentVariables": {
         "SpeechApiKey": "5801820bf589448ebea3cc096fa9068f",
+        "GOOGLE_APPLICATION_CREDENTIALS": "C:\\cloudkey.json",
         "SpeechApiRegion": "westeurope"
       }
     }

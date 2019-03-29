@@ -1,4 +1,4 @@
-﻿@model IEnumerable<ProxiCall.CRM.Models.Company>
+﻿@model IEnumerable<Proxicall.CRM.Models.Company>
 
 @{
     ViewData["Title"] = "Index";
@@ -19,6 +19,9 @@
             <th>
                 @Html.DisplayNameFor(model => model.Address)
             </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Contact)
+            </th>
             <th></th>
         </tr>
     </thead>
@@ -30,6 +33,9 @@
             </td>
             <td>
                 @Html.DisplayFor(modelItem => item.Address)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Contact.FullName)
             </td>
             <td>
                 <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |

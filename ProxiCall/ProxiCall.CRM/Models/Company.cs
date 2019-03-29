@@ -1,7 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using Newtonsoft.Json;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
-namespace ProxiCall.CRM.Models
+namespace Proxicall.CRM.Models
 {
     public class Company
     {
@@ -10,8 +11,12 @@ namespace ProxiCall.CRM.Models
         [Required]
         public string Name { get; set; }
         public string Address { get; set; }
-
-        public ICollection<Lead> Leads { get; set; }
+        
+        [Display(Name = "Contact")]
+        [ForeignKey("Contact")]
+        public string ContactId { get; set; }
+        [Display(Name = "Contact")]
+        public Lead Contact { get; set; }
 
         public override string ToString()
         {
