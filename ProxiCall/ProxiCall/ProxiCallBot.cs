@@ -127,7 +127,7 @@ namespace ProxiCall
 
                                 case Intents.None:
                                 default:
-                                    await dialogContext.Context.SendActivityAsync(Localization.NoIntentFound);
+                                    await dialogContext.Context.SendActivityAsync(CulturedBot.NoIntentFound);
                                     break;
                             }
 
@@ -149,7 +149,7 @@ namespace ProxiCall
             }
             else if (turnContext.Activity.Type == ActivityTypes.ConversationUpdate && turnContext.Activity.MembersAdded.FirstOrDefault()?.Id == turnContext.Activity.Recipient.Id)
             {
-                var welcomingMessage = $"{Localization.Greet} {Localization.AskForRequest}";
+                var welcomingMessage = $"{CulturedBot.Greet} {CulturedBot.AskForRequest}";
                 var reply = MessageFactory.Text(welcomingMessage,
                                                 welcomingMessage,
                                                 InputHints.AcceptingInput);

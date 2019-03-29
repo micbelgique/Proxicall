@@ -117,37 +117,61 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="callForwardingConfirmed" xml:space="preserve">
-    <value>Nous transférons votre appel.</value>
+  <data name="AskForRequest" xml:space="preserve">
+    <value>Que puis-je faire pour vous?</value>
   </data>
-  <data name="forwardCallPrompt" xml:space="preserve">
+  <data name="AskIfWantForwardCall" xml:space="preserve">
     <value>Souhaitez vous être mis en contact ?</value>
   </data>
-  <data name="goodbye" xml:space="preserve">
-    <value>Merci d'avoir utiliser ProxiCall. Bonne journée.</value>
+  <data name="AskIfWantRetry" xml:space="preserve">
+    <value>Souhaitez-vous réessayer?</value>
   </data>
-  <data name="noIntentError" xml:space="preserve">
-    <value>Je n'ai pas compris ce que vous venez de dire.</value>
-  </data>
-  <data name="phoneNumberOf_1" xml:space="preserve">
-    <value>Le numéro de</value>
-  </data>
-  <data name="phoneNumberOf_2" xml:space="preserve">
-    <value>est le</value>
-  </data>
-  <data name="querySearchPerson" xml:space="preserve">
+  <data name="AskSearchedPersonFullName" xml:space="preserve">
     <value>Quelle est la personne que vous recherchez ?</value>
   </data>
-  <data name="retryNumberSearchPrompt" xml:space="preserve">
-    <value>n'a pas été trouvé. Souhaitez-vous réessayer?</value>
-  </data>
-  <data name="retryPrompt" xml:space="preserve">
+  <data name="AskYesOrNo" xml:space="preserve">
     <value>Veuillez répondre par 'Oui' ou  'Non' pour confirmer.</value>
   </data>
-  <data name="welcome" xml:space="preserve">
-    <value>Bienvenue sur ProxiCall. Que puis-je faire pour vous?</value>
+  <data name="FullNameIncomplete" xml:space="preserve">
+    <value>{0} n'est pas un nom complet.</value>
   </data>
-  <data name="welcome_2" xml:space="preserve">
-    <value>Que puis-je faire pour vous?</value>
+  <data name="Greet" xml:space="preserve">
+    <value>Bienvenue sur ProxiCall.</value>
+  </data>
+  <data name="InformAboutForwardingCall" xml:space="preserve">
+    <value>Nous transférons votre appel.</value>
+  </data>
+  <data name="IntroduceLeadData" xml:space="preserve">
+    <value>Voici les données demandées pour {0} :</value>
+  </data>
+  <data name="LeadNotFound" xml:space="preserve">
+    <value>{0} n'a pas été trouvé.</value>
+  </data>
+  <data name="MissingDataForThisLead" xml:space="preserve">
+    <value>Les données suivantes sont absentes de la base de données : {0}.</value>
+  </data>
+  <data name="NoDataFoundInDB" xml:space="preserve">
+    <value>Ces informations ne sont malheureusement pas référencées.</value>
+  </data>
+  <data name="NoIntentFound" xml:space="preserve">
+    <value>Je n'ai pas compris ce que vous venez de dire.</value>
+  </data>
+  <data name="PhoneNumberNotFound" xml:space="preserve">
+    <value>Le numéro de téléphone de {0} n'a pas été trouvé.</value>
+  </data>
+  <data name="SayCompany" xml:space="preserve">
+    <value>Compagnie</value>
+  </data>
+  <data name="SayEmailAddress" xml:space="preserve">
+    <value>Adresse email</value>
+  </data>
+  <data name="SayHomeAddress" xml:space="preserve">
+    <value>Adresse du domicile</value>
+  </data>
+  <data name="SayPhoneNumber" xml:space="preserve">
+    <value>Numéro de téléphone</value>
+  </data>
+  <data name="ThisDataNotFoundInDB" xml:space="preserve">
+    <value>Cette information n'est malheureusement pas référencée.</value>
   </data>
 </root>
