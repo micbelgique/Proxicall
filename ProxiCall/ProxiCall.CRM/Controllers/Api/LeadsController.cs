@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Proxicall.CRM.Models;
 using NinjaNye.SearchExtensions.Levenshtein;
 using Proxicall.CRM.Models.Enumeration.Levenshtein;
+using Proxicall.CRM.Models.Dictionnaries;
 
 namespace Proxicall.CRM.Controllers.Api
 {
@@ -14,9 +15,7 @@ namespace Proxicall.CRM.Controllers.Api
     public class LeadsController : ControllerBase
     {
         private readonly ProxicallCRMContext _context;
-
-        public int LevenshteinAllowedDistance { get; private set; }
-
+       
         public LeadsController(ProxicallCRMContext context)
         {
             _context = context;
@@ -110,20 +109,20 @@ namespace Proxicall.CRM.Controllers.Api
             }
             return null;
         }
-
+        
         private int CalculateAllowedDistance(string name)
         {
             if(name.Length<3)
             {
-                return LevenshteinAllowedDistance;
+                return LevenshteinAllowedDistance.AllowedDistance.GetValueOrDefault(LevenshteinAllowedDistance.VERY_SMALL_WORD);
             }
             else if (name.Length<8)
             {
-                return 1;
+                return LevenshteinAllowedDistance.AllowedDistance.GetValueOrDefault(LevenshteinAllowedDistance.SMALL_WORD); ;
             }
             else
             {
-                return 2;
+                return LevenshteinAllowedDistance.AllowedDistance.GetValueOrDefault(LevenshteinAllowedDistance.MEDIUM_WORD); ;
             }
         }
 

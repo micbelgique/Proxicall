@@ -17,6 +17,7 @@ namespace Proxicall.CRM.Models.Dictionnaries
             {
                 if(allowedDistance==null)
                 {
+                    allowedDistance = new Dictionary<string, int>();
                     allowedDistance.Add(VERY_SMALL_WORD, 0);
                     allowedDistance.Add(SMALL_WORD, 1);
                     allowedDistance.Add(MEDIUM_WORD, 2);
