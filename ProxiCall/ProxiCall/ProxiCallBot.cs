@@ -68,6 +68,7 @@ namespace ProxiCall
             _dialogStateAccessor = _conversationState.CreateProperty<DialogState>(nameof(DialogState));
             Dialogs = new DialogSet(_dialogStateAccessor);
             Dialogs.Add(new SearchLeadDataDialog(_crmStateAccessor,_luisStateAccessor, _loggerFactory, _services));
+            Dialogs.Add(new SearchCompanyDataDialog(_crmStateAccessor, _luisStateAccessor, _loggerFactory, _services));
         }
 
         /// <summary>
@@ -118,10 +119,13 @@ namespace ProxiCall
                         case DialogTurnStatus.Empty:
                             switch (topIntent)
                             {
-                                case Intents.SearchData:
+                                case Intents.SearchCompanyData:
+                                    await UpdateDialogStatesAsync(luisResults, topIntent, dialogContext.Context);
+                                    await dialogContext.BeginDialogAsync(nameof(SearchCompanyDataDialog));
+                                    break;
+                                case Intents.SearchLeadData:
                                 case Intents.MakeACall:
                                     await UpdateDialogStatesAsync(luisResults, topIntent, dialogContext.Context);
-
                                     await dialogContext.BeginDialogAsync(nameof(SearchLeadDataDialog));
                                     break;
 
@@ -176,26 +180,20 @@ namespace ProxiCall
                 // Supported LUIS Entities
                 string[] luisExpectedLeadName =
                 {
-                    "searchlead",
+                    "leadfullname",
                     "personName"
                 };
-                //TODO : no need for array + rename into search_ (ex : searchaddress)
-                string[] luisHintSearchAddress =
-                {
-                    "searchaddress"
-                };
-                string[] luisHintSearchCompany =
-                {
-                    "searchcompany"
-                };
-                string[] luisHintSearchPhone =
-                {
-                    "searchphone"
-                };
-                string[] luisHintSearchEmail =
-                {
-                    "searchemail"
-                };
+
+                string luisExpectedCompanyName = "companyName";
+
+                string luisHintSearchLeadAddress = "searchaddress";
+                string luisHintSearchLeadCompany = "searchcompany";
+                string luisHintSearchLeadPhone = "searchphone";
+                string luisHintSearchLeadEmail = "searchemail";
+
+
+                string luisHintSearchCompanyContact = "searchcontact";
+                string luisHintSearchContactName = "searchcontactname";
 
                 // Update every entities
                 // TODO Consider a confirm dialog, instead of just updating.
@@ -204,60 +202,67 @@ namespace ProxiCall
                     if (entities[name] != null)
                     {
                         var fullName = (string)entities[name][0];
-                        //if (crmState.Lead == null)
-                        //{
-                        //    crmState.Lead = new Lead();
-                        //}
                         crmState.Lead.FullName = fullName;
                         break;
                     }
                 }
 
-                foreach (var address in luisHintSearchAddress)
+                if (entities[luisExpectedCompanyName] != null)
                 {
-                    if (entities[address] != null)
+                    var companyName = (string)entities[luisExpectedCompanyName][0].First;
+                    crmState.Company.Name = companyName;
+                }
+
+                if (entities[luisHintSearchLeadAddress] != null)
+                {
+                    luisState.AddDetectedEntity(LuisState.SEARCH_ADDRESS_ENTITYNAME);
+                }
+
+                if (entities[luisHintSearchLeadCompany] != null)
+                {
+                    luisState.AddDetectedEntity(LuisState.SEARCH_COMPANY_ENTITYNAME);
+                }
+
+                if (entities[luisHintSearchLeadPhone] != null)
+                {
+                    luisState.AddDetectedEntity(LuisState.SEARCH_PHONENUMBER_ENTITYNAME);
+                }
+
+                if (entities[luisHintSearchLeadEmail] != null)
+                {
+                    luisState.AddDetectedEntity(LuisState.SEARCH_EMAIL_ENTITYNAME);
+                }
+                
+                if (entities[luisHintSearchCompanyContact] != null)
+                {
+                    luisState.AddDetectedEntity(LuisState.SEARCH_CONTACT_ENTITYNAME);
+                }
+
+                if (entities[luisHintSearchContactName] != null)
+                {
+                    luisState.AddDetectedEntity(LuisState.SEARCH_CONTACT_NAME_ENTITYNAME);
+                }
+
+                //Searching for "informations" about lead
+                if (intentName == Intents.SearchLeadData)
+                {
+                    if(luisState.Entities == null || luisState.Entities.Count==0)
                     {
                         luisState.AddDetectedEntity(LuisState.SEARCH_ADDRESS_ENTITYNAME);
-                        break;
-                    }
-                }
-
-                foreach (var company in luisHintSearchCompany)
-                {
-                    if (entities[company] != null)
-                    {
                         luisState.AddDetectedEntity(LuisState.SEARCH_COMPANY_ENTITYNAME);
-                        break;
-                    }
-                }
-
-                foreach (var phone in luisHintSearchPhone)
-                {
-                    if (entities[phone] != null)
-                    {
                         luisState.AddDetectedEntity(LuisState.SEARCH_PHONENUMBER_ENTITYNAME);
-                        break;
-                    }
-                }
-                foreach (var email in luisHintSearchEmail)
-                {
-                    if (entities[email] != null)
-                    {
-                        luisState.AddDetectedEntity(LuisState.SEARCH_EMAIL_ENTITYNAME);
-                        break;
                     }
                 }
 
-                //Searching for "informations"
-                if (intentName == Intents.SearchData)
+                if (intentName == Intents.SearchCompanyData && luisState.Entities != null && luisState.Entities.Contains(LuisState.SEARCH_CONTACT_ENTITYNAME))
                 {
-                    if(luisState.Entities == null ||luisState.Entities.Count==0)
+                    if (luisState.Entities.Count == 1)
                     {
                         luisState.AddDetectedEntity(LuisState.SEARCH_ADDRESS_ENTITYNAME);
-                        luisState.AddDetectedEntity(LuisState.SEARCH_COMPANY_ENTITYNAME);
                         luisState.AddDetectedEntity(LuisState.SEARCH_PHONENUMBER_ENTITYNAME);
                     }
                 }
+
                 // Set the new values into state.
                 luisState.IntentName = intentName;
                 await _crmStateAccessor.SetAsync(turnContext, crmState);

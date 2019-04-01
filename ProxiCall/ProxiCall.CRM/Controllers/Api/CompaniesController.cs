@@ -20,6 +20,18 @@ namespace Proxicall.CRM.Controllers.Api
             _context = context;
         }
 
+        [HttpGet("byName")]
+        public async Task<ActionResult<Company>> GetFullCompanyByName(string name)
+        {
+            var company = await GetCompanyByName(name);
+            if (company == null)
+            {
+                return BadRequest();
+            }
+
+            return company;
+        }
+
         [HttpGet("getcontact")]
         public async Task<ActionResult<Lead>> GetContact(string name)
         {
