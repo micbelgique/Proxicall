@@ -28,8 +28,21 @@ namespace ProxiCall.Web.Services
             _callSid = callSid;
         }
 
-        public async Task ReceiveMessagesFromBotAsync(OnReplyHandler SendActivitiesToUser)
+        private async Task UserLogin(string phonenumber)
         {
+            var activity = new Activity
+            {
+                Type = ActivityTypes.Event,
+                Text = phonenumber
+            };
+
+            await SendMessageToBotAsync(activity);
+        }
+
+        public async Task ReceiveMessagesFromBotAsync(OnReplyHandler SendActivitiesToUser, string phonenumber)
+        {
+            await UserLogin(phonenumber);
+
             var webSocket = new ClientWebSocket();
             await webSocket.ConnectAsync(new Uri(_streamUrl), CancellationToken.None);
 
