@@ -109,7 +109,7 @@ namespace ProxiCall.Dialogs.SearchData
 
             //Searching the compan
             var companyNameGivenByUser = crmState.Company.Name;
-            crmState.Company = await SearchCompanyAsync(crmState.Company.Name);
+            crmState.Company = await SearchCompanyAsync(stepContext, crmState.Company.Name);
 
             //Asking for retry if necessary
             var promptMessage = "";
@@ -130,9 +130,10 @@ namespace ProxiCall.Dialogs.SearchData
         }
 
         //Searching Company in Database
-        private async Task<Company> SearchCompanyAsync(string name)
+        private async Task<Company> SearchCompanyAsync(WaterfallStepContext stepContext, string name)
         {
-            var companyService = new CompanyService();
+            var crmState = await CRMStateAccessor.GetAsync(stepContext.Context);
+            var companyService = new CompanyService(crmState.AuthToken);
             return await companyService.GetCompanyByName(name);
         }
 

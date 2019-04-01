@@ -12,7 +12,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 
 namespace Proxicall.CRM.Controllers.Api
 {
-    [Authorize(Roles = "Admin,User")]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin,User")]
     [Route("api/[controller]")]
     [ApiController]
     public class LeadsController : ControllerBase

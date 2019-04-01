@@ -107,7 +107,7 @@ namespace ProxiCall.Dialogs.SearchData
 
             //Searching the lead
             var fullNameGivenByUser = crmState.Lead.FullName;
-            crmState.Lead = await SearchLeadAsync(crmState.Lead.FirstName, crmState.Lead.LastName);
+            crmState.Lead = await SearchLeadAsync(stepContext, crmState.Lead.FirstName, crmState.Lead.LastName);
 
             //Asking for retry if necessary
             var promptMessage = "";
@@ -140,9 +140,10 @@ namespace ProxiCall.Dialogs.SearchData
         }
 
         //Searching Lead in Database
-        private async Task<Lead> SearchLeadAsync(string firstName, string lastName)
+        private async Task<Lead> SearchLeadAsync(WaterfallStepContext stepContext, string firstName, string lastName)
         {
-            var leadService = new LeadService();
+            var crmState = await CRMStateAccessor.GetAsync(stepContext.Context);
+            var leadService = new LeadService(crmState.AuthToken);
             return await leadService.GetLeadByName(firstName, lastName);
         }
 

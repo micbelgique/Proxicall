@@ -1,23 +1,23 @@
 ﻿using ProxiCall.Models;
 using System;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Threading.Tasks;
 
 namespace ProxiCall.Services.ProxiCallCRM
 {
-    public class LeadService
+    public class LeadService : BaseService
     {
-        private readonly HttpClient _httpClient;
-        public LeadService()
+        public LeadService(string token)
+            : base(token)
         {
-            _httpClient = new HttpClient();
-            _httpClient.BaseAddress = new Uri(Environment.GetEnvironmentVariable("ApiHost"));
         }
 
         public async Task<Lead> GetLeadByName(string firstName, string lastName)
         {
             Lead lead = null;
             var path = $"api/leads/byName?firstName={firstName}&lastName={lastName}";
+            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", AuthToken);
             var response = await _httpClient.GetAsync(path);
             if (response.IsSuccessStatusCode)
             {

@@ -14,6 +14,7 @@ using ProxiCall.Dialogs.SearchData;
 using ProxiCall.Dialogs.Shared;
 using ProxiCall.Resources;
 using ProxiCall.Models;
+using ProxiCall.Services.ProxiCallCRM;
 
 namespace ProxiCall
 {
@@ -159,6 +160,19 @@ namespace ProxiCall
                                                 InputHints.AcceptingInput);
                 await turnContext.SendActivityAsync(reply, cancellationToken);
             }
+            else if (turnContext.Activity.Type == ActivityTypes.Event)
+            {
+                var accountService = new AccountService();
+                var token = await accountService.Authenticate(turnContext.Activity.Text);
+
+                var crmState = await _crmStateAccessor.GetAsync(turnContext);
+                if(crmState == null)
+                {
+                    crmState = new CRMState();
+                }
+                crmState.AuthToken = token;
+                await _crmStateAccessor.SetAsync(turnContext, crmState);
+            }
 
             // Save the dialog state into the conversation state.
             await _conversationState.SaveChangesAsync(turnContext, false, cancellationToken);
@@ -173,6 +187,7 @@ namespace ProxiCall
             {
                 // Get latest States
                 var crmState = await _crmStateAccessor.GetAsync(turnContext, () => new CRMState());
+
                 var luisState = await _luisStateAccessor.GetAsync(turnContext, () => new LuisState());
 
                 var entities = luisResult.Entities;

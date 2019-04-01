@@ -7,6 +7,7 @@ namespace ProxiCall.Dialogs.Shared
         public Lead Lead { get; set; }
 
         public Company Company { get; set; }
+        public string AuthToken { get; set; }
 
         public CRMState()
         {
