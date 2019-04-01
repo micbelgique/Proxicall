@@ -7,9 +7,12 @@ using Proxicall.CRM.Models;
 using NinjaNye.SearchExtensions.Levenshtein;
 using Proxicall.CRM.Models.Enumeration.Levenshtein;
 using Proxicall.CRM.Models.Dictionnaries;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 
 namespace Proxicall.CRM.Controllers.Api
 {
+    [Authorize(Roles = "Admin,User")]
     [Route("api/[controller]")]
     [ApiController]
     public class LeadsController : ControllerBase

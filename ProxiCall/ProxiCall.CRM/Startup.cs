@@ -17,6 +17,7 @@ using System.IdentityModel.Tokens.Jwt;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using Microsoft.IdentityModel.Logging;
 
 namespace Proxicall.CRM
 {
@@ -120,6 +121,7 @@ namespace Proxicall.CRM
             });
 
             rolesInitializer.Initialize();
+            IdentityModelEventSource.ShowPII = true;
         }
     }
 }

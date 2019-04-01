@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -9,6 +11,7 @@ using Proxicall.CRM.Models;
 
 namespace Proxicall.CRM.Controllers.Api
 {
+    [Authorize(Roles = "Admin,User")]
     [Route("api/[controller]")]
     [ApiController]
     public class CompaniesController : ControllerBase
@@ -55,7 +58,6 @@ namespace Proxicall.CRM.Controllers.Api
             {
                 return NotFound();
             }
-
             return opportunities;
         }
 
