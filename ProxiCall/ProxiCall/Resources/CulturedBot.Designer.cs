@@ -22,14 +22,14 @@ namespace ProxiCall.Resources {
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "15.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    public class Localization {
+    public class CulturedBot {
         
         private static global::System.Resources.ResourceManager resourceMan;
         
         private static global::System.Globalization.CultureInfo resourceCulture;
         
         [global::System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
-        internal Localization() {
+        internal CulturedBot() {
         }
         
         /// <summary>
@@ -39,7 +39,7 @@ namespace ProxiCall.Resources {
         public static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("ProxiCall.Resources.Localization", typeof(Localization).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("ProxiCall.Resources.CulturedBot", typeof(CulturedBot).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -133,6 +133,42 @@ namespace ProxiCall.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Voici les données demandées pour {0} :.
+        /// </summary>
+        public static string IntroduceLeadData {
+            get {
+                return ResourceManager.GetString("IntroduceLeadData", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0} n&apos;a pas été trouvé..
+        /// </summary>
+        public static string LeadNotFound {
+            get {
+                return ResourceManager.GetString("LeadNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Les données suivantes sont absentes de la base de données : {0}..
+        /// </summary>
+        public static string MissingDataForThisLead {
+            get {
+                return ResourceManager.GetString("MissingDataForThisLead", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Ces informations ne sont malheureusement pas référencées..
+        /// </summary>
+        public static string NoDataFoundInDB {
+            get {
+                return ResourceManager.GetString("NoDataFoundInDB", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Je n&apos;ai pas compris ce que vous venez de dire..
         /// </summary>
         public static string NoIntentFound {
@@ -142,20 +178,56 @@ namespace ProxiCall.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to {0} n&apos;a pas été trouvé..
-        /// </summary>
-        public static string PersonNotFound {
-            get {
-                return ResourceManager.GetString("PersonNotFound", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Le numéro de téléphone de {0} n&apos;a pas été trouvé..
         /// </summary>
         public static string PhoneNumberNotFound {
             get {
                 return ResourceManager.GetString("PhoneNumberNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Compagnie.
+        /// </summary>
+        public static string SayCompany {
+            get {
+                return ResourceManager.GetString("SayCompany", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Adresse email.
+        /// </summary>
+        public static string SayEmailAddress {
+            get {
+                return ResourceManager.GetString("SayEmailAddress", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Adresse du domicile.
+        /// </summary>
+        public static string SayHomeAddress {
+            get {
+                return ResourceManager.GetString("SayHomeAddress", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Numéro de téléphone.
+        /// </summary>
+        public static string SayPhoneNumber {
+            get {
+                return ResourceManager.GetString("SayPhoneNumber", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Cette information n&apos;est malheureusement pas référencée..
+        /// </summary>
+        public static string ThisDataNotFoundInDB {
+            get {
+                return ResourceManager.GetString("ThisDataNotFoundInDB", resourceCulture);
             }
         }
     }

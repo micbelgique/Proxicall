@@ -89,7 +89,7 @@ namespace ProxiCall.Dialogs.SearchData
             if (string.IsNullOrEmpty(crmState.Lead.FullName))
             {
                 return await stepContext.PromptAsync(_leadFullNamePrompt, new PromptOptions {
-                    Prompt = MessageFactory.Text(Localization.AskSearchedPersonFullName) }, cancellationToken);
+                    Prompt = MessageFactory.Text(CulturedBot.AskSearchedPersonFullName) }, cancellationToken);
             }
             return await stepContext.NextAsync();
         }
@@ -106,21 +106,21 @@ namespace ProxiCall.Dialogs.SearchData
             }
 
             //Searching the lead
-            var fullName = crmState.Lead.FullName;
+            var fullNameGivenByUser = crmState.Lead.FullName;
             crmState.Lead = await SearchLeadAsync(crmState.Lead.FirstName, crmState.Lead.LastName);
 
             //Asking for retry if necessary
             var promptMessage = "";
             if (crmState.Lead == null)
             {
-                promptMessage = $"{fullName} {Properties.strings.retryNumberSearchPrompt}";
+                promptMessage = $"{string.Format(CulturedBot.LeadNotFound, fullNameGivenByUser)} {CulturedBot.AskIfWantRetry}";
             }
             else if (luisState.IntentName == Intents.MakeACall)
             {
                 if(crmState.Lead.PhoneNumber == null)
                 {
                     crmState.WantsToCallButNumberNotFound=true;
-                    promptMessage = $"Le numéro de {crmState.Lead.FullName} {Properties.strings.retryNumberSearchPrompt}";
+                    promptMessage = $"{string.Format(CulturedBot.PhoneNumberNotFound, fullNameGivenByUser)} {CulturedBot.AskIfWantRetry}";
                 }
             }
             var needsRetry = !string.IsNullOrEmpty(promptMessage);
@@ -130,7 +130,7 @@ namespace ProxiCall.Dialogs.SearchData
                 var promptOptions = new PromptOptions
                 {
                     Prompt = MessageFactory.Text(promptMessage),
-                    RetryPrompt = MessageFactory.Text(Properties.strings.retryPrompt),
+                    RetryPrompt = MessageFactory.Text(CulturedBot.AskYesOrNo),
                 };
                 return await stepContext.PromptAsync(_retryFetchingMinimumDataFromUserPrompt, promptOptions, cancellationToken);
             }
@@ -165,7 +165,7 @@ namespace ProxiCall.Dialogs.SearchData
                 else
                 {
                     //Ending Dialog if user decides not to retry
-                    var message = Properties.strings.welcome_2;
+                    var message = CulturedBot.AskForRequest;
                     await stepContext.Context.SendActivityAsync(MessageFactory
                         .Text(message, message, InputHints.AcceptingInput)
                         , cancellationToken
@@ -201,8 +201,8 @@ namespace ProxiCall.Dialogs.SearchData
                 {
                     var forwardPromptOptions = new PromptOptions
                     {
-                        Prompt = MessageFactory.Text(Properties.strings.forwardCallPrompt),
-                        RetryPrompt = MessageFactory.Text(Properties.strings.retryPrompt),
+                        Prompt = MessageFactory.Text(CulturedBot.AskIfWantForwardCall),
+                        RetryPrompt = MessageFactory.Text(CulturedBot.AskYesOrNo),
                     };
                     return await stepContext.PromptAsync(_confirmForwardingPrompt, forwardPromptOptions, cancellationToken);
                 }
@@ -229,22 +229,23 @@ namespace ProxiCall.Dialogs.SearchData
             var wantedData = new StringBuilder(string.Empty);
             var missingWantedData = string.Empty;
 
+            var hasMoreThanOneWantedInfo = luisState.Entities.Count > 1;
             var hasOneOrMoreResult =
                 (wantCompany && hasCompany) || (wantAddress && hasAddress)
                 || (wantPhone && hasPhone) || (wantEmail && hasEmail);
 
             if (hasOneOrMoreResult)
             {
-                wantedData.AppendLine($"Voici les données demandées pour {crmState.Lead.FullName} : ");
+                wantedData.AppendLine($"{string.Format(CulturedBot.IntroduceLeadData,crmState.Lead.FullName)}");
                 if (wantCompany)
                 {
                     if (!hasCompany)
                     {
-                        missingWantedData += "compagnie. ";
+                        missingWantedData += $"{CulturedBot.SayCompany}. ";
                     }
                     else
                     {
-                        wantedData.AppendLine($"Compagnie : {crmState.Lead.Company}.");
+                        wantedData.AppendLine($"{CulturedBot.SayCompany} : {crmState.Lead.Company}.");
                     }
                 }
 
@@ -252,11 +253,11 @@ namespace ProxiCall.Dialogs.SearchData
                 {
                     if (!hasAddress)
                     {
-                        missingWantedData += "adresse du domicile. ";
+                        missingWantedData += $"{CulturedBot.SayHomeAddress}. ";
                     }
                     else
                     {
-                        wantedData.AppendLine($"Adresse du domicile : {crmState.Lead.Address}.");
+                        wantedData.AppendLine($"{CulturedBot.SayHomeAddress} : {crmState.Lead.Address}.");
                     }
                 }
 
@@ -264,11 +265,11 @@ namespace ProxiCall.Dialogs.SearchData
                 {
                     if (!hasPhone)
                     {
-                        missingWantedData += "numéro de téléphone. ";
+                        missingWantedData += $"{CulturedBot.SayPhoneNumber}. ";
                     }
                     else
                     {
-                        wantedData.AppendLine($"Numéro de téléphone : {crmState.Lead.PhoneNumber}.");
+                        wantedData.AppendLine($"{CulturedBot.SayPhoneNumber} : {crmState.Lead.PhoneNumber}.");
                     }
                 }
 
@@ -276,22 +277,29 @@ namespace ProxiCall.Dialogs.SearchData
                 {
                     if (!hasEmail)
                     {
-                        missingWantedData += "adresse email. ";
+                        missingWantedData += $"{CulturedBot.SayEmailAddress}. ";
                     }
                     else
                     {
-                        wantedData.AppendLine($"Adresse email : {crmState.Lead.Email}.");
+                        wantedData.AppendLine($"{CulturedBot.SayEmailAddress} : {crmState.Lead.Email}.");
                     }
                 }
             }
             else
             {
-                wantedData.Append($"{crmState.Lead.FullName} est bien référencé dans la base de données mais les informations demandées sont absentes.");
+                if(hasMoreThanOneWantedInfo)
+                {
+                    wantedData.Append($"{CulturedBot.NoDataFoundInDB}.");
+                }
+                else
+                {
+                    wantedData.Append($"{CulturedBot.ThisDataNotFoundInDB}");
+                }
             }
             
             if(!string.IsNullOrEmpty(missingWantedData))
             {
-                missingWantedData = "Les données suivantes sont absentes de la base de données : " + missingWantedData;
+                missingWantedData = $"{string.Format(CulturedBot.MissingDataForThisLead, missingWantedData)}";
             }
             return $"{wantedData.ToString()} {missingWantedData}";
         }
@@ -315,7 +323,7 @@ namespace ProxiCall.Dialogs.SearchData
                 if (!forward)
                 {
                     //Ending Dialog
-                    var message = Properties.strings.welcome_2;
+                    var message = CulturedBot.AskForRequest;
                     await stepContext.Context.SendActivityAsync(MessageFactory
                         .Text(message, message, InputHints.AcceptingInput)
                         , cancellationToken
@@ -330,7 +338,7 @@ namespace ProxiCall.Dialogs.SearchData
             }
             
             //"Forwarding" the call
-            var textMessage = Properties.strings.callForwardingConfirmed;
+            var textMessage = CulturedBot.InformAboutForwardingCall;
             Activity activity = MessageFactory.Text(textMessage, textMessage, InputHints.IgnoringInput);
             var entity = new Entity();
             entity.Properties.Add("forward", JToken.Parse(crmState.Lead.PhoneNumber));
