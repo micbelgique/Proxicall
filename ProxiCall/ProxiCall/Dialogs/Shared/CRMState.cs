@@ -6,14 +6,15 @@ namespace ProxiCall.Dialogs.Shared
     {
         public Lead Lead { get; set; }
 
+        public Company Company { get; set; }
+
         public CRMState()
         {
             Lead = new Lead();
+            Company = new Company();
         }
 
         public bool WantsToCallButNumberNotFound { get; set; }
-
-        public bool FullNameIncomplete { get; set; }
 
         public void ResetLead()
         {

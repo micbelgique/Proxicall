@@ -8,7 +8,8 @@ namespace ProxiCall.Models.Intents
     public static class Intents
     {
         public const string MakeACall = "MakeACall";
-        public const string SearchData = "SearchData";
+        public const string SearchLeadData = "SearchLeadData";
+        public const string SearchCompanyData = "SearchCompanyData";
         public const string None = "None";
     }
 }
