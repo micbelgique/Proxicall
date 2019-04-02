@@ -10,11 +10,8 @@ namespace ProxiCall.Services.ProxiCallCRM
 {
     public class CompanyService : BaseService
     {
-        private readonly HttpClient _httpClient;
         public CompanyService(string token) : base(token)
         {
-            _httpClient = new HttpClient();
-            _httpClient.BaseAddress = new Uri(Environment.GetEnvironmentVariable("ApiHost"));
         }
 
         public async Task<Company> GetCompanyByName(string name)

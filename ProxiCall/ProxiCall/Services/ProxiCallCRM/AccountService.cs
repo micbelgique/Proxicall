@@ -11,12 +11,12 @@ namespace ProxiCall.Services.ProxiCallCRM
         {
         }
 
-        public async Task<string> Authenticate(string phonenumber)
+        public async Task<LoginDTO> Authenticate(string phonenumber)
         {
             var path = $"api/account/login?phoneNumber={phonenumber}";
             var response = await _httpClient.GetAsync(path);
             var result = await response.Content.ReadAsAsync<LoginDTO>();
-            return result.Token;
+            return result;
         }
     }
 }

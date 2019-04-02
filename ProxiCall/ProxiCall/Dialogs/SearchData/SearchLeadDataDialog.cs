@@ -329,11 +329,21 @@ namespace ProxiCall.Dialogs.SearchData
             var isMakeACall = luisState.IntentName == Intents.MakeACall;
             var wantPhone = luisState.Entities.Contains(LuisState.SEARCH_PHONENUMBER_ENTITYNAME);
             var hasPhoneNumber = !string.IsNullOrEmpty(crmState.Lead.PhoneNumber);
+            var hasOnlyOneEntity =
+                    !(luisState.Entities.Contains(LuisState.SEARCH_ADDRESS_ENTITYNAME)
+                    ||
+                    luisState.Entities.Contains(LuisState.SEARCH_COMPANY_ENTITYNAME)
+                    ||
+                    luisState.Entities.Contains(LuisState.SEARCH_EMAIL_ENTITYNAME)
+                    ||
+                    luisState.Entities.Contains(LuisState.SEARCH_PHONENUMBER_ENTITYNAME));
+            var wantPhoneOnly = wantPhone && hasOnlyOneEntity;
+            var wantPhoneOfContact = wantPhoneOnly && luisState.IntentName == Intents.SearchCompanyData;
             var forward = false;
 
             if (isSearchLeadData)
             {
-                if(wantPhone && hasPhoneNumber && luisState.Entities.Count==1)
+                if(wantPhoneOnly || wantPhoneOfContact)
                 {
                     forward = (bool)stepContext.Result;
                 }

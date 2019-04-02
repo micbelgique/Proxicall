@@ -12,7 +12,8 @@ namespace ProxiCall.Services.ProxiCallCRM
 
         public BaseService()
         {
-
+            _httpClient = new HttpClient();
+            _httpClient.BaseAddress = new Uri(Environment.GetEnvironmentVariable("ApiHost"));
         }
 
         public BaseService(string token)

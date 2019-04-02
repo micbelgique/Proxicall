@@ -16,16 +16,18 @@ namespace ProxiCall.Web.Services
         private readonly string _conversationId;
         private readonly string _streamUrl;
         private readonly string _callSid;
+        private readonly string _fromNumber;
 
         public delegate Task OnReplyHandler(IList<Activity> botReplies, string callSid);
 
-        public BotConnector(string callSid)
+        public BotConnector(string callSid, string fromNumber)
         {
             _directLineClient = new DirectLineClient(Environment.GetEnvironmentVariable("DirectLineSecret"));
             var conversation = _directLineClient.Conversations.StartConversation();
             _conversationId = conversation.ConversationId;
             _streamUrl = conversation.StreamUrl;
             _callSid = callSid;
+            _fromNumber = fromNumber;
         }
 
         private async Task UserLogin(string phonenumber)
@@ -33,15 +35,15 @@ namespace ProxiCall.Web.Services
             var activity = new Activity
             {
                 Type = ActivityTypes.Event,
-                Text = phonenumber
+                Text = $"from:{phonenumber}"
             };
 
             await SendMessageToBotAsync(activity);
         }
 
-        public async Task ReceiveMessagesFromBotAsync(OnReplyHandler SendActivitiesToUser, string phonenumber)
+        public async Task ReceiveMessagesFromBotAsync(OnReplyHandler SendActivitiesToUser)
         {
-            await UserLogin(phonenumber);
+            //await UserLogin(_fromNumber);
 
             var webSocket = new ClientWebSocket();
             await webSocket.ConnectAsync(new Uri(_streamUrl), CancellationToken.None);

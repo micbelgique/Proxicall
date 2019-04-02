@@ -44,6 +44,7 @@ namespace ProxiCall
         
         private readonly IStatePropertyAccessor<CRMState> _crmStateAccessor;
         private readonly IStatePropertyAccessor<LuisState> _luisStateAccessor;
+        private LoginDTO _currentUser;
 
         /// <summary>
         /// Initializes a new instance of the class.
@@ -70,6 +71,11 @@ namespace ProxiCall
             Dialogs = new DialogSet(_dialogStateAccessor);
             Dialogs.Add(new SearchLeadDataDialog(_crmStateAccessor,_luisStateAccessor, _loggerFactory, _services));
             Dialogs.Add(new SearchCompanyDataDialog(_crmStateAccessor, _luisStateAccessor, _loggerFactory, _services));
+
+            //Default login for debugging
+            //TODO remove .Result
+            var accountService = new AccountService();
+            _currentUser = accountService.Authenticate("32471452559").Result;
         }
 
         /// <summary>
@@ -152,27 +158,21 @@ namespace ProxiCall
                     }
                 }
             }
-            else if (turnContext.Activity.Type == ActivityTypes.ConversationUpdate && turnContext.Activity.MembersAdded.FirstOrDefault()?.Id == turnContext.Activity.Recipient.Id)
-            {
-                var welcomingMessage = $"{CulturedBot.Greet} {CulturedBot.AskForRequest}";
-                var reply = MessageFactory.Text(welcomingMessage,
-                                                welcomingMessage,
-                                                InputHints.AcceptingInput);
-                await turnContext.SendActivityAsync(reply, cancellationToken);
-            }
-            else if (turnContext.Activity.Type == ActivityTypes.Event)
-            {
-                var accountService = new AccountService();
-                var token = await accountService.Authenticate(turnContext.Activity.Text);
+            //else if (activity.Type == ActivityTypes.Event)
+            //{
+            //    var accountService = new AccountService();
+            //    _currentUser = await accountService.Authenticate(activity.Text.Split(':')[1]);
 
-                var crmState = await _crmStateAccessor.GetAsync(turnContext);
-                if(crmState == null)
-                {
-                    crmState = new CRMState();
-                }
-                crmState.AuthToken = token;
-                await _crmStateAccessor.SetAsync(turnContext, crmState);
-            }
+            //    var crmState = await _crmStateAccessor.GetAsync(turnContext, () => new CRMState());
+            //    crmState.AuthToken = _currentUser.Token;
+            //    await _crmStateAccessor.SetAsync(turnContext, crmState);
+            //    //TODO change username in crm
+            //    var message = $"Bonjour {_currentUser.UserName.Split('@')[0]} {CulturedBot.AskForRequest}";
+            //    var reply = MessageFactory.Text(message,
+            //                                    message,
+            //                                    InputHints.AcceptingInput);
+            //    await turnContext.SendActivityAsync(reply, cancellationToken);
+            //}
 
             // Save the dialog state into the conversation state.
             await _conversationState.SaveChangesAsync(turnContext, false, cancellationToken);
@@ -217,6 +217,10 @@ namespace ProxiCall
                     if (entities[name] != null)
                     {
                         var fullName = (string)entities[name][0];
+                        if(crmState.Lead == null)
+                        {
+                            crmState.Lead = new Lead();
+                        }
                         crmState.Lead.FullName = fullName;
                         break;
                     }

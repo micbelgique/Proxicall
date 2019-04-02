@@ -52,9 +52,9 @@ namespace ProxiCall.Web.Controllers.Api
         [HttpGet("receive")]
         public IActionResult ReceiveCall([FromQuery] string CallSid, [FromQuery] string From)
         {
-            _botConnector = new BotConnector(CallSid);
+            _botConnector = new BotConnector(CallSid, From);
             
-            System.Threading.Tasks.Task.Run(() => _botConnector.ReceiveMessagesFromBotAsync(HandleIncomingBotMessagesAsync, From));
+            System.Threading.Tasks.Task.Run(() => _botConnector.ReceiveMessagesFromBotAsync(HandleIncomingBotMessagesAsync));
             
             //Preventing the call from hanging up (/receive needs to return a TwiML)
             var response = new VoiceResponse();
