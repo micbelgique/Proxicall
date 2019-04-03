@@ -20,17 +20,19 @@ namespace ProxiCall.Dialogs.SearchData
         public IStatePropertyAccessor<LuisState> LuisStateAccessor { get; }
         public ILoggerFactory LoggerFactory { get; }
         public BotServices BotServices { get; }
+        private LoginDTO _currentUser;
 
         private const string _searchCompanyDataWaterfall = "searchCompanyDataWaterfall";
         private const string _companyNamePrompt = "companyFullNamePrompt";
         private const string _retryFetchingMinimumDataFromUserPrompt = "retryFetchingMinimumDataFromUserPrompt";
         private const string _confirmForwardingPrompt = "confirmForwardingPrompt";
 
-        public SearchCompanyDataDialog(IStatePropertyAccessor<CRMState> crmStateAccessor, IStatePropertyAccessor<LuisState> luisStateAccessor,
+        public SearchCompanyDataDialog(IStatePropertyAccessor<CRMState> crmStateAccessor, IStatePropertyAccessor<LuisState> luisStateAccessor, LoginDTO currentUser,
             ILoggerFactory loggerFactory, BotServices botServices) : base(nameof(SearchCompanyDataDialog))
         {
             CRMStateAccessor = crmStateAccessor;
             LuisStateAccessor = luisStateAccessor;
+            _currentUser = currentUser;
             LoggerFactory = loggerFactory;
             BotServices = botServices;
 
@@ -109,7 +111,7 @@ namespace ProxiCall.Dialogs.SearchData
 
             //Searching the compan
             var companyNameGivenByUser = crmState.Company.Name;
-            crmState.Company = await SearchCompanyAsync(stepContext, crmState.Company.Name);
+            crmState.Company = await SearchCompanyAsync(crmState.Company.Name);
 
             //Asking for retry if necessary
             var promptMessage = "";
@@ -130,10 +132,9 @@ namespace ProxiCall.Dialogs.SearchData
         }
 
         //Searching Company in Database
-        private async Task<Company> SearchCompanyAsync(WaterfallStepContext stepContext, string name)
+        private async Task<Company> SearchCompanyAsync(string name)
         {
-            var crmState = await CRMStateAccessor.GetAsync(stepContext.Context);
-            var companyService = new CompanyService(crmState.AuthToken);
+            var companyService = new CompanyService(_currentUser.Token);
             return await companyService.GetCompanyByName(name);
         }
 
@@ -183,7 +184,7 @@ namespace ProxiCall.Dialogs.SearchData
 
             if(luisState.Entities.Contains(LuisState.SEARCH_CONTACT_ENTITYNAME))
             {
-                AddDialog(new SearchLeadDataDialog(CRMStateAccessor, LuisStateAccessor, LoggerFactory, BotServices));
+                AddDialog(new SearchLeadDataDialog(CRMStateAccessor, LuisStateAccessor, _currentUser, LoggerFactory, BotServices));
                 crmState.Lead = crmState.Company.Contact;
                 await CRMStateAccessor.SetAsync(stepContext.Context, crmState);
                 return await stepContext.ReplaceDialogAsync(nameof(SearchLeadDataDialog));

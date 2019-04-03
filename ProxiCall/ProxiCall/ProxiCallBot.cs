@@ -44,7 +44,8 @@ namespace ProxiCall
         
         private readonly IStatePropertyAccessor<CRMState> _crmStateAccessor;
         private readonly IStatePropertyAccessor<LuisState> _luisStateAccessor;
-        private LoginDTO _currentUser;
+        private readonly IStatePropertyAccessor<string> _authTokenAccessor;
+        private LoginDTO _currentUser = null;
 
         /// <summary>
         /// Initializes a new instance of the class.
@@ -68,14 +69,16 @@ namespace ProxiCall
             _crmStateAccessor = _userState.CreateProperty<CRMState>(nameof(CRMState));
             _luisStateAccessor = _userState.CreateProperty<LuisState>(nameof(LuisState));
             _dialogStateAccessor = _conversationState.CreateProperty<DialogState>(nameof(DialogState));
-            Dialogs = new DialogSet(_dialogStateAccessor);
-            Dialogs.Add(new SearchLeadDataDialog(_crmStateAccessor,_luisStateAccessor, _loggerFactory, _services));
-            Dialogs.Add(new SearchCompanyDataDialog(_crmStateAccessor, _luisStateAccessor, _loggerFactory, _services));
+            _authTokenAccessor = _userState.CreateProperty<string>("AuthToken");
 
             //Default login for debugging
             //TODO remove .Result
             var accountService = new AccountService();
             _currentUser = accountService.Authenticate("32471452559").Result;
+
+            Dialogs = new DialogSet(_dialogStateAccessor);
+            Dialogs.Add(new SearchLeadDataDialog(_crmStateAccessor, _luisStateAccessor, _currentUser, _loggerFactory, _services));
+            Dialogs.Add(new SearchCompanyDataDialog(_crmStateAccessor, _luisStateAccessor, _currentUser, _loggerFactory, _services));
         }
 
         /// <summary>
@@ -162,10 +165,10 @@ namespace ProxiCall
             {
                 if(_currentUser != null)
                 {
-                    var crmState = await _crmStateAccessor.GetAsync(dialogContext.Context, () => new CRMState());
-                    crmState.AuthToken = _currentUser.Token;
+                    var authTokenState = await _authTokenAccessor.GetAsync(dialogContext.Context, () => string.Empty);
+                    authTokenState = _currentUser.Token;
                     
-                    await _crmStateAccessor.SetAsync(dialogContext.Context, crmState);
+                    await _authTokenAccessor.SetAsync(dialogContext.Context, authTokenState);
                     //TODO change username in crm
                     var message = $"Bonjour {_currentUser.UserName.Split('@')[0]} {CulturedBot.AskForRequest}";
                     var reply = MessageFactory.Text(message,
@@ -209,7 +212,7 @@ namespace ProxiCall
             if (luisResult.Entities != null && luisResult.Entities.HasValues)
             {
                 // Get latest States
-                var crmState = await _crmStateAccessor.GetAsync(turnContext);
+                var crmState = await _crmStateAccessor.GetAsync(turnContext, () => new CRMState());
 
                 var luisState = await _luisStateAccessor.GetAsync(turnContext, () => new LuisState());
 
