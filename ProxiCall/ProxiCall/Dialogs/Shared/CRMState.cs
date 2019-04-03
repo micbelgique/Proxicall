@@ -16,10 +16,16 @@ namespace ProxiCall.Dialogs.Shared
         }
 
         public bool WantsToCallButNumberNotFound { get; set; }
+        public bool IsEligibleForPotentialForwarding { get; set; }
 
         public void ResetLead()
         {
             Lead = new Lead();
+        }
+
+        public void ResetCompany()
+        {
+            Company = new Company();
         }
     }
 }

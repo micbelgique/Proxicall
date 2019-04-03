@@ -117,6 +117,9 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="AskCompanyName" xml:space="preserve">
+    <value>Quelle est le nom de la compagnie concernée pour cette demande?</value>
+  </data>
   <data name="AskForRequest" xml:space="preserve">
     <value>Que puis-je faire pour vous?</value>
   </data>
@@ -135,20 +138,32 @@
   <data name="FullNameIncomplete" xml:space="preserve">
     <value>{0} n'est pas un nom complet.</value>
   </data>
+  <data name="GiveCompanyName" xml:space="preserve">
+    <value>{0} travaille pour {1}.</value>
+  </data>
+  <data name="GiveContactName" xml:space="preserve">
+    <value>Votre contact chez {0} est {1}.</value>
+  </data>
+  <data name="GiveEmailAddress" xml:space="preserve">
+    <value>Son adresse email est {0}.</value>
+  </data>
+  <data name="GiveHomeAddress" xml:space="preserve">
+    <value>Il/Elle habite au {0}.</value>
+  </data>
+  <data name="GivePhoneNumber" xml:space="preserve">
+    <value>Son numéro de téléphone est le {0}</value>
+  </data>
   <data name="Greet" xml:space="preserve">
     <value>Bienvenue sur ProxiCall.</value>
   </data>
   <data name="InformAboutForwardingCall" xml:space="preserve">
     <value>Nous transférons votre appel.</value>
   </data>
-  <data name="IntroduceLeadData" xml:space="preserve">
-    <value>Voici les données demandées pour {0} :</value>
-  </data>
-  <data name="LeadNotFound" xml:space="preserve">
-    <value>{0} n'a pas été trouvé.</value>
-  </data>
   <data name="MissingDataForThisLead" xml:space="preserve">
     <value>Les données suivantes sont absentes de la base de données : {0}.</value>
+  </data>
+  <data name="NamedObjectNotFound" xml:space="preserve">
+    <value>{0} n'a pas été trouvé.</value>
   </data>
   <data name="NoDataFoundInDB" xml:space="preserve">
     <value>Ces informations ne sont malheureusement pas référencées.</value>
@@ -158,18 +173,6 @@
   </data>
   <data name="PhoneNumberNotFound" xml:space="preserve">
     <value>Le numéro de téléphone de {0} n'a pas été trouvé.</value>
-  </data>
-  <data name="SayCompany" xml:space="preserve">
-    <value>Compagnie</value>
-  </data>
-  <data name="SayEmailAddress" xml:space="preserve">
-    <value>Adresse email</value>
-  </data>
-  <data name="SayHomeAddress" xml:space="preserve">
-    <value>Adresse du domicile</value>
-  </data>
-  <data name="SayPhoneNumber" xml:space="preserve">
-    <value>Numéro de téléphone</value>
   </data>
   <data name="ThisDataNotFoundInDB" xml:space="preserve">
     <value>Cette information n'est malheureusement pas référencée.</value>

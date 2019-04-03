@@ -285,24 +285,26 @@ namespace ProxiCall
                     luisState.AddDetectedEntity(LuisState.SEARCH_CONTACT_NAME_ENTITYNAME);
                 }
 
-                //Searching for "informations" about lead
-                if (intentName == Intents.SearchLeadData)
+                //Searching for "informations" about leads
+                var searchInformationsOnLead =
+                    intentName == Intents.SearchLeadData 
+                    && (luisState.Entities == null || luisState.Entities.Count == 0);
+
+                var searchInformationsOnContactLead =
+                    intentName == Intents.SearchCompanyData
+                    && luisState.Entities != null
+                    && luisState.Entities.Contains(LuisState.SEARCH_CONTACT_ENTITYNAME)
+                    && luisState.Entities.Count == 1;
+
+                if (searchInformationsOnLead)
                 {
-                    if(luisState.Entities == null || luisState.Entities.Count==0)
-                    {
-                        luisState.AddDetectedEntity(LuisState.SEARCH_ADDRESS_ENTITYNAME);
-                        luisState.AddDetectedEntity(LuisState.SEARCH_COMPANY_ENTITYNAME);
-                        luisState.AddDetectedEntity(LuisState.SEARCH_PHONENUMBER_ENTITYNAME);
-                    }
+                    //TODO : add number of opportunities
+                    luisState.AddDetectedEntity(LuisState.SEARCH_COMPANY_ENTITYNAME);
                 }
 
-                if (intentName == Intents.SearchCompanyData && luisState.Entities != null && luisState.Entities.Contains(LuisState.SEARCH_CONTACT_ENTITYNAME))
+                if(searchInformationsOnContactLead)
                 {
-                    if (luisState.Entities.Count == 1)
-                    {
-                        luisState.AddDetectedEntity(LuisState.SEARCH_ADDRESS_ENTITYNAME);
-                        luisState.AddDetectedEntity(LuisState.SEARCH_PHONENUMBER_ENTITYNAME);
-                    }
+                    //TODO : add number of opportunities
                 }
 
                 // Set the new values into state.
