@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Proxicall.CRM.DAO;
 using Proxicall.CRM.Models;
 
 namespace Proxicall.CRM.Controllers.Api
@@ -26,7 +27,7 @@ namespace Proxicall.CRM.Controllers.Api
         [HttpGet("byName")]
         public async Task<ActionResult<Company>> GetFullCompanyByName(string name)
         {
-            var company = await GetCompanyByName(name);
+            var company = await CompanyDAO.GetCompanyByName(_context, name);
             if (company == null)
             {
                 return BadRequest();
@@ -38,7 +39,7 @@ namespace Proxicall.CRM.Controllers.Api
         [HttpGet("getcontact")]
         public async Task<ActionResult<Lead>> GetContact(string name)
         {
-            var company = await GetCompanyByName(name);
+            var company = await CompanyDAO.GetCompanyByName(_context, name);
             if (company == null)
             {
                 return BadRequest();
@@ -54,7 +55,7 @@ namespace Proxicall.CRM.Controllers.Api
         [HttpGet("getopportunities")]
         public async Task<ActionResult<IEnumerable<Opportunity>>> GetByCompany(string name)
         {
-            var company = await GetCompanyByName(name);
+            var company = await CompanyDAO.GetCompanyByName(_context, name);
             if (company == null)
             {
                 return BadRequest();
@@ -71,19 +72,6 @@ namespace Proxicall.CRM.Controllers.Api
                 return NotFound();
             }
             return opportunities;
-        }
-
-        private async Task<Company> GetCompanyByName(string name)
-        {
-            var company = await _context.Companies.Where(c => c.Name == name)
-                .Include(c => c.Contact)
-                .FirstOrDefaultAsync();
-            if (company == null)
-            {
-                return null;
-            }
-
-            return company;
         }
 
         // GET: api/Companies

@@ -9,6 +9,7 @@ using Proxicall.CRM.Models.Enumeration.Levenshtein;
 using Proxicall.CRM.Models.Dictionnaries;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Proxicall.CRM.DAO;
 
 namespace Proxicall.CRM.Controllers.Api
 {
@@ -23,11 +24,32 @@ namespace Proxicall.CRM.Controllers.Api
         {
             _context = context;
         }
+        
+        // GET: api/Leads
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<Lead>>> GetLead()
+        {
+            return await _context.Leads.Include(l => l.Company).ToListAsync();
+        }
+
+        // GET: api/Leads/5
+        [HttpGet("{id}")]
+        public async Task<ActionResult<Lead>> GetLead(string id)
+        {
+            var lead = await _context.Leads.Include(l => l.Company).FirstOrDefaultAsync(l => l.Id == id);
+
+            if (lead == null)
+            {
+                return NotFound();
+            }
+
+            return lead;
+        }
 
         [HttpGet("getopportunities")]
-        public async Task<ActionResult<IEnumerable<Opportunity>>> GetAllOpportunitiesByLead(string firstname, string lastname)
+        public async Task<ActionResult<IEnumerable<Opportunity>>> GetAllOpportunitiesByLead(string firstName, string lastName)
         {
-            var lead = await GetLeadByName(firstname, lastname);
+            var lead = await LeadDAO.GetLeadByName(_context, firstName, lastName);
             if (lead == null)
             {
                 return BadRequest();
@@ -50,98 +72,7 @@ namespace Proxicall.CRM.Controllers.Api
         [HttpGet("byName")]
         public async Task<ActionResult<Lead>> GetLead(string firstName, string lastName)
         {
-            var lead = await GetLeadByName(firstName, lastName);
-            if (lead == null)
-            {
-                return NotFound();
-            }
-
-            return lead;
-        }
-
-        private async Task<Lead> GetLeadByName(string firstName, string lastName)
-        {
-            firstName = char.ToLower(firstName[0]) + firstName.Substring(1).ToLower();
-            lastName = char.ToLower(lastName[0]) + lastName.Substring(1).ToLower();
-            var lead = await _context.Leads.Where(l =>
-                l.FirstName == firstName && l.LastName == lastName
-                ||
-                l.FirstName == lastName && l.LastName == firstName)
-            .Include(l => l.Company)
-            .FirstOrDefaultAsync();
-
-            if (lead == null)
-            {
-                return FindLeadWithLevenshtein(firstName,lastName);
-            }
-
-            return lead;
-        }
-
-        private Lead FindLeadWithLevenshtein(string firstName, string lastName)
-        {
-            var resultOfLvsDistanceDB = _context
-                    .Leads
-                    .Include(l => l.Company)
-                    .LevenshteinDistanceOf(leadInDB => leadInDB.FirstName, leadInDB => leadInDB.LastName)
-                    .ComparedTo(firstName, lastName);
-
-            var allowedDistanceForFirstName = CalculateAllowedDistance(firstName);
-            var allowedDistanceForLastName = CalculateAllowedDistance(lastName);
-
-            foreach (var lvsDistance in resultOfLvsDistanceDB)
-            {
-                //"FirstName LastName" compared to "FirstName LastName" in the database
-                var distanceFirstNameToFirstNameDB = lvsDistance.Distances[LevenshteinCompare.FirstNameToFirstNameDB.Id];
-                var distanceLastNameToLastNameDB = lvsDistance.Distances[LevenshteinCompare.LastNameToLastNameDB.Id];
-
-                if (distanceFirstNameToFirstNameDB <= allowedDistanceForFirstName
-                    && distanceLastNameToLastNameDB <= allowedDistanceForLastName)
-                {
-                    return lvsDistance.Item;
-                }
-                //"FirstName LastName" compared to "LastName FirstName" in the database
-                var distanceFirstNametoLastNameDB = lvsDistance.Distances[LevenshteinCompare.FirstNameToLastNameDB.Id];
-                var distanceLastNameToFirstNameDB = lvsDistance.Distances[LevenshteinCompare.LastNameToFirstNameDB.Id];
-
-                if (distanceFirstNametoLastNameDB <= allowedDistanceForFirstName
-                    && distanceLastNameToFirstNameDB <= allowedDistanceForLastName)
-                {
-                    return lvsDistance.Item;
-                }
-            }
-            return null;
-        }
-        
-        private int CalculateAllowedDistance(string name)
-        {
-            if(name.Length<3)
-            {
-                return LevenshteinAllowedDistance.AllowedDistance.GetValueOrDefault(LevenshteinAllowedDistance.VERY_SMALL_WORD);
-            }
-            else if (name.Length<8)
-            {
-                return LevenshteinAllowedDistance.AllowedDistance.GetValueOrDefault(LevenshteinAllowedDistance.SMALL_WORD); ;
-            }
-            else
-            {
-                return LevenshteinAllowedDistance.AllowedDistance.GetValueOrDefault(LevenshteinAllowedDistance.MEDIUM_WORD); ;
-            }
-        }
-
-        // GET: api/Leads
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<Lead>>> GetLead()
-        {
-            return await _context.Leads.Include(l => l.Company).ToListAsync();
-        }
-
-        // GET: api/Leads/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<Lead>> GetLead(string id)
-        {
-            var lead = await _context.Leads.Include(l => l.Company).FirstOrDefaultAsync(l => l.Id == id);
-
+            var lead = await LeadDAO.GetLeadByName(_context, firstName, lastName);
             if (lead == null)
             {
                 return NotFound();
@@ -178,7 +109,7 @@ namespace Proxicall.CRM.Controllers.Api
             }
 
             return NoContent();
-        }
+        }    
 
         // POST: api/Leads
         [HttpPost]
