@@ -158,6 +158,29 @@ namespace ProxiCall
                     }
                 }
             }
+            else if (turnContext.Activity.Type == ActivityTypes.ConversationUpdate && turnContext.Activity.MembersAdded.FirstOrDefault()?.Id == turnContext.Activity.Recipient.Id)
+            {
+                if(_currentUser != null)
+                {
+                    var crmState = await _crmStateAccessor.GetAsync(dialogContext.Context, () => new CRMState());
+                    crmState.AuthToken = _currentUser.Token;
+                    
+                    await _crmStateAccessor.SetAsync(dialogContext.Context, crmState);
+                    //TODO change username in crm
+                    var message = $"Bonjour {_currentUser.UserName.Split('@')[0]} {CulturedBot.AskForRequest}";
+                    var reply = MessageFactory.Text(message,
+                                                    message,
+                                                    InputHints.AcceptingInput);
+                    await turnContext.SendActivityAsync(reply, cancellationToken);
+                }
+                else {
+                    var welcomingMessage = $"{CulturedBot.Greet} {CulturedBot.AskForRequest}";
+                    var reply = MessageFactory.Text(welcomingMessage,
+                                                    welcomingMessage,
+                                                    InputHints.AcceptingInput);
+                    await turnContext.SendActivityAsync(reply, cancellationToken);
+                }
+            }
             //else if (activity.Type == ActivityTypes.Event)
             //{
             //    var accountService = new AccountService();
@@ -186,7 +209,7 @@ namespace ProxiCall
             if (luisResult.Entities != null && luisResult.Entities.HasValues)
             {
                 // Get latest States
-                var crmState = await _crmStateAccessor.GetAsync(turnContext, () => new CRMState());
+                var crmState = await _crmStateAccessor.GetAsync(turnContext);
 
                 var luisState = await _luisStateAccessor.GetAsync(turnContext, () => new LuisState());
 
