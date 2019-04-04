@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Proxicall.CRM.DAO;
@@ -52,26 +53,42 @@ namespace Proxicall.CRM.Controllers.Api
             return company.Contact;
         }
 
-        [HttpGet("getopportunities")]
-        public async Task<ActionResult<IEnumerable<Opportunity>>> GetByCompany(string name)
+        [HttpGet("opportunities")]
+        public async Task<ActionResult<IEnumerable<Opportunity>>> GetOpportunitiesByCompanyAndOwner
+            (string companyName,string ownerPhoneNumber)
         {
-            var company = await CompanyDAO.GetCompanyByName(_context, name);
-            if (company == null)
+            if (string.IsNullOrEmpty(companyName) || string.IsNullOrEmpty(ownerPhoneNumber))
             {
                 return BadRequest();
             }
+
+            //Searching the company
+            var company = await CompanyDAO.GetCompanyByName(_context, companyName);
+            if (company == null)
+            {
+                return NotFound();
+            }
+
+            //Searching the owner
+            var owner = _context.Set<IdentityUser>().FirstOrDefault(u => u.PhoneNumber == ownerPhoneNumber);
+            if (owner == null)
+            {
+                return  NotFound();
+            }
+            
+            //Searching the opportunities
             var opportunities = await _context.Opportunities
-                .Where(o => o.Lead.Company == company)
                 .Include(o => o.Owner)
                 .Include(o => o.Product)
                 .Include(o => o.Lead)
+                .Where(o => o.Lead.Company == company && o.Owner == owner)
                 .ToListAsync();
 
             if (opportunities == null || opportunities.Count == 0)
             {
                 return NotFound();
             }
-            return opportunities;
+            return Ok(opportunities);
         }
 
         // GET: api/Companies

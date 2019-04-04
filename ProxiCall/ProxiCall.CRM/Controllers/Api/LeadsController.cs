@@ -10,6 +10,7 @@ using Proxicall.CRM.Models.Dictionnaries;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Proxicall.CRM.DAO;
+using Microsoft.AspNetCore.Identity;
 
 namespace Proxicall.CRM.Controllers.Api
 {
@@ -46,16 +47,31 @@ namespace Proxicall.CRM.Controllers.Api
             return lead;
         }
 
-        [HttpGet("getopportunities")]
-        public async Task<ActionResult<IEnumerable<Opportunity>>> GetAllOpportunitiesByLead(string firstName, string lastName)
+        [HttpGet("opportunities")]
+        public async Task<ActionResult<IEnumerable<Opportunity>>> GetOpportunitiesByLeadAndOwner
+            (string leadFirstName, string leadLastName, string ownerPhoneNumber)
         {
-            var lead = await LeadDAO.GetLeadByName(_context, firstName, lastName);
+            if(string.IsNullOrEmpty(leadFirstName) || string.IsNullOrEmpty(leadLastName) || string.IsNullOrEmpty(ownerPhoneNumber))
+            {
+                return NotFound();
+            }
+
+            //Searching the lead
+            var lead = await LeadDAO.GetLeadByName(_context, leadFirstName, leadLastName);
             if (lead == null)
             {
-                return BadRequest();
+                return NotFound();
             }
+
+            //Searching the owner
+            var owner = _context.Set<IdentityUser>().FirstOrDefault(u => u.PhoneNumber == ownerPhoneNumber);
+            if (owner == null)
+            {
+                return NotFound();
+            }
+
             var opportunities = await _context.Opportunities
-                .Where(o => o.Lead == lead)
+                .Where(o => o.Lead == lead && o.Owner == owner)
                 .Include(o => o.Owner)
                 .Include(o => o.Product)
                 .Include(o => o.Lead)
