@@ -18,7 +18,6 @@ namespace ProxiCall.Models
 
         }
         
-        //TODO : include company to response from http request in LeadService
         public static Lead CloneWithCompany(Lead lead, Company company)
         {
             Lead newLead = new Lead

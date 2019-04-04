@@ -150,6 +150,9 @@
   <data name="GiveHomeAddress" xml:space="preserve">
     <value>Il/Elle habite au {0}.</value>
   </data>
+  <data name="GivenNumberOfOpportunities" xml:space="preserve">
+    <value>Vous avez en ce moment {0} opportunités avec lui/elle.</value>
+  </data>
   <data name="GivePhoneNumber" xml:space="preserve">
     <value>Son numéro de téléphone est le {0}</value>
   </data>
@@ -158,6 +161,12 @@
   </data>
   <data name="InformAboutForwardingCall" xml:space="preserve">
     <value>Nous transférons votre appel.</value>
+  </data>
+  <data name="LinkWithAnd" xml:space="preserve">
+    <value>et</value>
+  </data>
+  <data name="ListOpportunitiesButTheFirstOne" xml:space="preserve">
+    <value>pour le produit {0}, créée le {1}</value>
   </data>
   <data name="MissingDataForThisLead" xml:space="preserve">
     <value>Les données suivantes sont absentes de la base de données : {0}.</value>

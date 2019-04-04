@@ -262,78 +262,68 @@ namespace ProxiCall.Dialogs.SearchData
 
             var wantedData = new StringBuilder(string.Empty);
 
-            var hasMoreThanOneWantedInfos = luisState.Entities.Count > 1;
-            var hasOneOrMoreResults =
-                (wantCompany && hasCompany) || (wantAddress && hasAddress)
-                || (wantPhone && hasPhone) || (wantEmail && hasEmail)
-                || (wantContact && hasCompany)
-                || ((wantNumberOppornunities || wantOppornunities) && hasOppornunities);
-
-            if (hasOneOrMoreResults)
+            //Contact
+            if (wantContact && hasCompany)
             {
-                if (wantContact && hasCompany)
-                {
-                    wantedData.AppendLine($"{string.Format(CulturedBot.GiveContactName, crmState.Lead.Company.Name, crmState.Lead.FullName)}");
-                }
+                wantedData.AppendLine($"{string.Format(CulturedBot.GiveContactName, crmState.Lead.Company.Name, crmState.Lead.FullName)}");
+            }
 
-                if (wantCompany && hasCompany)
-                {
-                    wantedData.AppendLine($"{string.Format(CulturedBot.GiveCompanyName, crmState.Lead.FullName, crmState.Lead.Company.Name)}");
-                }
+            //Company
+            if (wantCompany && hasCompany)
+            {
+                wantedData.AppendLine($"{string.Format(CulturedBot.GiveCompanyName, crmState.Lead.FullName, crmState.Lead.Company.Name)}");
+            }
 
-                if (wantAddress && hasAddress)
-                {
-                    wantedData.AppendLine($"{string.Format(CulturedBot.GiveHomeAddress, crmState.Lead.Address)}");
-                }
+            //Address
+            if (wantAddress && hasAddress)
+            {
+                wantedData.AppendLine($"{string.Format(CulturedBot.GiveHomeAddress, crmState.Lead.Address)}");
+            }
 
-                if (wantPhone && hasPhone)
-                {
-                    wantedData.AppendLine($"{string.Format(CulturedBot.GivePhoneNumber, crmState.Lead.PhoneNumber)}");
-                }
+            //Phone Number
+            if (wantPhone && hasPhone)
+            {
+                wantedData.AppendLine($"{string.Format(CulturedBot.GivePhoneNumber, crmState.Lead.PhoneNumber)}");
+            }
 
-                if (wantEmail && hasEmail)
-                {
-                    wantedData.AppendLine($"{string.Format(CulturedBot.GiveEmailAddress, crmState.Lead.Email)}");
-                }
+            //Email
+            if (wantEmail && hasEmail)
+            {
+                wantedData.AppendLine($"{string.Format(CulturedBot.GiveEmailAddress, crmState.Lead.Email)}");
+            }
 
-                //TODO : to be improved
+            //Number of Opportunities
+            if (wantNumberOppornunities || wantOppornunities)
+            {
+                var numberOfOpportunities = (crmState.Opportunities!=null? crmState.Opportunities.Count : 0);
+                wantedData.AppendLine($"{string.Format(CulturedBot.GivenNumberOfOpportunities, numberOfOpportunities)}");
+            }
 
-                if (wantNumberOppornunities || wantOppornunities)
+            //Opportunities
+            if (wantOppornunities && hasOppornunities)
+            {
+                var numberOfOpportunities = crmState.Opportunities.Count;
+                for (int i = 0; i < crmState.Opportunities.Count; i++)
                 {
-                    wantedData.AppendLine($"Vous avez en ce moment {crmState.Opportunities.Count} opportunités avec lui/elle.");
-                }
-
-                if (wantOppornunities && hasOppornunities)
-                {
-                    var numberOpportunity = crmState.Opportunities.Count;
-                    for (int i=0; i<crmState.Opportunities.Count; i++)
+                    wantedData.Append(string.Format(CulturedBot.ListOpportunitiesButTheFirstOne,
+                        crmState.Opportunities[i].Product.Title, crmState.Opportunities[i].CreationDate));
+                    if (i == (numberOfOpportunities - 2))
                     {
-                        if (i==0)
-                        {
-                            if(numberOpportunity > 1)
-                            {
-                                wantedData.Append($"une oppportunité ");
-                            }
-                            wantedData.Append($"pour le produit {crmState.Opportunities[i].Product.Title}, créée le {crmState.Opportunities[i].CreationDate}");
-                        }
-                       else
-                        {
-                            wantedData.Append($"une pour le produit {crmState.Opportunities[i].Product.Title}, créée le {crmState.Opportunities[i].CreationDate}");
-                        }
-                        if(i==(numberOpportunity-2))
-                        {
-                            wantedData.Append($" et ");
-                        }
-                        else if (i != (numberOpportunity - 1))
-                        {
-                            wantedData.Append($", ");
-                        }
+                        wantedData.Append($" {CulturedBot.LinkWithAnd} ");
+                    }
+                    else if (i != (numberOfOpportunities - 1))
+                    {
+                        wantedData.Append($", ");
                     }
                 }
             }
-            else
+
+
+            var hasNoResults = !(hasCompany || hasAddress || hasPhone || hasEmail || hasOppornunities);
+            if (hasNoResults)
             {
-                if(hasMoreThanOneWantedInfos)
+                var hasMoreThanOneWantedInfos = luisState.Entities.Count > 1;
+                if (hasMoreThanOneWantedInfos)
                 {
                     wantedData.Append($"{CulturedBot.NoDataFoundInDB}.");
                 }

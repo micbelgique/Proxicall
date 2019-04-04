@@ -160,6 +160,15 @@ namespace ProxiCall.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Vous avez en ce moment {0} opportunités avec lui/elle..
+        /// </summary>
+        public static string GivenNumberOfOpportunities {
+            get {
+                return ResourceManager.GetString("GivenNumberOfOpportunities", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Son numéro de téléphone est le {0}.
         /// </summary>
         public static string GivePhoneNumber {
@@ -183,6 +192,24 @@ namespace ProxiCall.Resources {
         public static string InformAboutForwardingCall {
             get {
                 return ResourceManager.GetString("InformAboutForwardingCall", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to et.
+        /// </summary>
+        public static string LinkWithAnd {
+            get {
+                return ResourceManager.GetString("LinkWithAnd", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to pour le produit {0}, créée le {1}.
+        /// </summary>
+        public static string ListOpportunitiesButTheFirstOne {
+            get {
+                return ResourceManager.GetString("ListOpportunitiesButTheFirstOne", resourceCulture);
             }
         }
         
