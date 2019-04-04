@@ -122,6 +122,9 @@ namespace ProxiCall
             var userState = new UserState(dataStore);
             services.AddSingleton(userState);
 
+            var privateConversationState = new PrivateConversationState(dataStore);
+            services.AddSingleton(privateConversationState);
+
             services.AddBot<ProxiCallBot>(options =>
             {
                 options.CredentialProvider = new SimpleCredentialProvider(endpointService.AppId, endpointService.AppPassword);

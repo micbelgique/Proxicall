@@ -177,12 +177,21 @@ namespace ProxiCall
             }
             else if (turnContext.Activity.Type == ActivityTypes.ConversationUpdate && turnContext.Activity.MembersAdded.FirstOrDefault()?.Id == turnContext.Activity.Recipient.Id)
             {
-                var user = await _currentUserAccessor.GetAsync(dialogContext.Context, () => new User());
+                var user = await _currentUserAccessor.GetAsync(dialogContext.Context, () => null);
                 var welcomingMessage = $"{CulturedBot.Greet} {CulturedBot.AskForRequest}";
 
-                if(!string.IsNullOrEmpty(user?.Alias))
+                if (user != null)
                 {
                     welcomingMessage = $"Bonjour {user.Alias} {CulturedBot.AskForRequest}";
+                }
+                else //TODO REMOVE HARDCODED LOGIN ONLY FOR TESTS
+                {
+                    var accountService = new AccountService();
+                    var testUser = await accountService.Authenticate("+32471452559");
+                    if (testUser != null)
+                    {
+                        await _currentUserAccessor.SetAsync(dialogContext.Context, user);
+                    }
                 }
 
                 var reply = MessageFactory.Text(welcomingMessage,
@@ -198,6 +207,9 @@ namespace ProxiCall
             await _userState.SaveChangesAsync(turnContext, false, cancellationToken);
 
             await _privateConversationState.SaveChangesAsync(turnContext, false, cancellationToken);
+
+            var test = await _currentUserAccessor.GetAsync(turnContext);
+            Console.WriteLine(test);
         }
         
         private async Task UpdateDialogStatesAsync(RecognizerResult luisResult, string intentName, ITurnContext turnContext)
