@@ -1,4 +1,5 @@
 ﻿using ProxiCall.Models;
+using System.Collections.Generic;
 
 namespace ProxiCall.Dialogs.Shared
 {
@@ -7,6 +8,9 @@ namespace ProxiCall.Dialogs.Shared
         public Lead Lead { get; set; }
 
         public Company Company { get; set; }
+
+        public IList<Opportunity> Opportunities { get; set; }
+
         public string AuthToken { get; set; }
 
         public CRMState()

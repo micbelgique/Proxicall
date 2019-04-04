@@ -233,6 +233,9 @@ namespace ProxiCall
                 string luisHintSearchCompanyContact = "searchcontact";
                 string luisHintSearchContactName = "searchcontactname";
 
+                string luisHintSearchNumberOpportunites = "searchnumberopportunities";
+                string luisHintSearchOpportunites = "searchopportunities";
+
                 // Update every entities
                 // TODO Consider a confirm dialog, instead of just updating.
                 foreach (var name in luisExpectedLeadName)
@@ -284,6 +287,16 @@ namespace ProxiCall
                 {
                     luisState.AddDetectedEntity(LuisState.SEARCH_CONTACT_NAME_ENTITYNAME);
                 }
+                
+                if (entities[luisHintSearchOpportunites] != null)
+                {
+                    luisState.AddDetectedEntity(LuisState.SEARCH_OPPORTUNITIES_NAME_ENTITYNAME);
+                }
+                
+                if (entities[luisHintSearchNumberOpportunites] != null)
+                {
+                    luisState.AddDetectedEntity(LuisState.SEARCH_NUMBER_OPPORTUNITIES_ENTITYNAME);
+                }
 
                 //Searching for "informations" about leads
                 var searchInformationsOnLead =
@@ -300,11 +313,13 @@ namespace ProxiCall
                 {
                     //TODO : add number of opportunities
                     luisState.AddDetectedEntity(LuisState.SEARCH_COMPANY_ENTITYNAME);
+                    luisState.AddDetectedEntity(LuisState.SEARCH_NUMBER_OPPORTUNITIES_ENTITYNAME);
                 }
 
                 if(searchInformationsOnContactLead)
                 {
                     //TODO : add number of opportunities
+                    luisState.AddDetectedEntity(LuisState.SEARCH_NUMBER_OPPORTUNITIES_ENTITYNAME);
                 }
 
                 // Set the new values into state.

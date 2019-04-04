@@ -59,9 +59,9 @@ namespace ProxiCall.Models
                     {
                         lastName.Append(names[i] + " ");
                     }
-
+                    
                     FirstName = firstName;
-                    LastName = lastName.ToString();
+                    LastName = lastName.ToString().Trim();
                 }
                 else
                 {
