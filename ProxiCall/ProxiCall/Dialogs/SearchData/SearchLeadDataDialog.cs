@@ -16,24 +16,19 @@ namespace ProxiCall.Dialogs.SearchData
 {
     public class SearchLeadDataDialog : ComponentDialog
     {
-        private readonly IStatePropertyAccessor<CRMState> _CRMStateAccessor;
-        private readonly IStatePropertyAccessor<LuisState> _luisStateAccessor;
-        private readonly IStatePropertyAccessor<User> _currentUserAccessor;
+        private readonly StateAccessors _accessors;
         private readonly ILoggerFactory _loggerFactory;
+        private readonly BotServices _botServices;
         private const string _searchLeadDataWaterfall = "searchLeadDataWaterfall";
         private const string _leadFullNamePrompt = "leadFullNamePrompt";
         private const string _retryFetchingMinimumDataFromUserPrompt = "retryFetchingMinimumDataFromUserPrompt";
         private const string _confirmForwardingPrompt = "confirmForwardingPrompt";
 
-        public BotServices BotServices { get; }
-
-        public SearchLeadDataDialog(IStatePropertyAccessor<CRMState> crmStateAccessor, IStatePropertyAccessor<LuisState> luisStateAccessor, IStatePropertyAccessor<User> currentUserAccessor, ILoggerFactory loggerFactory, BotServices botServices) : base(nameof(SearchLeadDataDialog))
+        public SearchLeadDataDialog(StateAccessors accessors, ILoggerFactory loggerFactory, BotServices botServices) : base(nameof(SearchLeadDataDialog))
         {
-            _CRMStateAccessor = crmStateAccessor;
-            _luisStateAccessor = luisStateAccessor;
-            _currentUserAccessor = currentUserAccessor;
+            _accessors = accessors;
             _loggerFactory = loggerFactory;
-            BotServices = botServices;
+            _botServices = botServices;
 
             var waterfallSteps = new WaterfallStep[]
             {
@@ -53,44 +48,44 @@ namespace ProxiCall.Dialogs.SearchData
         private async Task<DialogTurnResult> InitializeStateStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
         {
             //Initializing CRMStateAccessor
-            var crmState = await _CRMStateAccessor.GetAsync(stepContext.Context, () => null);
+            var crmState = await _accessors.CRMStateAccessor.GetAsync(stepContext.Context, () => null);
             if (crmState == null)
             {
                 if (stepContext.Options is CRMState callStateOpt)
                 {
-                    await _CRMStateAccessor.SetAsync(stepContext.Context, callStateOpt);
+                    await _accessors.CRMStateAccessor.SetAsync(stepContext.Context, callStateOpt);
                 }
                 else
                 {
-                    await _CRMStateAccessor.SetAsync(stepContext.Context, new CRMState());
+                    await _accessors.CRMStateAccessor.SetAsync(stepContext.Context, new CRMState());
                 }
             }
 
             //Initializing LuisStateAccessor
-            var luisState = await _luisStateAccessor.GetAsync(stepContext.Context, () => null);
+            var luisState = await _accessors.LuisStateAccessor.GetAsync(stepContext.Context, () => null);
             if (luisState == null)
             {
                 if (stepContext.Options is LuisState callStateOpt)
                 {
-                    await _luisStateAccessor.SetAsync(stepContext.Context, callStateOpt);
+                    await _accessors.LuisStateAccessor.SetAsync(stepContext.Context, callStateOpt);
                 }
                 else
                 {
-                    await _luisStateAccessor.SetAsync(stepContext.Context, new LuisState());
+                    await _accessors.LuisStateAccessor.SetAsync(stepContext.Context, new LuisState());
                 }
             }
 
             //Initializing CurrentUserAccessor
-            var currentUser = await _currentUserAccessor.GetAsync(stepContext.Context, () => null);
+            var currentUser = await _accessors.UserProfileAccessor.GetAsync(stepContext.Context, () => null);
             if (currentUser == null)
             {
-                if (stepContext.Options is User callStateOpt)
+                if (stepContext.Options is UserProfile callStateOpt)
                 {
-                    await _currentUserAccessor.SetAsync(stepContext.Context, callStateOpt);
+                    await _accessors.UserProfileAccessor.SetAsync(stepContext.Context, callStateOpt);
                 }
                 else
                 {
-                    await _currentUserAccessor.SetAsync(stepContext.Context, new User());
+                    await _accessors.UserProfileAccessor.SetAsync(stepContext.Context, new UserProfile());
                 }
             }
 
@@ -99,7 +94,7 @@ namespace ProxiCall.Dialogs.SearchData
 
         private async Task<DialogTurnResult> AskForLeadFullNameStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
         {
-            var crmState = await _CRMStateAccessor.GetAsync(stepContext.Context);
+            var crmState = await _accessors.CRMStateAccessor.GetAsync(stepContext.Context);
 
             //Asking for the name of the lead if not already given
             if (string.IsNullOrEmpty(crmState.Lead.FullName))
@@ -112,8 +107,8 @@ namespace ProxiCall.Dialogs.SearchData
 
         private async Task<DialogTurnResult> SearchLeadStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
         {
-            var crmState = await _CRMStateAccessor.GetAsync(stepContext.Context);
-            var luisState = await _luisStateAccessor.GetAsync(stepContext.Context);
+            var crmState = await _accessors.CRMStateAccessor.GetAsync(stepContext.Context, () => new CRMState());
+            var luisState = await _accessors.LuisStateAccessor.GetAsync(stepContext.Context, () => new LuisState());
 
             //Gathering the name of the lead if not already given
             if (string.IsNullOrEmpty(crmState.Lead.FullName))
@@ -142,7 +137,7 @@ namespace ProxiCall.Dialogs.SearchData
             var needsRetry = !string.IsNullOrEmpty(promptMessage);
             if (needsRetry)
             {
-                await _CRMStateAccessor.SetAsync(stepContext.Context, crmState);
+                await _accessors.CRMStateAccessor.SetAsync(stepContext.Context, crmState);
                 var promptOptions = new PromptOptions
                 {
                     Prompt = MessageFactory.Text(promptMessage),
@@ -151,22 +146,22 @@ namespace ProxiCall.Dialogs.SearchData
                 return await stepContext.PromptAsync(_retryFetchingMinimumDataFromUserPrompt, promptOptions, cancellationToken);
             }
 
-            await _CRMStateAccessor.SetAsync(stepContext.Context, crmState);
+            await _accessors.CRMStateAccessor.SetAsync(stepContext.Context, crmState);
             return await stepContext.NextAsync();
         }
 
         //Searching Lead in Database
         private async Task<Lead> SearchLeadAsync(ITurnContext turnContext, string firstName, string lastName)
         {
-            var user = await _currentUserAccessor.GetAsync(turnContext);
+            var user = await _accessors.UserProfileAccessor.GetAsync(turnContext, () => new UserProfile());
             var leadService = new LeadService(user.Token);
             return await leadService.GetLeadByName(firstName, lastName);
         }
 
         private async Task<DialogTurnResult> ResultHandlerStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
         {
-            var crmState = await _CRMStateAccessor.GetAsync(stepContext.Context);
-            var luisState = await _luisStateAccessor.GetAsync(stepContext.Context);
+            var crmState = await _accessors.CRMStateAccessor.GetAsync(stepContext.Context, () => new CRMState());
+            var luisState = await _accessors.LuisStateAccessor.GetAsync(stepContext.Context, () => new LuisState());
 
             //Handling when lead not found
             if (crmState.Lead == null || crmState.WantsToCallButNumberNotFound)
@@ -176,7 +171,7 @@ namespace ProxiCall.Dialogs.SearchData
                 {
                     //Restarting dialog if user decides to retry
                     crmState.ResetLead();
-                    await _CRMStateAccessor.SetAsync(stepContext.Context, crmState);
+                    await _accessors.CRMStateAccessor.SetAsync(stepContext.Context, crmState);
                     return await stepContext.ReplaceDialogAsync(_searchLeadDataWaterfall, cancellationToken);
                 }
                 else
@@ -190,8 +185,8 @@ namespace ProxiCall.Dialogs.SearchData
                     
                     crmState.ResetLead();
                     luisState.ResetAll();
-                    await _CRMStateAccessor.SetAsync(stepContext.Context, crmState);
-                    await _luisStateAccessor.SetAsync(stepContext.Context, luisState);
+                    await _accessors.CRMStateAccessor.SetAsync(stepContext.Context, crmState);
+                    await _accessors.LuisStateAccessor.SetAsync(stepContext.Context, luisState);
                     return await stepContext.EndDialogAsync();
                 }
             }
@@ -238,8 +233,8 @@ namespace ProxiCall.Dialogs.SearchData
 
         private async Task<string> FormatMessageWithWantedData(WaterfallStepContext stepContext)
         {
-            var crmState = await _CRMStateAccessor.GetAsync(stepContext.Context);
-            var luisState = await _luisStateAccessor.GetAsync(stepContext.Context);
+            var crmState = await _accessors.CRMStateAccessor.GetAsync(stepContext.Context, () => new CRMState());
+            var luisState = await _accessors.LuisStateAccessor.GetAsync(stepContext.Context, () => new LuisState());
 
             var wantPhone = luisState.Entities.Contains(LuisState.SEARCH_PHONENUMBER_ENTITYNAME);
             var wantAddress = luisState.Entities.Contains(LuisState.SEARCH_ADDRESS_ENTITYNAME);
@@ -335,8 +330,8 @@ namespace ProxiCall.Dialogs.SearchData
 
         private async Task<DialogTurnResult> EndSearchDialogStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
         {
-            var crmState = await _CRMStateAccessor.GetAsync(stepContext.Context);
-            var luisState = await _luisStateAccessor.GetAsync(stepContext.Context);
+            var crmState = await _accessors.CRMStateAccessor.GetAsync(stepContext.Context, () => new CRMState());
+            var luisState = await _accessors.LuisStateAccessor.GetAsync(stepContext.Context, () => new LuisState());
 
             var isSearchLeadData =
                 luisState.IntentName == Intents.SearchLeadData
@@ -374,8 +369,8 @@ namespace ProxiCall.Dialogs.SearchData
 
                     crmState.ResetLead();
                     luisState.ResetAll();
-                    await _CRMStateAccessor.SetAsync(stepContext.Context, crmState);
-                    await _luisStateAccessor.SetAsync(stepContext.Context, luisState);
+                    await _accessors.CRMStateAccessor.SetAsync(stepContext.Context, crmState);
+                    await _accessors.LuisStateAccessor.SetAsync(stepContext.Context, luisState);
                 }
             }
             if (forward || (isMakeACall && hasPhoneNumber))
@@ -392,8 +387,8 @@ namespace ProxiCall.Dialogs.SearchData
                 crmState.ResetLead();
                 luisState.ResetAll();
                 luisState.ResetIntentIfNoEntities();
-                await _CRMStateAccessor.SetAsync(stepContext.Context, crmState);
-                await _luisStateAccessor.SetAsync(stepContext.Context, luisState);
+                await _accessors.CRMStateAccessor.SetAsync(stepContext.Context, crmState);
+                await _accessors.LuisStateAccessor.SetAsync(stepContext.Context, luisState);
             }
             return await stepContext.EndDialogAsync();
         }

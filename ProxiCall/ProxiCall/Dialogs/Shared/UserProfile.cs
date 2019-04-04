@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace ProxiCall.Models
+namespace ProxiCall.Dialogs.Shared
 {
-    public class User
+    public class UserProfile
     {
         public string UserName { get; set; }
         public string Alias { get; set; }

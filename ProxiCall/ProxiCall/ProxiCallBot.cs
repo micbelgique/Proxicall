@@ -33,14 +33,8 @@ namespace ProxiCall
     {
         private const string LuisConfiguration = "proxicall-luis";
         private readonly BotServices _services;
-        private readonly UserState _userState;
-        private readonly ConversationState _conversationState;
-        private readonly PrivateConversationState _privateConversationState;
+        private readonly StateAccessors _accessors;
         private readonly ILoggerFactory _loggerFactory;
-        private readonly IStatePropertyAccessor<DialogState> _dialogStateAccessor;
-        private readonly IStatePropertyAccessor<CRMState> _crmStateAccessor;
-        private readonly IStatePropertyAccessor<LuisState> _luisStateAccessor;
-        private readonly IStatePropertyAccessor<User> _currentUserAccessor;
 
         public DialogSet Dialogs { get; private set; }
 
@@ -50,28 +44,20 @@ namespace ProxiCall
         /// <param name="conversationState">The managed conversation state.</param>
         /// <param name="loggerFactory">A <see cref="ILoggerFactory"/> that is hooked to the Azure App Service provider.</param>
         /// <seealso cref="https://docs.microsoft.com/en-us/aspnet/core/fundamentals/logging/?view=aspnetcore-2.1#windows-eventlog-provider"/>
-        public ProxiCallBot(BotServices services, UserState userState, ConversationState conversationState, PrivateConversationState privateConversationState, ILoggerFactory loggerFactory)
+        public ProxiCallBot(BotServices services, StateAccessors accessors, ILoggerFactory loggerFactory)
         {
+            _accessors = accessors ?? throw new System.ArgumentNullException(nameof(accessors));
             _loggerFactory = loggerFactory ?? throw new ArgumentNullException(nameof(loggerFactory));
             _services = services ?? throw new ArgumentNullException(nameof(services));
-            _userState = userState ?? throw new ArgumentNullException(nameof(userState));
-            _conversationState = conversationState ?? throw new ArgumentNullException(nameof(conversationState));
-            _privateConversationState = privateConversationState ?? throw new ArgumentNullException(nameof(privateConversationState));
 
             if (!_services.LuisServices.ContainsKey(LuisConfiguration))
             {
                 throw new System.ArgumentException($"The bot configuration does not contain a service type of `luis` with the id `{LuisConfiguration}`.");
             }
 
-            
-            _crmStateAccessor = _userState.CreateProperty<CRMState>(nameof(CRMState));
-            _luisStateAccessor = _userState.CreateProperty<LuisState>(nameof(LuisState));
-            _dialogStateAccessor = _conversationState.CreateProperty<DialogState>(nameof(DialogState));
-            _currentUserAccessor = _privateConversationState.CreateProperty<User>(nameof(User));
-
-            Dialogs = new DialogSet(_dialogStateAccessor);
-            Dialogs.Add(new SearchLeadDataDialog(_crmStateAccessor, _luisStateAccessor, _currentUserAccessor, _loggerFactory, _services));
-            Dialogs.Add(new SearchCompanyDataDialog(_crmStateAccessor, _luisStateAccessor, _currentUserAccessor, _loggerFactory, _services));
+            Dialogs = new DialogSet(_accessors.DialogStateAccessor);
+            Dialogs.Add(new SearchLeadDataDialog(_accessors, _loggerFactory, _services));
+            Dialogs.Add(new SearchCompanyDataDialog(_accessors, _loggerFactory, _services));
         }
 
         /// <summary>
@@ -98,6 +84,9 @@ namespace ProxiCall
 
             // Create a dialog context
             var dialogContext = await Dialogs.CreateContextAsync(turnContext);
+
+
+            var userProfile = await _accessors.UserProfileAccessor.GetAsync(turnContext, () => new UserProfile());
 
             if (activity.Type == ActivityTypes.Message)
             {
@@ -156,20 +145,18 @@ namespace ProxiCall
             }
             else if (activity.Type == ActivityTypes.Event)
             {
+                //This is the first message sent by the bot on production
                 var accountService = new AccountService();
-                var user = await accountService.Authenticate(activity.Text.Split(':')[1]);
-
-                var welcomingMessage = $"Bonjour {user.Alias} {CulturedBot.AskForRequest}";
-
-                if (user != null)
-                {
-                    await _currentUserAccessor.SetAsync(dialogContext.Context, user);
-                }
-                else
+                userProfile = await accountService.Authenticate(activity.Text.Split(':')[1]);
+                var welcomingMessage = string.Empty;
+                if (string.IsNullOrEmpty(userProfile.Token))
                 {
                     welcomingMessage = "L'utilisateur n'a pas pu être connecté";
                 }
-
+                else
+                {
+                    welcomingMessage = $"Bonjour {userProfile.Alias} {CulturedBot.AskForRequest}";
+                }
                 var reply = MessageFactory.Text(welcomingMessage,
                                                 welcomingMessage,
                                                 InputHints.AcceptingInput);
@@ -177,39 +164,32 @@ namespace ProxiCall
             }
             else if (turnContext.Activity.Type == ActivityTypes.ConversationUpdate && turnContext.Activity.MembersAdded.FirstOrDefault()?.Id == turnContext.Activity.Recipient.Id)
             {
-                var user = await _currentUserAccessor.GetAsync(dialogContext.Context, () => null);
-                var welcomingMessage = $"{CulturedBot.Greet} {CulturedBot.AskForRequest}";
-
-                if (user != null)
-                {
-                    welcomingMessage = $"Bonjour {user.Alias} {CulturedBot.AskForRequest}";
-                }
-                else //TODO REMOVE HARDCODED LOGIN ONLY FOR TESTS
+                //Only for testing
+                if (string.IsNullOrEmpty(userProfile.Token))
                 {
                     var accountService = new AccountService();
-                    var testUser = await accountService.Authenticate("+32471452559");
-                    if (testUser != null)
+                    userProfile = await accountService.Authenticate("+32471452559");
+                    var welcomingMessage = string.Empty;
+                    if (string.IsNullOrEmpty(userProfile.Token))
                     {
-                        await _currentUserAccessor.SetAsync(dialogContext.Context, user);
+                        welcomingMessage = "L'utilisateur n'a pas pu être connecté";
                     }
+                    else
+                    {
+                        welcomingMessage = $"Bonjour {userProfile.Alias} {CulturedBot.AskForRequest}";
+                    }
+                    var reply = MessageFactory.Text(welcomingMessage,
+                                                    welcomingMessage,
+                                                    InputHints.AcceptingInput);
+                    await turnContext.SendActivityAsync(reply, cancellationToken);
                 }
-
-                var reply = MessageFactory.Text(welcomingMessage,
-                                                welcomingMessage,
-                                                InputHints.AcceptingInput);
-                await turnContext.SendActivityAsync(reply, cancellationToken);
             }
 
-            // Save the dialog state into the conversation state.
-            await _conversationState.SaveChangesAsync(turnContext, false, cancellationToken);
+            await _accessors.UserProfileAccessor.SetAsync(dialogContext.Context, userProfile);
 
-            // Save the user profile updates into the user state.
-            await _userState.SaveChangesAsync(turnContext, false, cancellationToken);
-
-            await _privateConversationState.SaveChangesAsync(turnContext, false, cancellationToken);
-
-            var test = await _currentUserAccessor.GetAsync(turnContext);
-            Console.WriteLine(test);
+            await _accessors.UserState.SaveChangesAsync(turnContext, false, cancellationToken);
+            await _accessors.ConversationState.SaveChangesAsync(turnContext, false, cancellationToken);
+            await _accessors.PrivateConversationState.SaveChangesAsync(turnContext);
         }
         
         private async Task UpdateDialogStatesAsync(RecognizerResult luisResult, string intentName, ITurnContext turnContext)
@@ -217,9 +197,9 @@ namespace ProxiCall
             if (luisResult.Entities != null && luisResult.Entities.HasValues)
             {
                 // Get latest States
-                var crmState = await _crmStateAccessor.GetAsync(turnContext, () => new CRMState());
+                var crmState = await _accessors.CRMStateAccessor.GetAsync(turnContext, () => new CRMState());
 
-                var luisState = await _luisStateAccessor.GetAsync(turnContext, () => new LuisState());
+                var luisState = await _accessors.LuisStateAccessor.GetAsync(turnContext, () => new LuisState());
 
                 var entities = luisResult.Entities;
 
@@ -236,7 +216,6 @@ namespace ProxiCall
                 string luisHintSearchLeadCompany = "searchcompany";
                 string luisHintSearchLeadPhone = "searchphone";
                 string luisHintSearchLeadEmail = "searchemail";
-
 
                 string luisHintSearchCompanyContact = "searchcontact";
                 string luisHintSearchContactName = "searchcontactname";
@@ -315,8 +294,8 @@ namespace ProxiCall
 
                 // Set the new values into state.
                 luisState.IntentName = intentName;
-                await _crmStateAccessor.SetAsync(turnContext, crmState);
-                await _luisStateAccessor.SetAsync(turnContext, luisState);
+                await _accessors.CRMStateAccessor.SetAsync(turnContext, crmState);
+                await _accessors.LuisStateAccessor.SetAsync(turnContext, luisState);
             }
         }
     }
