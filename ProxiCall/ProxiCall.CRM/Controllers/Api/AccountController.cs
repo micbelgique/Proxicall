@@ -42,6 +42,8 @@ namespace Proxicall.CRM.Controllers.Api
                 return BadRequest();
             }
 
+            phonenumber = phonenumber.Trim();
+
             var user = _context.Set<IdentityUser>().FirstOrDefault(u => u.PhoneNumber == phonenumber);
                        
             if (user == null)
