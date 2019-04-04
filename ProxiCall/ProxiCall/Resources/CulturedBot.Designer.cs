@@ -61,6 +61,15 @@ namespace ProxiCall.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Quelle est le nom de la compagnie concernée pour cette demande?.
+        /// </summary>
+        public static string AskCompanyName {
+            get {
+                return ResourceManager.GetString("AskCompanyName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Que puis-je faire pour vous?.
         /// </summary>
         public static string AskForRequest {
@@ -115,6 +124,69 @@ namespace ProxiCall.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to {0} travaille pour {1}..
+        /// </summary>
+        public static string GiveCompanyName {
+            get {
+                return ResourceManager.GetString("GiveCompanyName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Votre contact chez {0} est {1}..
+        /// </summary>
+        public static string GiveContactName {
+            get {
+                return ResourceManager.GetString("GiveContactName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Son adresse email est {0}..
+        /// </summary>
+        public static string GiveEmailAddress {
+            get {
+                return ResourceManager.GetString("GiveEmailAddress", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Il/Elle habite au {0}..
+        /// </summary>
+        public static string GiveHomeAddress {
+            get {
+                return ResourceManager.GetString("GiveHomeAddress", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Vous avez en ce moment {0} opportunités avec lui/elle..
+        /// </summary>
+        public static string GivenNumberOfOpportunities {
+            get {
+                return ResourceManager.GetString("GivenNumberOfOpportunities", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Vous avez en ce moment {0} opportunités avec cette compagnie..
+        /// </summary>
+        public static string GivenNumberOfOpportunitiesByCompany {
+            get {
+                return ResourceManager.GetString("GivenNumberOfOpportunitiesByCompany", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Son numéro de téléphone est le {0}.
+        /// </summary>
+        public static string GivePhoneNumber {
+            get {
+                return ResourceManager.GetString("GivePhoneNumber", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Bienvenue sur ProxiCall..
         /// </summary>
         public static string Greet {
@@ -133,20 +205,29 @@ namespace ProxiCall.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Voici les données demandées pour {0} :.
+        ///   Looks up a localized string similar to et.
         /// </summary>
-        public static string IntroduceLeadData {
+        public static string LinkWithAnd {
             get {
-                return ResourceManager.GetString("IntroduceLeadData", resourceCulture);
+                return ResourceManager.GetString("LinkWithAnd", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to {0} n&apos;a pas été trouvé..
+        ///   Looks up a localized string similar to pour le produit {0}, créée le {1}.
         /// </summary>
-        public static string LeadNotFound {
+        public static string ListOpportunities {
             get {
-                return ResourceManager.GetString("LeadNotFound", resourceCulture);
+                return ResourceManager.GetString("ListOpportunities", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to avec {0} pour le produit {1}, créée le {2}.
+        /// </summary>
+        public static string ListOpportunitiesOfCompany {
+            get {
+                return ResourceManager.GetString("ListOpportunitiesOfCompany", resourceCulture);
             }
         }
         
@@ -156,6 +237,15 @@ namespace ProxiCall.Resources {
         public static string MissingDataForThisLead {
             get {
                 return ResourceManager.GetString("MissingDataForThisLead", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0} n&apos;a pas été trouvé..
+        /// </summary>
+        public static string NamedObjectNotFound {
+            get {
+                return ResourceManager.GetString("NamedObjectNotFound", resourceCulture);
             }
         }
         
@@ -183,42 +273,6 @@ namespace ProxiCall.Resources {
         public static string PhoneNumberNotFound {
             get {
                 return ResourceManager.GetString("PhoneNumberNotFound", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Compagnie.
-        /// </summary>
-        public static string SayCompany {
-            get {
-                return ResourceManager.GetString("SayCompany", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Adresse email.
-        /// </summary>
-        public static string SayEmailAddress {
-            get {
-                return ResourceManager.GetString("SayEmailAddress", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Adresse du domicile.
-        /// </summary>
-        public static string SayHomeAddress {
-            get {
-                return ResourceManager.GetString("SayHomeAddress", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Numéro de téléphone.
-        /// </summary>
-        public static string SayPhoneNumber {
-            get {
-                return ResourceManager.GetString("SayPhoneNumber", resourceCulture);
             }
         }
         

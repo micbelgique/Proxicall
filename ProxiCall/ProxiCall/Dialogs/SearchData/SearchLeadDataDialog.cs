@@ -8,6 +8,7 @@ using ProxiCall.Models;
 using ProxiCall.Models.Intents;
 using ProxiCall.Resources;
 using ProxiCall.Services.ProxiCallCRM;
+using System.Collections.Generic;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -124,7 +125,7 @@ namespace ProxiCall.Dialogs.SearchData
             var promptMessage = "";
             if (crmState.Lead == null)
             {
-                promptMessage = $"{string.Format(CulturedBot.LeadNotFound, fullNameGivenByUser)} {CulturedBot.AskIfWantRetry}";
+                promptMessage = $"{string.Format(CulturedBot.NamedObjectNotFound, fullNameGivenByUser)} {CulturedBot.AskIfWantRetry}";
             }
             else if (luisState.IntentName == Intents.MakeACall)
             {
@@ -195,16 +196,24 @@ namespace ProxiCall.Dialogs.SearchData
             if (luisState.IntentName == Intents.SearchLeadData || luisState.IntentName == Intents.SearchCompanyData)
             {
                 var wantPhone = luisState.Entities.Contains(LuisState.SEARCH_PHONENUMBER_ENTITYNAME);
-                var hasOnlyOneEntity =
+                var hasOnlyPhoneEntity =
                     !(luisState.Entities.Contains(LuisState.SEARCH_ADDRESS_ENTITYNAME)
                     ||
                     luisState.Entities.Contains(LuisState.SEARCH_COMPANY_ENTITYNAME)
                     ||
                     luisState.Entities.Contains(LuisState.SEARCH_EMAIL_ENTITYNAME)
                     ||
-                    luisState.Entities.Contains(LuisState.SEARCH_PHONENUMBER_ENTITYNAME));
-                var wantPhoneOnly = wantPhone && hasOnlyOneEntity;
+                    luisState.Entities.Contains(LuisState.SEARCH_PHONENUMBER_ENTITYNAME)
+                    ||
+                    luisState.Entities.Contains(LuisState.SEARCH_NUMBER_OPPORTUNITIES_ENTITYNAME)
+                    ||
+                    luisState.Entities.Contains(LuisState.SEARCH_OPPORTUNITIES_NAME_ENTITYNAME));
+
+                var wantPhoneOnly = wantPhone && hasOnlyPhoneEntity;
                 var wantPhoneOfContact = wantPhoneOnly && luisState.IntentName == Intents.SearchCompanyData;
+
+                crmState.IsEligibleForPotentialForwarding = (wantPhoneOnly || wantPhoneOfContact) && !string.IsNullOrEmpty(crmState.Lead.PhoneNumber);
+                await CRMStateAccessor.SetAsync(stepContext.Context, crmState);
 
                 //Creating adapted response
                 var textMessage = await FormatMessageWithWantedData(stepContext);
@@ -217,7 +226,7 @@ namespace ProxiCall.Dialogs.SearchData
                 );
 
                 //Asking if user wants to forward the call
-                if ((wantPhoneOnly || wantPhoneOfContact) && !string.IsNullOrEmpty(crmState.Lead.PhoneNumber))
+                if (crmState.IsEligibleForPotentialForwarding)
                 {
                     var forwardPromptOptions = new PromptOptions
                     {
@@ -240,78 +249,89 @@ namespace ProxiCall.Dialogs.SearchData
             var wantAddress = luisState.Entities.Contains(LuisState.SEARCH_ADDRESS_ENTITYNAME);
             var wantCompany = luisState.Entities.Contains(LuisState.SEARCH_COMPANY_ENTITYNAME);
             var wantEmail = luisState.Entities.Contains(LuisState.SEARCH_EMAIL_ENTITYNAME);
+            var wantContact = luisState.Entities.Contains(LuisState.SEARCH_CONTACT_ENTITYNAME);
+            var wantContactName = luisState.Entities.Contains(LuisState.SEARCH_CONTACT_NAME_ENTITYNAME);
+            var wantOppornunities = luisState.Entities.Contains(LuisState.SEARCH_OPPORTUNITIES_NAME_ENTITYNAME);
+            var wantNumberOppornunities = luisState.Entities.Contains(LuisState.SEARCH_NUMBER_OPPORTUNITIES_ENTITYNAME);
 
             var hasPhone = !string.IsNullOrEmpty(crmState.Lead.PhoneNumber);
+            var hasAddress = !string.IsNullOrEmpty(crmState.Lead.Address);
             var hasCompany = crmState.Lead.Company!= null && !string.IsNullOrEmpty(crmState.Lead.Company.Name);
             var hasEmail = !string.IsNullOrEmpty(crmState.Lead.Email);
-            var hasAddress = !string.IsNullOrEmpty(crmState.Lead.Address);
+            var hasOppornunities = false;
+
+            if (wantOppornunities || wantNumberOppornunities)
+            {
+                //Searching opportunities with this lead
+                crmState.Opportunities = (List<Opportunity>) await SearchOpportunitiesAsync
+                    (stepContext, crmState.Lead.FirstName, crmState.Lead.LastName, "32491180031");
+                await CRMStateAccessor.SetAsync(stepContext.Context, crmState);
+                hasOppornunities = crmState.Opportunities != null && crmState.Opportunities.Count != 0;
+            }
 
             var wantedData = new StringBuilder(string.Empty);
-            var missingWantedData = string.Empty;
 
-            var hasMoreThanOneWantedInfo = luisState.Entities.Count > 1;
-            var hasOneOrMoreResult =
-                (wantCompany && hasCompany) || (wantAddress && hasAddress)
-                || (wantPhone && hasPhone) || (wantEmail && hasEmail);
-
-            if (hasOneOrMoreResult)
+            //Contact
+            if (wantContact && hasCompany)
             {
-                if (luisState.IntentName != Intents.SearchCompanyData)
-                {
-                    wantedData.AppendLine($"{string.Format(CulturedBot.IntroduceLeadData, crmState.Lead.FullName)}");
-                }
+                wantedData.AppendLine($"{string.Format(CulturedBot.GiveContactName, crmState.Lead.Company.Name, crmState.Lead.FullName)}");
+            }
 
-                if (wantCompany)
-                {
-                    if (!hasCompany)
-                    {
-                        missingWantedData += $"{CulturedBot.SayCompany}. ";
-                    }
-                    else
-                    {
-                        wantedData.AppendLine($"{CulturedBot.SayCompany} : {crmState.Lead.Company}.");
-                    }
-                }
+            //Company
+            if (wantCompany && hasCompany)
+            {
+                wantedData.AppendLine($"{string.Format(CulturedBot.GiveCompanyName, crmState.Lead.FullName, crmState.Lead.Company.Name)}");
+            }
 
-                if (wantAddress)
-                {
-                    if (!hasAddress)
-                    {
-                        missingWantedData += $"{CulturedBot.SayHomeAddress}. ";
-                    }
-                    else
-                    {
-                        wantedData.AppendLine($"{CulturedBot.SayHomeAddress} : {crmState.Lead.Address}.");
-                    }
-                }
+            //Address
+            if (wantAddress && hasAddress)
+            {
+                wantedData.AppendLine($"{string.Format(CulturedBot.GiveHomeAddress, crmState.Lead.Address)}");
+            }
 
-                if (wantPhone)
-                {
-                    if (!hasPhone)
-                    {
-                        missingWantedData += $"{CulturedBot.SayPhoneNumber}. ";
-                    }
-                    else
-                    {
-                        wantedData.AppendLine($"{CulturedBot.SayPhoneNumber} : {crmState.Lead.PhoneNumber}.");
-                    }
-                }
+            //Phone Number
+            if (wantPhone && hasPhone)
+            {
+                wantedData.AppendLine($"{string.Format(CulturedBot.GivePhoneNumber, crmState.Lead.PhoneNumber)}");
+            }
 
-                if (wantEmail)
+            //Email
+            if (wantEmail && hasEmail)
+            {
+                wantedData.AppendLine($"{string.Format(CulturedBot.GiveEmailAddress, crmState.Lead.Email)}");
+            }
+
+            //Number of Opportunities
+            if (wantNumberOppornunities || wantOppornunities)
+            {
+                var numberOfOpportunities = (crmState.Opportunities!=null? crmState.Opportunities.Count : 0);
+                wantedData.AppendLine($"{string.Format(CulturedBot.GivenNumberOfOpportunities, numberOfOpportunities)}");
+            }
+
+            //Opportunities
+            if (wantOppornunities && hasOppornunities)
+            {
+                var numberOfOpportunities = crmState.Opportunities.Count;
+                for (int i = 0; i < crmState.Opportunities.Count; i++)
                 {
-                    if (!hasEmail)
+                    wantedData.Append(string.Format(CulturedBot.ListOpportunities,
+                        crmState.Opportunities[i].Product.Title, crmState.Opportunities[i].CreationDate.ToShortDateString()));
+                    if (i == (numberOfOpportunities - 2))
                     {
-                        missingWantedData += $"{CulturedBot.SayEmailAddress}. ";
+                        wantedData.Append($" {CulturedBot.LinkWithAnd} ");
                     }
-                    else
+                    else if (i != (numberOfOpportunities - 1))
                     {
-                        wantedData.AppendLine($"{CulturedBot.SayEmailAddress} : {crmState.Lead.Email}.");
+                        wantedData.Append($", ");
                     }
                 }
             }
-            else
+
+            var hasNoResults = !(hasCompany || hasAddress || hasPhone || hasEmail || hasOppornunities);
+            if (hasNoResults)
             {
-                if(hasMoreThanOneWantedInfo)
+                var hasMoreThanOneWantedInfos = luisState.Entities.Count > 1;
+                if (hasMoreThanOneWantedInfos)
                 {
                     wantedData.Append($"{CulturedBot.NoDataFoundInDB}.");
                 }
@@ -320,12 +340,17 @@ namespace ProxiCall.Dialogs.SearchData
                     wantedData.Append($"{CulturedBot.ThisDataNotFoundInDB}");
                 }
             }
-            
-            if(!string.IsNullOrEmpty(missingWantedData))
-            {
-                missingWantedData = $"{string.Format(CulturedBot.MissingDataForThisLead, missingWantedData)}";
-            }
-            return $"{wantedData.ToString()} {missingWantedData}";
+            return $"{wantedData.ToString()}";
+        }
+        
+        //Searching Opportunities in Database
+        private async Task<IEnumerable<Opportunity>> SearchOpportunitiesAsync
+            (WaterfallStepContext stepContext, string leadFirstName, string leadLastName, string ownerPhoneNumber)
+        {
+            var crmState = await CRMStateAccessor.GetAsync(stepContext.Context);
+            var leadService = new LeadService(crmState.AuthToken);
+            var opportunities = await leadService.GetOpportunities(leadFirstName, leadLastName, ownerPhoneNumber);
+            return opportunities;
         }
 
         private async Task<DialogTurnResult> EndSearchDialogStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
@@ -337,24 +362,12 @@ namespace ProxiCall.Dialogs.SearchData
                 luisState.IntentName == Intents.SearchLeadData
                 ||
                 luisState.IntentName == Intents.SearchCompanyData && luisState.Entities.Contains(LuisState.SEARCH_CONTACT_ENTITYNAME);
-            var isMakeACall = luisState.IntentName == Intents.MakeACall;
-            var wantPhone = luisState.Entities.Contains(LuisState.SEARCH_PHONENUMBER_ENTITYNAME);
-            var hasPhoneNumber = !string.IsNullOrEmpty(crmState.Lead.PhoneNumber);
-            var hasOnlyOneEntity =
-                    !(luisState.Entities.Contains(LuisState.SEARCH_ADDRESS_ENTITYNAME)
-                    ||
-                    luisState.Entities.Contains(LuisState.SEARCH_COMPANY_ENTITYNAME)
-                    ||
-                    luisState.Entities.Contains(LuisState.SEARCH_EMAIL_ENTITYNAME)
-                    ||
-                    luisState.Entities.Contains(LuisState.SEARCH_PHONENUMBER_ENTITYNAME));
-            var wantPhoneOnly = wantPhone && hasOnlyOneEntity;
-            var wantPhoneOfContact = wantPhoneOnly && luisState.IntentName == Intents.SearchCompanyData;
+            
             var forward = false;
 
             if (isSearchLeadData)
             {
-                if(wantPhoneOnly || wantPhoneOfContact)
+                if(crmState.IsEligibleForPotentialForwarding)
                 {
                     forward = (bool)stepContext.Result;
                 }
@@ -373,6 +386,10 @@ namespace ProxiCall.Dialogs.SearchData
                     await _accessors.LuisStateAccessor.SetAsync(stepContext.Context, luisState);
                 }
             }
+
+            var isMakeACall = luisState.IntentName == Intents.MakeACall;
+            var hasPhoneNumber = !string.IsNullOrEmpty(crmState.Lead.PhoneNumber);
+
             if (forward || (isMakeACall && hasPhoneNumber))
             {
                 //"Forwarding" the call

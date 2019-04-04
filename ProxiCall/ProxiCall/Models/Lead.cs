@@ -10,11 +10,27 @@ namespace ProxiCall.Models
         public string Email { get; set; }
         public string PhoneNumber { get; set; }
         public string Address { get; set; }
+
         public Company Company { get; set; }
 
         public Lead()
         {
 
+        }
+        
+        public static Lead CloneWithCompany(Lead lead, Company company)
+        {
+            Lead newLead = new Lead
+            {
+                Id = lead.Id,
+                FullName = lead.FullName,
+                Email = lead.Email,
+                PhoneNumber = lead.PhoneNumber,
+                Address = lead.Address,
+                Company = company
+            };
+
+            return newLead;
         }
 
         public Lead(string firstName, string lastName)
@@ -42,9 +58,9 @@ namespace ProxiCall.Models
                     {
                         lastName.Append(names[i] + " ");
                     }
-
+                    
                     FirstName = firstName;
-                    LastName = lastName.ToString();
+                    LastName = lastName.ToString().Trim();
                 }
                 else
                 {
