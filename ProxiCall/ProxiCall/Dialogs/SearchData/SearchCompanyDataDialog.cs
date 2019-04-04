@@ -229,7 +229,7 @@ namespace ProxiCall.Dialogs.SearchData
                 //Searching opportunities with this lead
                 crmState.Opportunities = (List<Opportunity>)await SearchOpportunitiesAsync
                     (stepContext, crmState.Company.Name, "32491180031");
-                await CRMStateAccessor.SetAsync(stepContext.Context, crmState);
+                await _accessors.CRMStateAccessor.SetAsync(stepContext.Context, crmState);
                 hasOppornunities = crmState.Opportunities != null && crmState.Opportunities.Count != 0;
             }
 
@@ -267,8 +267,8 @@ namespace ProxiCall.Dialogs.SearchData
         private async Task<IEnumerable<Opportunity>> SearchOpportunitiesAsync
             (WaterfallStepContext stepContext, string companyName, string ownerPhoneNumber)
         {
-            var crmState = await CRMStateAccessor.GetAsync(stepContext.Context);
-            var companyService = new CompanyService(crmState.AuthToken);
+            var user = await _accessors.UserProfileAccessor.GetAsync(stepContext.Context, () => new UserProfile());
+            var companyService = new CompanyService(user.Token);
             var opportunities = await companyService.GetOpportunities(companyName, ownerPhoneNumber);
             return opportunities;
         }

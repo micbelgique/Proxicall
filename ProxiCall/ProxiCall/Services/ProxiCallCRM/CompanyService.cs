@@ -8,14 +8,16 @@ namespace ProxiCall.Services.ProxiCallCRM
 {
     public class CompanyService : BaseService
     {
-        public CompanyService(string token) : base(token)
+        private readonly string _token;
+        public CompanyService(string token) : base()
         {
+            _token = token;
         }
 
         public async Task<Company> GetCompanyByName(string name)
         {
             var path = $"api/companies/byName?name={name}";
-            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", AuthToken);
+            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _token);
             var response = await _httpClient.GetAsync(path);
             if (response.IsSuccessStatusCode)
             {
@@ -28,7 +30,7 @@ namespace ProxiCall.Services.ProxiCallCRM
         {
             IEnumerable<Opportunity> opportunities = new List<Opportunity>();
             var path = $"api/companies/opportunities?companyName={companyName}&ownerPhoneNumber={ownerPhoneNumber}";
-            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", AuthToken);
+            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _token);
             var response = await _httpClient.GetAsync(path);
             if (response.IsSuccessStatusCode)
             {

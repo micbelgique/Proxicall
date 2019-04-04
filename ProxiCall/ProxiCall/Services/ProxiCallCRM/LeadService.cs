@@ -31,7 +31,7 @@ namespace ProxiCall.Services.ProxiCallCRM
         {
             IEnumerable<Opportunity> opportunities = new List<Opportunity>();
             var path = $"api/leads/opportunities?leadfirstname={leadFirstName}&leadlastname={leadLastName}&ownerPhoneNumber={ownerPhoneNumber}";
-            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", AuthToken);
+            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _token);
             var response = await _httpClient.GetAsync(path);
             if (response.IsSuccessStatusCode)
             {

@@ -213,7 +213,7 @@ namespace ProxiCall.Dialogs.SearchData
                 var wantPhoneOfContact = wantPhoneOnly && luisState.IntentName == Intents.SearchCompanyData;
 
                 crmState.IsEligibleForPotentialForwarding = (wantPhoneOnly || wantPhoneOfContact) && !string.IsNullOrEmpty(crmState.Lead.PhoneNumber);
-                await CRMStateAccessor.SetAsync(stepContext.Context, crmState);
+                await _accessors.CRMStateAccessor.SetAsync(stepContext.Context, crmState);
 
                 //Creating adapted response
                 var textMessage = await FormatMessageWithWantedData(stepContext);
@@ -265,7 +265,7 @@ namespace ProxiCall.Dialogs.SearchData
                 //Searching opportunities with this lead
                 crmState.Opportunities = (List<Opportunity>) await SearchOpportunitiesAsync
                     (stepContext, crmState.Lead.FirstName, crmState.Lead.LastName, "32491180031");
-                await CRMStateAccessor.SetAsync(stepContext.Context, crmState);
+                await _accessors.CRMStateAccessor.SetAsync(stepContext.Context, crmState);
                 hasOppornunities = crmState.Opportunities != null && crmState.Opportunities.Count != 0;
             }
 
@@ -344,11 +344,10 @@ namespace ProxiCall.Dialogs.SearchData
         }
         
         //Searching Opportunities in Database
-        private async Task<IEnumerable<Opportunity>> SearchOpportunitiesAsync
-            (WaterfallStepContext stepContext, string leadFirstName, string leadLastName, string ownerPhoneNumber)
+        private async Task<IEnumerable<Opportunity>> SearchOpportunitiesAsync(WaterfallStepContext stepContext, string leadFirstName, string leadLastName, string ownerPhoneNumber)
         {
-            var crmState = await CRMStateAccessor.GetAsync(stepContext.Context);
-            var leadService = new LeadService(crmState.AuthToken);
+            var user = await _accessors.UserProfileAccessor.GetAsync(stepContext.Context, () => new UserProfile());
+            var leadService = new LeadService(user.Token);
             var opportunities = await leadService.GetOpportunities(leadFirstName, leadLastName, ownerPhoneNumber);
             return opportunities;
         }
