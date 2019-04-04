@@ -165,7 +165,7 @@
   <data name="LinkWithAnd" xml:space="preserve">
     <value>et</value>
   </data>
-  <data name="ListOpportunitiesButTheFirstOne" xml:space="preserve">
+  <data name="ListOpportunities" xml:space="preserve">
     <value>pour le produit {0}, créée le {1}</value>
   </data>
   <data name="MissingDataForThisLead" xml:space="preserve">
@@ -185,5 +185,11 @@
   </data>
   <data name="ThisDataNotFoundInDB" xml:space="preserve">
     <value>Cette information n'est malheureusement pas référencée.</value>
+  </data>
+  <data name="GivenNumberOfOpportunitiesByCompany" xml:space="preserve">
+    <value>Vous avez en ce moment {0} opportunités avec cette compagnie.</value>
+  </data>
+  <data name="ListOpportunitiesOfCompany" xml:space="preserve">
+    <value>avec {0} pour le produit {1}, créée le {2}</value>
   </data>
 </root>

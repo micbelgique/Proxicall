@@ -234,7 +234,6 @@ namespace ProxiCall.Dialogs.SearchData
             var crmState = await CRMStateAccessor.GetAsync(stepContext.Context);
             var luisState = await LuisStateAccessor.GetAsync(stepContext.Context);
 
-
             var wantPhone = luisState.Entities.Contains(LuisState.SEARCH_PHONENUMBER_ENTITYNAME);
             var wantAddress = luisState.Entities.Contains(LuisState.SEARCH_ADDRESS_ENTITYNAME);
             var wantCompany = luisState.Entities.Contains(LuisState.SEARCH_COMPANY_ENTITYNAME);
@@ -248,7 +247,6 @@ namespace ProxiCall.Dialogs.SearchData
             var hasAddress = !string.IsNullOrEmpty(crmState.Lead.Address);
             var hasCompany = crmState.Lead.Company!= null && !string.IsNullOrEmpty(crmState.Lead.Company.Name);
             var hasEmail = !string.IsNullOrEmpty(crmState.Lead.Email);
-
             var hasOppornunities = false;
 
             if (wantOppornunities || wantNumberOppornunities)
@@ -305,8 +303,8 @@ namespace ProxiCall.Dialogs.SearchData
                 var numberOfOpportunities = crmState.Opportunities.Count;
                 for (int i = 0; i < crmState.Opportunities.Count; i++)
                 {
-                    wantedData.Append(string.Format(CulturedBot.ListOpportunitiesButTheFirstOne,
-                        crmState.Opportunities[i].Product.Title, crmState.Opportunities[i].CreationDate));
+                    wantedData.Append(string.Format(CulturedBot.ListOpportunities,
+                        crmState.Opportunities[i].Product.Title, crmState.Opportunities[i].CreationDate.ToShortDateString()));
                     if (i == (numberOfOpportunities - 2))
                     {
                         wantedData.Append($" {CulturedBot.LinkWithAnd} ");
@@ -317,7 +315,6 @@ namespace ProxiCall.Dialogs.SearchData
                     }
                 }
             }
-
 
             var hasNoResults = !(hasCompany || hasAddress || hasPhone || hasEmail || hasOppornunities);
             if (hasNoResults)
