@@ -290,6 +290,10 @@ namespace ProxiCall
                     intentName == Intents.SearchLeadData 
                     && (luisState.Entities == null || luisState.Entities.Count == 0);
 
+                var searchInformationsOnCompany =
+                   intentName == Intents.SearchCompanyData
+                   && (luisState.Entities == null || luisState.Entities.Count == 0);
+
                 var searchInformationsOnContactLead =
                     intentName == Intents.SearchCompanyData
                     && luisState.Entities != null
@@ -298,14 +302,17 @@ namespace ProxiCall
 
                 if (searchInformationsOnLead)
                 {
-                    //TODO : add number of opportunities
                     luisState.AddDetectedEntity(LuisState.SEARCH_COMPANY_ENTITYNAME);
+                    luisState.AddDetectedEntity(LuisState.SEARCH_NUMBER_OPPORTUNITIES_ENTITYNAME);
+                }
+
+                if(searchInformationsOnCompany)
+                {
                     luisState.AddDetectedEntity(LuisState.SEARCH_NUMBER_OPPORTUNITIES_ENTITYNAME);
                 }
 
                 if(searchInformationsOnContactLead)
                 {
-                    //TODO : add number of opportunities
                     luisState.AddDetectedEntity(LuisState.SEARCH_NUMBER_OPPORTUNITIES_ENTITYNAME);
                 }
 
