@@ -7,12 +7,14 @@ using System.Linq;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Bot.Builder;
+using Microsoft.Bot.Builder.Dialogs;
 using Microsoft.Bot.Builder.Integration.AspNet.Core;
 using Microsoft.Bot.Configuration;
 using Microsoft.Bot.Connector.Authentication;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using ProxiCall.Dialogs.Shared;
 
 namespace ProxiCall
 {
@@ -121,6 +123,21 @@ namespace ProxiCall
 
             var userState = new UserState(dataStore);
             services.AddSingleton(userState);
+
+            var privateConversationState = new PrivateConversationState(dataStore);
+            services.AddSingleton(privateConversationState);
+
+            services.AddSingleton<StateAccessors>(sp =>
+            {
+                // Create the custom state accessor.
+                return new StateAccessors(userState, conversationState, privateConversationState)
+                {
+                    DialogStateAccessor = conversationState.CreateProperty<DialogState>(nameof(DialogState)),
+                    UserProfileAccessor = privateConversationState.CreateProperty<UserProfile>(nameof(UserProfile)),
+                    LuisStateAccessor = userState.CreateProperty<LuisState>(nameof(LuisState)),
+                    CRMStateAccessor = userState.CreateProperty<CRMState>(nameof(CRMState))
+                };
+            });
 
             services.AddBot<ProxiCallBot>(options =>
             {

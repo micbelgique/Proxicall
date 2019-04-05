@@ -6,31 +6,30 @@ using System.Threading.Tasks;
 
 namespace ProxiCall.Services.ProxiCallCRM
 {
-    public class LeadService : BaseService
+    public class CompanyService : BaseService
     {
         private readonly string _token;
-        public LeadService(string token) : base()
+        public CompanyService(string token) : base()
         {
             _token = token;
         }
 
-        public async Task<Lead> GetLeadByName(string firstName, string lastName)
+        public async Task<Company> GetCompanyByName(string name)
         {
-            Lead lead = null;
-            var path = $"api/leads/byName?firstName={firstName}&lastName={lastName}";
+            var path = $"api/companies/byName?name={name}";
             _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _token);
             var response = await _httpClient.GetAsync(path);
             if (response.IsSuccessStatusCode)
             {
-                lead = await response.Content.ReadAsAsync<Lead>();
+                return await response.Content.ReadAsAsync<Company>();
             }
-            return lead;
+            return null;
         }
 
-        public async Task<IEnumerable<Opportunity>> GetOpportunities(string leadFirstName, string leadLastName, string ownerPhoneNumber)
+        public async Task<IEnumerable<Opportunity>> GetOpportunities(string companyName, string ownerPhoneNumber)
         {
             IEnumerable<Opportunity> opportunities = new List<Opportunity>();
-            var path = $"api/leads/opportunities?leadfirstname={leadFirstName}&leadlastname={leadLastName}&ownerPhoneNumber={ownerPhoneNumber}";
+            var path = $"api/companies/opportunities?companyName={companyName}&ownerPhoneNumber={ownerPhoneNumber}";
             _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _token);
             var response = await _httpClient.GetAsync(path);
             if (response.IsSuccessStatusCode)

@@ -14,6 +14,7 @@ using ProxiCall.Dialogs.SearchData;
 using ProxiCall.Dialogs.Shared;
 using ProxiCall.Resources;
 using ProxiCall.Models;
+using ProxiCall.Services.ProxiCallCRM;
 
 namespace ProxiCall
 {
@@ -31,18 +32,11 @@ namespace ProxiCall
     public class ProxiCallBot : IBot
     {
         private const string LuisConfiguration = "proxicall-luis";
-
         private readonly BotServices _services;
-        private readonly UserState _userState;
-        private readonly ConversationState _conversationState;
+        private readonly StateAccessors _accessors;
         private readonly ILoggerFactory _loggerFactory;
 
-        private readonly IStatePropertyAccessor<DialogState> _dialogStateAccessor;
-
         public DialogSet Dialogs { get; private set; }
-        
-        private readonly IStatePropertyAccessor<CRMState> _crmStateAccessor;
-        private readonly IStatePropertyAccessor<LuisState> _luisStateAccessor;
 
         /// <summary>
         /// Initializes a new instance of the class.
@@ -50,24 +44,20 @@ namespace ProxiCall
         /// <param name="conversationState">The managed conversation state.</param>
         /// <param name="loggerFactory">A <see cref="ILoggerFactory"/> that is hooked to the Azure App Service provider.</param>
         /// <seealso cref="https://docs.microsoft.com/en-us/aspnet/core/fundamentals/logging/?view=aspnetcore-2.1#windows-eventlog-provider"/>
-        public ProxiCallBot(BotServices services, UserState userState, ConversationState conversationState, ILoggerFactory loggerFactory)
+        public ProxiCallBot(BotServices services, StateAccessors accessors, ILoggerFactory loggerFactory)
         {
+            _accessors = accessors ?? throw new System.ArgumentNullException(nameof(accessors));
             _loggerFactory = loggerFactory ?? throw new ArgumentNullException(nameof(loggerFactory));
             _services = services ?? throw new ArgumentNullException(nameof(services));
-            
+
             if (!_services.LuisServices.ContainsKey(LuisConfiguration))
             {
                 throw new System.ArgumentException($"The bot configuration does not contain a service type of `luis` with the id `{LuisConfiguration}`.");
             }
 
-            _userState = userState ?? throw new ArgumentNullException(nameof(userState));
-            _conversationState = conversationState ?? throw new ArgumentNullException(nameof(conversationState));
-            
-            _crmStateAccessor = _userState.CreateProperty<CRMState>(nameof(CRMState));
-            _luisStateAccessor = _userState.CreateProperty<LuisState>(nameof(LuisState));
-            _dialogStateAccessor = _conversationState.CreateProperty<DialogState>(nameof(DialogState));
-            Dialogs = new DialogSet(_dialogStateAccessor);
-            Dialogs.Add(new SearchLeadDataDialog(_crmStateAccessor,_luisStateAccessor, _loggerFactory, _services));
+            Dialogs = new DialogSet(_accessors.DialogStateAccessor);
+            Dialogs.Add(new SearchLeadDataDialog(_accessors, _loggerFactory, _services));
+            Dialogs.Add(new SearchCompanyDataDialog(_accessors, _loggerFactory, _services));
         }
 
         /// <summary>
@@ -95,6 +85,9 @@ namespace ProxiCall
             // Create a dialog context
             var dialogContext = await Dialogs.CreateContextAsync(turnContext);
 
+
+            var userProfile = await _accessors.UserProfileAccessor.GetAsync(turnContext, () => new UserProfile());
+
             if (activity.Type == ActivityTypes.Message)
             {
                 // Perform a call to LUIS to retrieve results for the current activity message.
@@ -118,16 +111,19 @@ namespace ProxiCall
                         case DialogTurnStatus.Empty:
                             switch (topIntent)
                             {
-                                case Intents.SearchData:
+                                case Intents.SearchCompanyData:
+                                    await UpdateDialogStatesAsync(luisResults, topIntent, dialogContext.Context);
+                                    await dialogContext.BeginDialogAsync(nameof(SearchCompanyDataDialog));
+                                    break;
+                                case Intents.SearchLeadData:
                                 case Intents.MakeACall:
                                     await UpdateDialogStatesAsync(luisResults, topIntent, dialogContext.Context);
-
                                     await dialogContext.BeginDialogAsync(nameof(SearchLeadDataDialog));
                                     break;
 
                                 case Intents.None:
                                 default:
-                                    await dialogContext.Context.SendActivityAsync(Localization.NoIntentFound);
+                                    await dialogContext.Context.SendActivityAsync(CulturedBot.NoIntentFound);
                                     break;
                             }
 
@@ -147,20 +143,53 @@ namespace ProxiCall
                     }
                 }
             }
-            else if (turnContext.Activity.Type == ActivityTypes.ConversationUpdate && turnContext.Activity.MembersAdded.FirstOrDefault()?.Id == turnContext.Activity.Recipient.Id)
+            else if (activity.Type == ActivityTypes.Event)
             {
-                var welcomingMessage = $"{Localization.Greet} {Localization.AskForRequest}";
+                //This is the first message sent by the bot on production
+                var accountService = new AccountService();
+                userProfile = await accountService.Authenticate(activity.Text.Split(':')[1]);
+                var welcomingMessage = string.Empty;
+                if (string.IsNullOrEmpty(userProfile.Token))
+                {
+                    welcomingMessage = "L'utilisateur n'a pas pu être connecté";
+                }
+                else
+                {
+                    welcomingMessage = $"Bonjour {userProfile.Alias} {CulturedBot.AskForRequest}";
+                }
                 var reply = MessageFactory.Text(welcomingMessage,
                                                 welcomingMessage,
                                                 InputHints.AcceptingInput);
                 await turnContext.SendActivityAsync(reply, cancellationToken);
             }
+            else if (turnContext.Activity.Type == ActivityTypes.ConversationUpdate && turnContext.Activity.MembersAdded.FirstOrDefault()?.Id == turnContext.Activity.Recipient.Id)
+            {
+                //Only for testing
+                if (string.IsNullOrEmpty(userProfile.Token))
+                {
+                    var accountService = new AccountService();
+                    userProfile = await accountService.Authenticate("+32471452559");
+                    var welcomingMessage = string.Empty;
+                    if (string.IsNullOrEmpty(userProfile.Token))
+                    {
+                        welcomingMessage = "L'utilisateur n'a pas pu être connecté";
+                    }
+                    else
+                    {
+                        welcomingMessage = $"Bonjour {userProfile.Alias} {CulturedBot.AskForRequest}";
+                    }
+                    var reply = MessageFactory.Text(welcomingMessage,
+                                                    welcomingMessage,
+                                                    InputHints.AcceptingInput);
+                    await turnContext.SendActivityAsync(reply, cancellationToken);
+                }
+            }
 
-            // Save the dialog state into the conversation state.
-            await _conversationState.SaveChangesAsync(turnContext, false, cancellationToken);
+            await _accessors.UserProfileAccessor.SetAsync(dialogContext.Context, userProfile);
 
-            // Save the user profile updates into the user state.
-            await _userState.SaveChangesAsync(turnContext, false, cancellationToken);
+            await _accessors.UserState.SaveChangesAsync(turnContext, false, cancellationToken);
+            await _accessors.ConversationState.SaveChangesAsync(turnContext, false, cancellationToken);
+            await _accessors.PrivateConversationState.SaveChangesAsync(turnContext);
         }
         
         private async Task UpdateDialogStatesAsync(RecognizerResult luisResult, string intentName, ITurnContext turnContext)
@@ -168,34 +197,31 @@ namespace ProxiCall
             if (luisResult.Entities != null && luisResult.Entities.HasValues)
             {
                 // Get latest States
-                var crmState = await _crmStateAccessor.GetAsync(turnContext, () => new CRMState());
-                var luisState = await _luisStateAccessor.GetAsync(turnContext, () => new LuisState());
+                var crmState = await _accessors.CRMStateAccessor.GetAsync(turnContext, () => new CRMState());
+
+                var luisState = await _accessors.LuisStateAccessor.GetAsync(turnContext, () => new LuisState());
 
                 var entities = luisResult.Entities;
 
                 // Supported LUIS Entities
                 string[] luisExpectedLeadName =
                 {
-                    "searchlead",
+                    "leadfullname",
                     "personName"
                 };
-                //TODO : no need for array + rename into search_ (ex : searchaddress)
-                string[] luisHintSearchAddress =
-                {
-                    "searchaddress"
-                };
-                string[] luisHintSearchCompany =
-                {
-                    "searchcompany"
-                };
-                string[] luisHintSearchPhone =
-                {
-                    "searchphone"
-                };
-                string[] luisHintSearchEmail =
-                {
-                    "searchemail"
-                };
+
+                string luisExpectedCompanyName = "companyName";
+
+                string luisHintSearchLeadAddress = "searchaddress";
+                string luisHintSearchLeadCompany = "searchcompany";
+                string luisHintSearchLeadPhone = "searchphone";
+                string luisHintSearchLeadEmail = "searchemail";
+
+                string luisHintSearchCompanyContact = "searchcontact";
+                string luisHintSearchContactName = "searchcontactname";
+
+                string luisHintSearchNumberOpportunites = "searchnumberopportunities";
+                string luisHintSearchOpportunites = "searchopportunities";
 
                 // Update every entities
                 // TODO Consider a confirm dialog, instead of just updating.
@@ -204,64 +230,96 @@ namespace ProxiCall
                     if (entities[name] != null)
                     {
                         var fullName = (string)entities[name][0];
-                        //if (crmState.Lead == null)
-                        //{
-                        //    crmState.Lead = new Lead();
-                        //}
+                        if(crmState.Lead == null)
+                        {
+                            crmState.Lead = new Lead();
+                        }
                         crmState.Lead.FullName = fullName;
                         break;
                     }
                 }
 
-                foreach (var address in luisHintSearchAddress)
+                if (entities[luisExpectedCompanyName] != null)
                 {
-                    if (entities[address] != null)
-                    {
-                        luisState.AddDetectedEntity(LuisState.SEARCH_ADDRESS_ENTITYNAME);
-                        break;
-                    }
+                    var companyName = (string)entities[luisExpectedCompanyName][0].First;
+                    crmState.Company.Name = companyName;
                 }
 
-                foreach (var company in luisHintSearchCompany)
+                if (entities[luisHintSearchLeadAddress] != null)
                 {
-                    if (entities[company] != null)
-                    {
-                        luisState.AddDetectedEntity(LuisState.SEARCH_COMPANY_ENTITYNAME);
-                        break;
-                    }
+                    luisState.AddDetectedEntity(LuisState.SEARCH_ADDRESS_ENTITYNAME);
                 }
 
-                foreach (var phone in luisHintSearchPhone)
+                if (entities[luisHintSearchLeadCompany] != null)
                 {
-                    if (entities[phone] != null)
-                    {
-                        luisState.AddDetectedEntity(LuisState.SEARCH_PHONENUMBER_ENTITYNAME);
-                        break;
-                    }
-                }
-                foreach (var email in luisHintSearchEmail)
-                {
-                    if (entities[email] != null)
-                    {
-                        luisState.AddDetectedEntity(LuisState.SEARCH_EMAIL_ENTITYNAME);
-                        break;
-                    }
+                    luisState.AddDetectedEntity(LuisState.SEARCH_COMPANY_ENTITYNAME);
                 }
 
-                //Searching for "informations"
-                if (intentName == Intents.SearchData)
+                if (entities[luisHintSearchLeadPhone] != null)
                 {
-                    if(luisState.Entities == null ||luisState.Entities.Count==0)
-                    {
-                        luisState.AddDetectedEntity(LuisState.SEARCH_ADDRESS_ENTITYNAME);
-                        luisState.AddDetectedEntity(LuisState.SEARCH_COMPANY_ENTITYNAME);
-                        luisState.AddDetectedEntity(LuisState.SEARCH_PHONENUMBER_ENTITYNAME);
-                    }
+                    luisState.AddDetectedEntity(LuisState.SEARCH_PHONENUMBER_ENTITYNAME);
                 }
+
+                if (entities[luisHintSearchLeadEmail] != null)
+                {
+                    luisState.AddDetectedEntity(LuisState.SEARCH_EMAIL_ENTITYNAME);
+                }
+                
+                if (entities[luisHintSearchCompanyContact] != null)
+                {
+                    luisState.AddDetectedEntity(LuisState.SEARCH_CONTACT_ENTITYNAME);
+                }
+
+                if (entities[luisHintSearchContactName] != null)
+                {
+                    luisState.AddDetectedEntity(LuisState.SEARCH_CONTACT_NAME_ENTITYNAME);
+                }
+                
+                if (entities[luisHintSearchOpportunites] != null)
+                {
+                    luisState.AddDetectedEntity(LuisState.SEARCH_OPPORTUNITIES_NAME_ENTITYNAME);
+                }
+                
+                if (entities[luisHintSearchNumberOpportunites] != null)
+                {
+                    luisState.AddDetectedEntity(LuisState.SEARCH_NUMBER_OPPORTUNITIES_ENTITYNAME);
+                }
+
+                //Searching for "informations" about leads
+                var searchInformationsOnLead =
+                    intentName == Intents.SearchLeadData 
+                    && (luisState.Entities == null || luisState.Entities.Count == 0);
+
+                var searchInformationsOnCompany =
+                   intentName == Intents.SearchCompanyData
+                   && (luisState.Entities == null || luisState.Entities.Count == 0);
+
+                var searchInformationsOnContactLead =
+                    intentName == Intents.SearchCompanyData
+                    && luisState.Entities != null
+                    && luisState.Entities.Contains(LuisState.SEARCH_CONTACT_ENTITYNAME)
+                    && luisState.Entities.Count == 1;
+
+                if (searchInformationsOnLead)
+                {
+                    luisState.AddDetectedEntity(LuisState.SEARCH_COMPANY_ENTITYNAME);
+                    luisState.AddDetectedEntity(LuisState.SEARCH_NUMBER_OPPORTUNITIES_ENTITYNAME);
+                }
+
+                if(searchInformationsOnCompany)
+                {
+                    luisState.AddDetectedEntity(LuisState.SEARCH_NUMBER_OPPORTUNITIES_ENTITYNAME);
+                }
+
+                if(searchInformationsOnContactLead)
+                {
+                    luisState.AddDetectedEntity(LuisState.SEARCH_NUMBER_OPPORTUNITIES_ENTITYNAME);
+                }
+
                 // Set the new values into state.
                 luisState.IntentName = intentName;
-                await _crmStateAccessor.SetAsync(turnContext, crmState);
-                await _luisStateAccessor.SetAsync(turnContext, luisState);
+                await _accessors.CRMStateAccessor.SetAsync(turnContext, crmState);
+                await _accessors.LuisStateAccessor.SetAsync(turnContext, luisState);
             }
         }
     }

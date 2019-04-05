@@ -2,13 +2,18 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Proxicall.CRM.DAO;
 using Proxicall.CRM.Models;
 
 namespace Proxicall.CRM.Controllers.Api
 {
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin,User")]
     [Route("api/[controller]")]
     [ApiController]
     public class CompaniesController : ControllerBase
@@ -20,10 +25,22 @@ namespace Proxicall.CRM.Controllers.Api
             _context = context;
         }
 
+        [HttpGet("byName")]
+        public async Task<ActionResult<Company>> GetFullCompanyByName(string name)
+        {
+            var company = await CompanyDAO.GetCompanyByName(_context, name);
+            if (company == null)
+            {
+                return BadRequest();
+            }
+
+            return company;
+        }
+
         [HttpGet("getcontact")]
         public async Task<ActionResult<Lead>> GetContact(string name)
         {
-            var company = await GetCompanyByName(name);
+            var company = await CompanyDAO.GetCompanyByName(_context, name);
             if (company == null)
             {
                 return BadRequest();
@@ -36,40 +53,42 @@ namespace Proxicall.CRM.Controllers.Api
             return company.Contact;
         }
 
-        [HttpGet("getopportunities")]
-        public async Task<ActionResult<IEnumerable<Opportunity>>> GetByCompany(string name)
+        [HttpGet("opportunities")]
+        public async Task<ActionResult<IEnumerable<Opportunity>>> GetOpportunitiesByCompanyAndOwner
+            (string companyName,string ownerPhoneNumber)
         {
-            var company = await GetCompanyByName(name);
-            if (company == null)
+            if (string.IsNullOrEmpty(companyName) || string.IsNullOrEmpty(ownerPhoneNumber))
             {
                 return BadRequest();
             }
+
+            //Searching the company
+            var company = await CompanyDAO.GetCompanyByName(_context, companyName);
+            if (company == null)
+            {
+                return NotFound();
+            }
+
+            //Searching the owner
+            var owner = _context.Set<IdentityUser>().FirstOrDefault(u => u.PhoneNumber == ownerPhoneNumber);
+            if (owner == null)
+            {
+                return  NotFound();
+            }
+            
+            //Searching the opportunities
             var opportunities = await _context.Opportunities
-                .Where(o => o.Lead.Company == company)
                 .Include(o => o.Owner)
                 .Include(o => o.Product)
                 .Include(o => o.Lead)
+                .Where(o => o.Lead.Company == company && o.Owner == owner)
                 .ToListAsync();
 
             if (opportunities == null || opportunities.Count == 0)
             {
                 return NotFound();
             }
-
-            return opportunities;
-        }
-
-        private async Task<Company> GetCompanyByName(string name)
-        {
-            var company = await _context.Companies.Where(c => c.Name == name)
-                .Include(c => c.Contact)
-                .FirstOrDefaultAsync();
-            if (company == null)
-            {
-                return null;
-            }
-
-            return company;
+            return Ok(opportunities);
         }
 
         // GET: api/Companies
@@ -77,6 +96,18 @@ namespace Proxicall.CRM.Controllers.Api
         public async Task<ActionResult<IEnumerable<Company>>> GetCompany()
         {
             return await _context.Companies.Include(c => c.Contact).ToListAsync();
+        }
+
+        [HttpGet("allnames")]
+        public async Task<ActionResult<IEnumerable<string>>> GetCompanyNames()
+        {
+            var companies = await _context.Companies.ToListAsync();
+            var names = new List<string>();
+            foreach(var company in companies)
+            {
+                names.Add(company.Name);
+            }
+            return names;
         }
 
         // GET: api/Companies/5
