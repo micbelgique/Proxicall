@@ -98,6 +98,18 @@ namespace Proxicall.CRM.Controllers.Api
             return await _context.Companies.Include(c => c.Contact).ToListAsync();
         }
 
+        [HttpGet("allnames")]
+        public async Task<ActionResult<IEnumerable<string>>> GetCompanyNames()
+        {
+            var companies = await _context.Companies.ToListAsync();
+            var names = new List<string>();
+            foreach(var company in companies)
+            {
+                names.Add(company.Name);
+            }
+            return names;
+        }
+
         // GET: api/Companies/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Company>> GetCompany(string id)
