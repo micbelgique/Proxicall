@@ -185,11 +185,11 @@ namespace ProxiCall
                 }
             }
 
-            await _accessors.UserProfileAccessor.SetAsync(dialogContext.Context, userProfile);
+            await _accessors.UserProfileAccessor.SetAsync(turnContext, userProfile);
 
             await _accessors.UserState.SaveChangesAsync(turnContext, false, cancellationToken);
             await _accessors.ConversationState.SaveChangesAsync(turnContext, false, cancellationToken);
-            await _accessors.PrivateConversationState.SaveChangesAsync(turnContext);
+            await _accessors.PrivateConversationState.SaveChangesAsync(turnContext, false, cancellationToken);
         }
         
         private async Task UpdateDialogStatesAsync(RecognizerResult luisResult, string intentName, ITurnContext turnContext)
