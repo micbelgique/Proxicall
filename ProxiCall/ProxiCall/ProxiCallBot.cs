@@ -15,6 +15,9 @@ using ProxiCall.Dialogs.Shared;
 using ProxiCall.Resources;
 using ProxiCall.Models;
 using ProxiCall.Services.ProxiCallCRM;
+using ProxiCall.Dialogs.CreateData;
+using System.Globalization;
+using ProxiCall.Services;
 
 namespace ProxiCall
 {
@@ -58,6 +61,7 @@ namespace ProxiCall
             Dialogs = new DialogSet(_accessors.DialogStateAccessor);
             Dialogs.Add(new SearchLeadDataDialog(_accessors, _loggerFactory, _services));
             Dialogs.Add(new SearchCompanyDataDialog(_accessors, _loggerFactory, _services));
+            Dialogs.Add(new CreateOpportunityDialog(_accessors, _loggerFactory, _services));
         }
 
         /// <summary>
@@ -86,7 +90,7 @@ namespace ProxiCall
             var dialogContext = await Dialogs.CreateContextAsync(turnContext);
 
 
-            var userProfile = await _accessors.UserProfileAccessor.GetAsync(turnContext, () => new UserProfile());
+            var userProfile = await _accessors.UserProfileAccessor.GetAsync(dialogContext.Context, () => new UserProfile());
 
             if (activity.Type == ActivityTypes.Message)
             {
@@ -111,6 +115,10 @@ namespace ProxiCall
                         case DialogTurnStatus.Empty:
                             switch (topIntent)
                             {
+                                case Intents.CreateOpportunity:
+                                    await UpdateDialogStatesAsync(luisResults, topIntent, dialogContext.Context);
+                                    await dialogContext.BeginDialogAsync(nameof(CreateOpportunityDialog));
+                                    break;
                                 case Intents.SearchCompanyData:
                                     await UpdateDialogStatesAsync(luisResults, topIntent, dialogContext.Context);
                                     await dialogContext.BeginDialogAsync(nameof(SearchCompanyDataDialog));
@@ -145,6 +153,7 @@ namespace ProxiCall
             }
             else if (activity.Type == ActivityTypes.Event)
             {
+                //TWilio
                 //This is the first message sent by the bot on production
                 var accountService = new AccountService();
                 userProfile = await accountService.Authenticate(activity.Text.Split(':')[1]);
@@ -164,6 +173,7 @@ namespace ProxiCall
             }
             else if (turnContext.Activity.Type == ActivityTypes.ConversationUpdate && turnContext.Activity.MembersAdded.FirstOrDefault()?.Id == turnContext.Activity.Recipient.Id)
             {
+                //Emulator
                 //Only for testing
                 if (string.IsNullOrEmpty(userProfile.Token))
                 {
@@ -185,7 +195,7 @@ namespace ProxiCall
                 }
             }
 
-            await _accessors.UserProfileAccessor.SetAsync(turnContext, userProfile);
+            await _accessors.UserProfileAccessor.SetAsync(dialogContext.Context, userProfile);
 
             await _accessors.UserState.SaveChangesAsync(turnContext, false, cancellationToken);
             await _accessors.ConversationState.SaveChangesAsync(turnContext, false, cancellationToken);
@@ -223,6 +233,9 @@ namespace ProxiCall
                 string luisHintSearchNumberOpportunites = "searchnumberopportunities";
                 string luisHintSearchOpportunites = "searchopportunities";
 
+
+                string luisExpectedDateTime = "datetime";
+
                 // Update every entities
                 // TODO Consider a confirm dialog, instead of just updating.
                 foreach (var name in luisExpectedLeadName)
@@ -243,6 +256,12 @@ namespace ProxiCall
                 {
                     var companyName = (string)entities[luisExpectedCompanyName][0].First;
                     crmState.Company.Name = companyName;
+                }
+
+                if (entities[luisExpectedDateTime] != null)
+                {
+                    string timex = (string)entities[luisExpectedDateTime]?[0]?["timex"]?.First;
+                    crmState.Opportunity.EstimatedCloseDate = FormatConvertor.TimexToDateTime(timex);
                 }
 
                 if (entities[luisHintSearchLeadAddress] != null)
