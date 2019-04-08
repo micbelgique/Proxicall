@@ -12,5 +12,21 @@ namespace ProxiCall.Models
         public string Comments { get; set; }
         public string Status { get; set; }
         public string Confidence { get; set; }
+
+        public Opportunity()
+        {
+            Lead = new Lead();
+            Product = new Product();
+        }
+
+        public void ResetLead()
+        {
+            Lead = new Lead();
+        }
+
+        public void ResetProduct()
+        {
+            Product = new Product();
+        }
     }
 }

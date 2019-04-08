@@ -12,11 +12,6 @@ namespace Proxicall.CRM.DAO
             var company = await context.Companies.Where(c => c.Name == name)
                 .Include(c => c.Contact)
                 .FirstOrDefaultAsync();
-            if (company == null)
-            {
-                return null;
-            }
-
             return company;
         }
     }

@@ -379,6 +379,7 @@ namespace ProxiCall.Dialogs.SearchData
                         , cancellationToken
                     );
 
+                    crmState.IsEligibleForPotentialForwarding = false;
                     crmState.ResetLead();
                     luisState.ResetAll();
                     await _accessors.CRMStateAccessor.SetAsync(stepContext.Context, crmState);
@@ -400,6 +401,7 @@ namespace ProxiCall.Dialogs.SearchData
 
                 await stepContext.Context.SendActivityAsync(activity, cancellationToken);
 
+                crmState.IsEligibleForPotentialForwarding = false;
                 crmState.ResetLead();
                 luisState.ResetAll();
                 luisState.ResetIntentIfNoEntities();
