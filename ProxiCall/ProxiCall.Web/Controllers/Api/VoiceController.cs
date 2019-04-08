@@ -15,6 +15,7 @@ using Twilio;
 using Twilio.Rest.Api.V2010.Account;
 using ProxiCall.Web.Services.Speech;
 using Twilio.Http;
+using Newtonsoft.Json.Linq;
 
 namespace ProxiCall.Web.Controllers.Api
 {
@@ -50,12 +51,37 @@ namespace ProxiCall.Web.Controllers.Api
         }
 
         [HttpGet("receive")]
-        public IActionResult ReceiveCall([FromQuery] string CallSid, [FromQuery] string From)
+        public async Task<IActionResult> ReceiveCall([FromQuery] string CallSid, [FromQuery] string From)
         {
-            _botConnector = new BotConnector(CallSid, From);
-            
-            System.Threading.Tasks.Task.Run(() => _botConnector.ReceiveMessagesFromBotAsync(HandleIncomingBotMessagesAsync));
-            
+            var audioToDelete = Directory.GetFiles(_hostingEnvironment.WebRootPath + "/audio");
+            foreach (var file in audioToDelete)
+            {
+                System.IO.File.Delete(file);
+            }
+            var xmlToDelete = Directory.GetFiles(_hostingEnvironment.WebRootPath + "/xml");
+            foreach (var file in xmlToDelete)
+            {
+                System.IO.File.Delete(file);
+            }
+
+            _botConnector = new BotConnector(CallSid);
+
+            _ = System.Threading.Tasks.Task.Run(() => _botConnector.ReceiveMessagesFromBotAsync(HandleIncomingBotMessagesAsync));
+
+            var activity = new Activity
+            {
+                From = new ChannelAccount("TwilioUserId", "TwilioUser"),
+                Type = ActivityTypes.Message,
+                Text = string.Empty,
+                Entities = new List<Entity>()
+            };
+            var entity = new Entity();
+            entity.Properties = new JObject();
+            entity.Properties.Add("firstmessage", JToken.Parse(From.Substring(1)));
+            activity.Entities.Add(entity);
+
+            await _botConnector.SendMessageToBotAsync(activity);
+
             //Preventing the call from hanging up (/receive needs to return a TwiML)
             var response = new VoiceResponse();
             response.Say("", voice: "alice", language: Say.LanguageEnum.FrFr);
@@ -70,12 +96,6 @@ namespace ProxiCall.Web.Controllers.Api
             var says = new StringBuilder();
             var forwardingNumber = string.Empty;
             var forward = false;
-
-            var filesToDelete = Directory.GetFiles(_hostingEnvironment.WebRootPath + "/audio");
-            foreach (var file in filesToDelete)
-            {
-                System.IO.File.Delete(file);
-            }
 
             foreach (var activity in botReplies)
             {
@@ -135,16 +155,10 @@ namespace ProxiCall.Web.Controllers.Api
         [HttpGet("send")]
         public async Task<IActionResult> SendUserMessageToBot([FromQuery] string SpeechResult, [FromQuery] double Confidence, [FromQuery] string CallSid)
         {
-            var filesToDelete = Directory.GetFiles(_hostingEnvironment.WebRootPath + "/xml");
-            foreach (var file in filesToDelete)
-            {
-                System.IO.File.Delete(file);
-            }
-
             var activityToSend = new Activity
             {
                 From = new ChannelAccount("TwilioUserId", "TwilioUser"),
-                Type = "message",
+                Type = ActivityTypes.Message,
                 Text = SpeechResult
             };
             

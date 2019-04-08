@@ -86,81 +86,97 @@ namespace ProxiCall
             var dialogContext = await Dialogs.CreateContextAsync(turnContext);
 
 
-            var userProfile = await _accessors.UserProfileAccessor.GetAsync(turnContext, () => new UserProfile());
+            var userProfile = await _accessors.UserProfileAccessor.GetAsync(dialogContext.Context, () => new UserProfile());
 
             if (activity.Type == ActivityTypes.Message)
             {
-                // Perform a call to LUIS to retrieve results for the current activity message.
-                var luisResults = await _services.LuisServices[LuisConfiguration].RecognizeAsync(dialogContext.Context, cancellationToken);
-
-                // If any entities were updated, treat as interruption.
-                // For example, "no my name is tony" will manifest as an update of the name to be "tony".
-                var topScoringIntent = luisResults?.GetTopScoringIntent();
-
-                var topIntent = topScoringIntent.Value.intent;
-
-                // Continue the current dialog
-                var dialogResult = await dialogContext.ContinueDialogAsync();
-
-                // If no one has responded,
-                if (!dialogContext.Context.Responded)
+                var isFirstMessage = false;
+                if(activity.Entities != null)
                 {
-                    // Examine results from active dialog
-                    switch (dialogResult.Status)
+                    var phonenumber = string.Empty;
+                    foreach (var entity in activity.Entities)
                     {
-                        case DialogTurnStatus.Empty:
-                            switch (topIntent)
-                            {
-                                case Intents.SearchCompanyData:
-                                    await UpdateDialogStatesAsync(luisResults, topIntent, dialogContext.Context);
-                                    await dialogContext.BeginDialogAsync(nameof(SearchCompanyDataDialog));
-                                    break;
-                                case Intents.SearchLeadData:
-                                case Intents.MakeACall:
-                                    await UpdateDialogStatesAsync(luisResults, topIntent, dialogContext.Context);
-                                    await dialogContext.BeginDialogAsync(nameof(SearchLeadDataDialog));
-                                    break;
+                        isFirstMessage = entity.Properties.TryGetValue("firstmessage", out var jtoken);
+                        phonenumber = isFirstMessage ? jtoken.ToString() : string.Empty;
+                    }
 
-                                case Intents.None:
-                                default:
-                                    await dialogContext.Context.SendActivityAsync(CulturedBot.NoIntentFound);
-                                    break;
-                            }
-
-                            break;
-
-                        case DialogTurnStatus.Waiting:
-                            // The active dialog is waiting for a response from the user, so do nothing.
-                            break;
-
-                        case DialogTurnStatus.Complete:
-                            await dialogContext.EndDialogAsync();
-                            break;
-
-                        default:
-                            await dialogContext.CancelAllDialogsAsync();
-                            break;
+                    if (isFirstMessage)
+                    {
+                        //Twilio
+                        //This is the first message sent by the bot on production
+                        var accountService = new AccountService();
+                        userProfile = await accountService.Authenticate(phonenumber);
+                        var welcomingMessage = string.Empty;
+                        if (string.IsNullOrEmpty(userProfile.Token))
+                        {
+                            welcomingMessage = "L'utilisateur n'a pas pu être connecté";
+                        }
+                        else
+                        {
+                            welcomingMessage = $"Bonjour {userProfile.Alias} {CulturedBot.AskForRequest}";
+                        }
+                        var reply = MessageFactory.Text(welcomingMessage,
+                                                        welcomingMessage,
+                                                        InputHints.AcceptingInput);
+                        await turnContext.SendActivityAsync(reply, cancellationToken);
                     }
                 }
-            }
-            else if (activity.Type == ActivityTypes.Event)
-            {
-                //This is the first message sent by the bot on production
-                var accountService = new AccountService();
-                userProfile = await accountService.Authenticate(activity.Text.Split(':')[1]);
-                var welcomingMessage = string.Empty;
-                if (string.IsNullOrEmpty(userProfile.Token))
+
+                if(!isFirstMessage)
                 {
-                    welcomingMessage = "L'utilisateur n'a pas pu être connecté";
+                    // Perform a call to LUIS to retrieve results for the current activity message.
+                    var luisResults = await _services.LuisServices[LuisConfiguration].RecognizeAsync(dialogContext.Context, cancellationToken);
+
+                    // If any entities were updated, treat as interruption.
+                    // For example, "no my name is tony" will manifest as an update of the name to be "tony".
+                    var topScoringIntent = luisResults?.GetTopScoringIntent();
+
+                    var topIntent = topScoringIntent.Value.intent;
+
+                    // Continue the current dialog
+                    var dialogResult = await dialogContext.ContinueDialogAsync();
+
+                    // If no one has responded,
+                    if (!dialogContext.Context.Responded)
+                    {
+                        // Examine results from active dialog
+                        switch (dialogResult.Status)
+                        {
+                            case DialogTurnStatus.Empty:
+                                switch (topIntent)
+                                {
+                                    case Intents.SearchCompanyData:
+                                        await UpdateDialogStatesAsync(luisResults, topIntent, dialogContext.Context);
+                                        await dialogContext.BeginDialogAsync(nameof(SearchCompanyDataDialog));
+                                        break;
+                                    case Intents.SearchLeadData:
+                                    case Intents.MakeACall:
+                                        await UpdateDialogStatesAsync(luisResults, topIntent, dialogContext.Context);
+                                        await dialogContext.BeginDialogAsync(nameof(SearchLeadDataDialog));
+                                        break;
+
+                                    case Intents.None:
+                                    default:
+                                        await dialogContext.Context.SendActivityAsync(CulturedBot.NoIntentFound);
+                                        break;
+                                }
+
+                                break;
+
+                            case DialogTurnStatus.Waiting:
+                                // The active dialog is waiting for a response from the user, so do nothing.
+                                break;
+
+                            case DialogTurnStatus.Complete:
+                                await dialogContext.EndDialogAsync();
+                                break;
+
+                            default:
+                                await dialogContext.CancelAllDialogsAsync();
+                                break;
+                        }
+                    }
                 }
-                else
-                {
-                    welcomingMessage = $"Bonjour {userProfile.Alias} {CulturedBot.AskForRequest}";
-                }
-                var reply = MessageFactory.Text(welcomingMessage,
-                                                welcomingMessage,
-                                                InputHints.AcceptingInput);
-                await turnContext.SendActivityAsync(reply, cancellationToken);
             }
             else if (turnContext.Activity.Type == ActivityTypes.ConversationUpdate && turnContext.Activity.MembersAdded.FirstOrDefault()?.Id == turnContext.Activity.Recipient.Id)
             {
@@ -168,7 +184,7 @@ namespace ProxiCall
                 if (string.IsNullOrEmpty(userProfile.Token))
                 {
                     var accountService = new AccountService();
-                    userProfile = await accountService.Authenticate("+32471452559");
+                    userProfile = await accountService.Authenticate("1234567890");
                     var welcomingMessage = string.Empty;
                     if (string.IsNullOrEmpty(userProfile.Token))
                     {
@@ -185,7 +201,7 @@ namespace ProxiCall
                 }
             }
 
-            await _accessors.UserProfileAccessor.SetAsync(turnContext, userProfile);
+            await _accessors.UserProfileAccessor.SetAsync(dialogContext.Context, userProfile);
 
             await _accessors.UserState.SaveChangesAsync(turnContext, false, cancellationToken);
             await _accessors.ConversationState.SaveChangesAsync(turnContext, false, cancellationToken);
