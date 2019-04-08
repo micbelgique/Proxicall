@@ -96,6 +96,8 @@ namespace ProxiCall.Web.Controllers.Api
             var says = new StringBuilder();
             var forwardingNumber = string.Empty;
             var forward = false;
+            var error = false;
+            var errorMessage = string.Empty;
 
             foreach (var activity in botReplies)
             {
@@ -115,13 +117,23 @@ namespace ProxiCall.Web.Controllers.Api
                 {
                     foreach (var entity in activity.Entities)
                     {
-                        forward = entity.Properties.TryGetValue("forward", out var jtoken);
-                        forwardingNumber = forward ? jtoken.ToString() : string.Empty;
+                        forward = entity.Properties.TryGetValue("forward", out var numberJToken);
+                        forwardingNumber = forward ? numberJToken.ToString() : string.Empty;
+
+                        error = entity.Properties.TryGetValue("error", out var errorMessageJToken);
+                        if (error)
+                        {
+                            break;
+                        }
                     }
                 }
             }
-            
-            if(forward)
+
+            if (error)
+            {
+                voiceResponse.Hangup();
+            }
+            else if(forward)
             {
                 voiceResponse.Dial(number: forwardingNumber);
             }

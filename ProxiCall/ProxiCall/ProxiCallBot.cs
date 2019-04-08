@@ -9,6 +9,7 @@ using Microsoft.Bot.Schema;
 using Microsoft.Bot.Builder.Dialogs;
 using Microsoft.Extensions.Logging;
 using System.Linq;
+using Newtonsoft.Json.Linq;
 using ProxiCall.Models.Intents;
 using ProxiCall.Dialogs.SearchData;
 using ProxiCall.Dialogs.Shared;
@@ -59,7 +60,7 @@ namespace ProxiCall
             Dialogs.Add(new SearchLeadDataDialog(_accessors, _loggerFactory, _services));
             Dialogs.Add(new SearchCompanyDataDialog(_accessors, _loggerFactory, _services));
         }
-
+        
         /// <summary>
         /// Every conversation turn for our Echo Bot will call this method.
         /// There are no dialogs used, since it's "single turn" processing, meaning a single
@@ -120,20 +121,24 @@ namespace ProxiCall
                     var accountService = new AccountService();
                     userProfile = await accountService.Authenticate(phonenumber);
                     await _accessors.UserProfileAccessor.SetAsync(dialogContext.Context, userProfile);
-                    if (!isDev)
+                    if (userProfile != null)
                     {
-                        var welcomingMessage = string.Empty;
-                        if (string.IsNullOrEmpty(userProfile.Token))
+                        if (!isDev && !string.IsNullOrEmpty(userProfile.Token))
                         {
-                            welcomingMessage = "L'utilisateur n'a pas pu être connecté";
+                            var welcomingMessage = $"Bonjour {userProfile.Alias}. {CulturedBot.AskForRequest}";
+                            var reply = MessageFactory.Text(welcomingMessage,
+                                welcomingMessage,
+                                InputHints.AcceptingInput);
+                            await turnContext.SendActivityAsync(reply, cancellationToken);
                         }
-                        else
-                        {
-                            welcomingMessage = $"Bonjour {userProfile.Alias} {CulturedBot.AskForRequest}";
-                        }
-                        var reply = MessageFactory.Text(welcomingMessage,
-                                                        welcomingMessage,
-                                                        InputHints.AcceptingInput);
+                    }
+                    else
+                    {
+                        string errorMessage = "Désolé, vous n'avez pas accès.";
+                        var reply = MessageFactory.Text(errorMessage, errorMessage, InputHints.AcceptingInput);
+                        var entity = new Entity();
+                        entity.Properties.Add("error", JToken.Parse("{\"hangup\":\"unauthorized\"}"));
+                        reply.Entities.Add(entity);
                         await turnContext.SendActivityAsync(reply, cancellationToken);
                     }
                 }
