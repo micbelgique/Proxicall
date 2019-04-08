@@ -91,21 +91,37 @@ namespace ProxiCall
             if (activity.Type == ActivityTypes.Message)
             {
                 var isFirstMessage = false;
-                if(activity.Entities != null)
-                {
-                    var phonenumber = string.Empty;
-                    foreach (var entity in activity.Entities)
-                    {
-                        isFirstMessage = entity.Properties.TryGetValue("firstmessage", out var jtoken);
-                        phonenumber = isFirstMessage ? jtoken.ToString() : string.Empty;
-                    }
+                var isDev = false;
+                var phonenumber = string.Empty;
 
-                    if (isFirstMessage)
+                if (activity.ChannelId == "directline")
+                {
+                    if (activity.Entities != null)
                     {
-                        //Twilio
-                        //This is the first message sent by the bot on production
-                        var accountService = new AccountService();
-                        userProfile = await accountService.Authenticate(phonenumber);
+                        foreach (var entity in activity.Entities)
+                        {
+                            isFirstMessage = entity.Properties.TryGetValue("firstmessage", out var jtoken);
+                            phonenumber = isFirstMessage ? jtoken.ToString() : string.Empty;
+                        }
+                    }
+                }
+                else if (userProfile.Token == null)
+                {
+                    //emulator and webchat
+                    isFirstMessage = true;
+                    isDev = true;
+                    phonenumber = "1234567890";
+                }
+
+                if(isFirstMessage)
+                {
+                    //Twilio
+                    //This is the first message sent by the bot on production
+                    var accountService = new AccountService();
+                    userProfile = await accountService.Authenticate(phonenumber);
+                    await _accessors.UserProfileAccessor.SetAsync(dialogContext.Context, userProfile);
+                    if (!isDev)
+                    {
                         var welcomingMessage = string.Empty;
                         if (string.IsNullOrEmpty(userProfile.Token))
                         {
@@ -121,8 +137,8 @@ namespace ProxiCall
                         await turnContext.SendActivityAsync(reply, cancellationToken);
                     }
                 }
-
-                if(!isFirstMessage)
+                
+                if(isDev || !isFirstMessage)
                 {
                     // Perform a call to LUIS to retrieve results for the current activity message.
                     var luisResults = await _services.LuisServices[LuisConfiguration].RecognizeAsync(dialogContext.Context, cancellationToken);
@@ -178,30 +194,6 @@ namespace ProxiCall
                     }
                 }
             }
-            else if (turnContext.Activity.Type == ActivityTypes.ConversationUpdate && turnContext.Activity.MembersAdded.FirstOrDefault()?.Id == turnContext.Activity.Recipient.Id)
-            {
-                //Only for testing
-                if (string.IsNullOrEmpty(userProfile.Token))
-                {
-                    var accountService = new AccountService();
-                    userProfile = await accountService.Authenticate("1234567890");
-                    var welcomingMessage = string.Empty;
-                    if (string.IsNullOrEmpty(userProfile.Token))
-                    {
-                        welcomingMessage = "L'utilisateur n'a pas pu être connecté";
-                    }
-                    else
-                    {
-                        welcomingMessage = $"Bonjour {userProfile.Alias} {CulturedBot.AskForRequest}";
-                    }
-                    var reply = MessageFactory.Text(welcomingMessage,
-                                                    welcomingMessage,
-                                                    InputHints.AcceptingInput);
-                    await turnContext.SendActivityAsync(reply, cancellationToken);
-                }
-            }
-
-            await _accessors.UserProfileAccessor.SetAsync(dialogContext.Context, userProfile);
 
             await _accessors.UserState.SaveChangesAsync(turnContext, false, cancellationToken);
             await _accessors.ConversationState.SaveChangesAsync(turnContext, false, cancellationToken);

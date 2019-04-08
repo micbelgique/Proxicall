@@ -5,6 +5,10 @@
     <UserSecretsId>c14654e0-bec8-465f-9d9e-6e99b0d0e1c8</UserSecretsId>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <Optimize>false</Optimize>
+  </PropertyGroup>
+
   <ItemGroup>
     <Content Include="ProxiCall.bot">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
