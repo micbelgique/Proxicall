@@ -4,13 +4,10 @@ using Microsoft.Bot.Schema;
 using Microsoft.Extensions.Logging;
 using ProxiCall.Dialogs.Shared;
 using ProxiCall.Models;
-using ProxiCall.Models.Intents;
 using ProxiCall.Resources;
 using ProxiCall.Services;
 using ProxiCall.Services.ProxiCallCRM;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -22,7 +19,7 @@ namespace ProxiCall.Dialogs.CreateData
         private readonly ILoggerFactory _loggerFactory;
         private readonly StateAccessors _accessors;
 
-        private const string _searchLeadDataWaterfall = "searchLeadDataWaterfall";
+        private const string _createOpportunityDataWaterfall = "createOpportunityDataWaterfall";
         //Searching for lead
         private const string _leadFullNamePrompt = "leadFullNamePrompt";
         private const string _retryFetchingLeadFromUserPrompt = "retryFetchingLeadFromUserPrompt";
@@ -42,6 +39,7 @@ namespace ProxiCall.Dialogs.CreateData
 
             var waterfallSteps = new WaterfallStep[]
             {
+                //Start of dialog
                 InitializeStateStepAsync,
                 //Searching for lead
                 AskForLeadFullNameStepAsync,
@@ -54,10 +52,12 @@ namespace ProxiCall.Dialogs.CreateData
                 //Checking the closing date
                 AskForClosingDateStepAsync,
                 SearchClosingDateStepAsync,
-                ClosingDateResultHandlerStepAsync
+                ClosingDateResultHandlerStepAsync,
+                //End of Dialog
+                EndSearchDialogStepAsync
 
             };
-            AddDialog(new WaterfallDialog(_searchLeadDataWaterfall, waterfallSteps));
+            AddDialog(new WaterfallDialog(_createOpportunityDataWaterfall, waterfallSteps));
             //Searching for lead
             AddDialog(new TextPrompt(_leadFullNamePrompt));
             AddDialog(new ConfirmPrompt(_retryFetchingLeadFromUserPrompt, defaultLocale: "fr-fr"));
@@ -69,6 +69,9 @@ namespace ProxiCall.Dialogs.CreateData
             AddDialog(new ConfirmPrompt(_retryFetchingClosingDateFromUserPrompt, defaultLocale: "fr-fr"));
         }
 
+        //-------------------------
+        //-----Start of dialog-----
+        //-------------------------
         private async Task<DialogTurnResult> InitializeStateStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
         {
             //Initializing CRMStateAccessor
@@ -123,17 +126,18 @@ namespace ProxiCall.Dialogs.CreateData
         {
             var crmState = await _accessors.CRMStateAccessor.GetAsync(stepContext.Context);
 
+            if(!string.IsNullOrEmpty(crmState.Lead.FullName))
+            {
+                crmState.Opportunity.Lead = crmState.Lead;
+            }
+
             //Asking for the name of the lead if not already given
-            if (string.IsNullOrEmpty(crmState.Lead.FullName))
+            if (string.IsNullOrEmpty(crmState.Opportunity.Lead.FullName))
             {
                 return await stepContext.PromptAsync(_leadFullNamePrompt, new PromptOptions
                 {
-                    Prompt = MessageFactory.Text("Pour quel client désirez-vous créer cette opportunité?")
+                    Prompt = MessageFactory.Text(CulturedBot.AskForWhichLeadToCreateOpportunity)
                 }, cancellationToken);
-            }
-            else
-            {
-                crmState.Opportunity.Lead = crmState.Lead;
             }
             return await stepContext.NextAsync();
         }
@@ -144,7 +148,7 @@ namespace ProxiCall.Dialogs.CreateData
             var luisState = await _accessors.LuisStateAccessor.GetAsync(stepContext.Context, () => new LuisState());
 
             //Gathering the name of the lead if not already given
-            if (string.IsNullOrEmpty(crmState.Lead.FullName))
+            if (string.IsNullOrEmpty(crmState.Opportunity.Lead.FullName))
             {
                 crmState.Opportunity.Lead.FullName = (string)stepContext.Result;
             }
@@ -196,9 +200,10 @@ namespace ProxiCall.Dialogs.CreateData
                 if (retry)
                 {
                     //Restarting dialog if user decides to retry
+                    crmState.ResetLead();
                     crmState.Opportunity.ResetLead();
                     await _accessors.CRMStateAccessor.SetAsync(stepContext.Context, crmState);
-                    return await stepContext.ReplaceDialogAsync(_searchLeadDataWaterfall, cancellationToken);
+                    return await stepContext.ReplaceDialogAsync(_createOpportunityDataWaterfall, cancellationToken);
                 }
                 else
                 {
@@ -209,23 +214,13 @@ namespace ProxiCall.Dialogs.CreateData
                         , cancellationToken
                     );
 
-                    crmState.Opportunity.ResetLead();
+                    crmState.ResetOpportunity();
                     luisState.ResetAll();
                     await _accessors.CRMStateAccessor.SetAsync(stepContext.Context, crmState);
                     await _accessors.LuisStateAccessor.SetAsync(stepContext.Context, luisState);
                     return await stepContext.EndDialogAsync();
                 }
             }
-
-            //Introducing next step
-            var textMessage = $"Une opportunité sera créée pour {crmState.Opportunity.Lead.FullName}.";
-
-            //Sending response
-            await stepContext.Context
-                .SendActivityAsync(MessageFactory
-                    .Text(textMessage, textMessage, InputHints.IgnoringInput)
-                    , cancellationToken
-            );
 
             return await stepContext.NextAsync();
         }
@@ -237,12 +232,17 @@ namespace ProxiCall.Dialogs.CreateData
         {
             var crmState = await _accessors.CRMStateAccessor.GetAsync(stepContext.Context);
 
+            if(!string.IsNullOrEmpty(crmState.Product.Title))
+            {
+                crmState.Opportunity.Product = crmState.Product;
+            }
+
             //Asking for the name of the product if not already given
             if (string.IsNullOrEmpty(crmState.Opportunity.Product.Title))
             {
                 return await stepContext.PromptAsync(_productNamePrompt, new PromptOptions
                 {
-                    Prompt = MessageFactory.Text("Pour quel produit désirez-vous créer une opportunité?")
+                    Prompt = MessageFactory.Text(CulturedBot.AskForWhichProduct)
                 }, cancellationToken);
             }
             return await stepContext.NextAsync();
@@ -260,7 +260,7 @@ namespace ProxiCall.Dialogs.CreateData
             }
 
             //Searching the product
-            var productNameGivenByUser = crmState.Lead.FullName;
+            var productNameGivenByUser = crmState.Opportunity.Product.Title;
             crmState.Opportunity.Product = await SearchProductAsync(stepContext.Context, crmState.Opportunity.Product.Title);
 
             //Asking for retry if necessary
@@ -299,16 +299,17 @@ namespace ProxiCall.Dialogs.CreateData
             var crmState = await _accessors.CRMStateAccessor.GetAsync(stepContext.Context, () => new CRMState());
             var luisState = await _accessors.LuisStateAccessor.GetAsync(stepContext.Context, () => new LuisState());
 
-            //Handling when lead not found
+            //Handling when product not found
             if (crmState.Opportunity.Product == null)
             {
                 var retry = (bool)stepContext.Result;
                 if (retry)
                 {
                     //Restarting dialog if user decides to retry
+                    crmState.ResetProduct();
                     crmState.Opportunity.ResetProduct();
                     await _accessors.CRMStateAccessor.SetAsync(stepContext.Context, crmState);
-                    return await stepContext.ReplaceDialogAsync(_searchLeadDataWaterfall, cancellationToken);
+                    return await stepContext.ReplaceDialogAsync(_createOpportunityDataWaterfall, cancellationToken);
                 }
                 else
                 {
@@ -319,25 +320,13 @@ namespace ProxiCall.Dialogs.CreateData
                         , cancellationToken
                     );
 
-                    crmState.Opportunity.ResetLead();
-                    crmState.Opportunity.ResetProduct();
+                    crmState.ResetOpportunity();
                     luisState.ResetAll();
                     await _accessors.CRMStateAccessor.SetAsync(stepContext.Context, crmState);
                     await _accessors.LuisStateAccessor.SetAsync(stepContext.Context, luisState);
                     return await stepContext.EndDialogAsync();
                 }
             }
-
-            //Introducing next step
-            var textMessage = $"Une opportunité sera créée pour {crmState.Opportunity.Product.Title}.";
-
-            //Sending response
-            await stepContext.Context
-                .SendActivityAsync(MessageFactory
-                    .Text(textMessage, textMessage, InputHints.IgnoringInput)
-                    , cancellationToken
-            );
-
             return await stepContext.NextAsync();
         }
 
@@ -354,7 +343,7 @@ namespace ProxiCall.Dialogs.CreateData
             {
                 return await stepContext.PromptAsync(_closingDatePrompt, new PromptOptions
                 {
-                    Prompt = MessageFactory.Text("A quelle date pourrait être conclue cette opportunité?")
+                    Prompt = MessageFactory.Text(CulturedBot.AskEstimatedClosingDateOfOpportunity)
                 }, cancellationToken);
             }
             return await stepContext.NextAsync();
@@ -369,7 +358,7 @@ namespace ProxiCall.Dialogs.CreateData
             //Gathering the date if not already given
             if (crmState.Opportunity.EstimatedCloseDate == DateTime.MinValue)
             {
-                luisResult = await _botServices.LuisServices["proxicall-luis"].RecognizeAsync(stepContext.Context, cancellationToken);
+                luisResult = await _botServices.LuisServices[BotServices.LUIS_APP_NAME].RecognizeAsync(stepContext.Context, cancellationToken);
 
                 var entities = luisResult.Entities;
                 string timex = (string)entities["datetime"]?[0]?["timex"]?.First;
@@ -379,11 +368,11 @@ namespace ProxiCall.Dialogs.CreateData
             var promptMessage = "";
             if (crmState.Opportunity.EstimatedCloseDate == DateTime.MinValue)
             {
-                promptMessage = $"Aucune Date reconnue {CulturedBot.AskIfWantRetry}";
+                promptMessage = $"{CulturedBot.AdmitNotUnderstanding} {CulturedBot.AskIfWantToSkip}";
             }
 
-            var needsRetry = !string.IsNullOrEmpty(promptMessage);
-            if (needsRetry)
+            crmState.isEligibleForPotentalSkippingStep = !string.IsNullOrEmpty(promptMessage);
+            if (crmState.isEligibleForPotentalSkippingStep)
             {
                 await _accessors.CRMStateAccessor.SetAsync(stepContext.Context, crmState);
                 var promptOptions = new PromptOptions
@@ -403,15 +392,15 @@ namespace ProxiCall.Dialogs.CreateData
             var crmState = await _accessors.CRMStateAccessor.GetAsync(stepContext.Context, () => new CRMState());
             var luisState = await _accessors.LuisStateAccessor.GetAsync(stepContext.Context, () => new LuisState());
 
-            //Handling when lead not found
-            if (crmState.Opportunity.EstimatedCloseDate == DateTime.MinValue)
+            //Handling when date not found
+            if (crmState.isEligibleForPotentalSkippingStep)
             {
                 var retry = (bool)stepContext.Result;
                 if (retry)
                 {
                     //Restarting dialog if user decides to retry
                     await _accessors.CRMStateAccessor.SetAsync(stepContext.Context, crmState);
-                    return await stepContext.ReplaceDialogAsync(_searchLeadDataWaterfall, cancellationToken);
+                    return await stepContext.ReplaceDialogAsync(_createOpportunityDataWaterfall, cancellationToken);
                 }
                 else
                 {
@@ -422,32 +411,38 @@ namespace ProxiCall.Dialogs.CreateData
                         , cancellationToken
                     );
 
-                    crmState.Opportunity.ResetLead();
-                    crmState.Opportunity.ResetProduct();
-                    crmState.Opportunity.EstimatedCloseDate = DateTime.MinValue;
+                    crmState.isEligibleForPotentalSkippingStep = false;
+                    crmState.ResetOpportunity();
                     luisState.ResetAll();
                     await _accessors.CRMStateAccessor.SetAsync(stepContext.Context, crmState);
                     await _accessors.LuisStateAccessor.SetAsync(stepContext.Context, luisState);
                     return await stepContext.EndDialogAsync();
                 }
             }
-
-            //Introducing next step
-            var textMessage = $"Une opportunité sera créée le {crmState.Opportunity.EstimatedCloseDate}.";
-
-            //Sending response
-            await stepContext.Context
-                .SendActivityAsync(MessageFactory
-                    .Text(textMessage, textMessage, InputHints.IgnoringInput)
-                    , cancellationToken
-            );
-
             return await stepContext.NextAsync();
         }
-
-
+        
         //-----------------------
         //-----End of dialog-----
         //-----------------------
+        private async Task<DialogTurnResult> EndSearchDialogStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
+        {
+            var crmState = await _accessors.CRMStateAccessor.GetAsync(stepContext.Context, () => new CRMState());
+            var luisState = await _accessors.LuisStateAccessor.GetAsync(stepContext.Context, () => new LuisState());
+
+            //TODO : post opportunity to crm
+
+            var message = $"{ CulturedBot.SayOpportunityWasCreated} {CulturedBot.AskForRequestAgain}";
+            await stepContext.Context.SendActivityAsync(MessageFactory
+                .Text(message, message, InputHints.AcceptingInput)
+                , cancellationToken
+            );
+
+            crmState.ResetOpportunity();
+            luisState.ResetAll();
+            await _accessors.CRMStateAccessor.SetAsync(stepContext.Context, crmState);
+            await _accessors.LuisStateAccessor.SetAsync(stepContext.Context, luisState);
+            return await stepContext.EndDialogAsync();
+        }
     }
 }

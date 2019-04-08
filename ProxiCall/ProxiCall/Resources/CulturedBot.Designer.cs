@@ -61,6 +61,15 @@ namespace ProxiCall.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Je n&apos;ai pas compris..
+        /// </summary>
+        public static string AdmitNotUnderstanding {
+            get {
+                return ResourceManager.GetString("AdmitNotUnderstanding", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Quelle est le nom de la compagnie concernée pour cette demande?.
         /// </summary>
         public static string AskCompanyName {
@@ -70,11 +79,47 @@ namespace ProxiCall.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to A quelle date estimez-vous pouvoir conclure cette opportunité?.
+        /// </summary>
+        public static string AskEstimatedClosingDateOfOpportunity {
+            get {
+                return ResourceManager.GetString("AskEstimatedClosingDateOfOpportunity", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Que puis-je faire pour vous?.
         /// </summary>
         public static string AskForRequest {
             get {
                 return ResourceManager.GetString("AskForRequest", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Que puis-je faire pour vous à présent?.
+        /// </summary>
+        public static string AskForRequestAgain {
+            get {
+                return ResourceManager.GetString("AskForRequestAgain", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Pour quel client désirez-vous créer cette opportunité?.
+        /// </summary>
+        public static string AskForWhichLeadToCreateOpportunity {
+            get {
+                return ResourceManager.GetString("AskForWhichLeadToCreateOpportunity", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Pour quel produit?.
+        /// </summary>
+        public static string AskForWhichProduct {
+            get {
+                return ResourceManager.GetString("AskForWhichProduct", resourceCulture);
             }
         }
         
@@ -93,6 +138,15 @@ namespace ProxiCall.Resources {
         public static string AskIfWantRetry {
             get {
                 return ResourceManager.GetString("AskIfWantRetry", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Voulez-vous passer cette étape?.
+        /// </summary>
+        public static string AskIfWantToSkip {
+            get {
+                return ResourceManager.GetString("AskIfWantToSkip", resourceCulture);
             }
         }
         
@@ -273,6 +327,15 @@ namespace ProxiCall.Resources {
         public static string PhoneNumberNotFound {
             get {
                 return ResourceManager.GetString("PhoneNumberNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Très bien, l&apos;opportunité a bien été créée..
+        /// </summary>
+        public static string SayOpportunityWasCreated {
+            get {
+                return ResourceManager.GetString("SayOpportunityWasCreated", resourceCulture);
             }
         }
         

@@ -192,4 +192,25 @@
   <data name="ListOpportunitiesOfCompany" xml:space="preserve">
     <value>avec {0} pour le produit {1}, créée le {2}</value>
   </data>
+  <data name="SayOpportunityWasCreated" xml:space="preserve">
+    <value>Très bien, l'opportunité a bien été créée.</value>
+  </data>
+  <data name="AdmitNotUnderstanding" xml:space="preserve">
+    <value>Je n'ai pas compris.</value>
+  </data>
+  <data name="AskEstimatedClosingDateOfOpportunity" xml:space="preserve">
+    <value>A quelle date estimez-vous pouvoir conclure cette opportunité?</value>
+  </data>
+  <data name="AskForRequestAgain" xml:space="preserve">
+    <value>Que puis-je faire pour vous à présent?</value>
+  </data>
+  <data name="AskForWhichLeadToCreateOpportunity" xml:space="preserve">
+    <value>Pour quel client désirez-vous créer cette opportunité?</value>
+  </data>
+  <data name="AskForWhichProduct" xml:space="preserve">
+    <value>Pour quel produit?</value>
+  </data>
+  <data name="AskIfWantToSkip" xml:space="preserve">
+    <value>Voulez-vous passer cette étape?</value>
+  </data>
 </root>

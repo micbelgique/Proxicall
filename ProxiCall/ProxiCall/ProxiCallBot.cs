@@ -16,7 +16,6 @@ using ProxiCall.Resources;
 using ProxiCall.Models;
 using ProxiCall.Services.ProxiCallCRM;
 using ProxiCall.Dialogs.CreateData;
-using System.Globalization;
 using ProxiCall.Services;
 
 namespace ProxiCall
@@ -178,7 +177,7 @@ namespace ProxiCall
                 if (string.IsNullOrEmpty(userProfile.Token))
                 {
                     var accountService = new AccountService();
-                    userProfile = await accountService.Authenticate("+32471452559");
+                    userProfile = await accountService.Authenticate("1234567890");
                     var welcomingMessage = string.Empty;
                     if (string.IsNullOrEmpty(userProfile.Token))
                     {
@@ -219,8 +218,9 @@ namespace ProxiCall
                     "leadfullname",
                     "personName"
                 };
-
                 string luisExpectedCompanyName = "companyName";
+                string luisExpectedDateTime = "datetime";
+                string luisExpectedProductTitle = "productTitle";
 
                 string luisHintSearchLeadAddress = "searchaddress";
                 string luisHintSearchLeadCompany = "searchcompany";
@@ -233,11 +233,7 @@ namespace ProxiCall
                 string luisHintSearchNumberOpportunites = "searchnumberopportunities";
                 string luisHintSearchOpportunites = "searchopportunities";
 
-
-                string luisExpectedDateTime = "datetime";
-
-                // Update every entities
-                // TODO Consider a confirm dialog, instead of just updating.
+                //Given Data
                 foreach (var name in luisExpectedLeadName)
                 {
                     if (entities[name] != null)
@@ -264,6 +260,13 @@ namespace ProxiCall
                     crmState.Opportunity.EstimatedCloseDate = FormatConvertor.TimexToDateTime(timex);
                 }
 
+                if (entities[luisExpectedProductTitle] != null)
+                {
+                    var productTitle = (string)entities[luisExpectedProductTitle][0];
+                    crmState.Product.Title = productTitle;
+                }
+
+                //Hints
                 if (entities[luisHintSearchLeadAddress] != null)
                 {
                     luisState.AddDetectedEntity(LuisState.SEARCH_ADDRESS_ENTITYNAME);
