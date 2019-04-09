@@ -263,6 +263,7 @@ namespace ProxiCall.Dialogs.SearchData
             if (wantOppornunities || wantNumberOppornunities)
             {
                 //Searching opportunities with this lead
+                //TODO : take off hardcode
                 crmState.Opportunities = (List<Opportunity>) await SearchOpportunitiesAsync
                     (stepContext, crmState.Lead.FirstName, crmState.Lead.LastName, "32491180031");
                 await _accessors.CRMStateAccessor.SetAsync(stepContext.Context, crmState);
@@ -315,7 +316,7 @@ namespace ProxiCall.Dialogs.SearchData
                 for (int i = 0; i < crmState.Opportunities.Count; i++)
                 {
                     wantedData.Append(string.Format(CulturedBot.ListOpportunities,
-                        crmState.Opportunities[i].Product.Title, crmState.Opportunities[i].CreationDate.ToShortDateString()));
+                        crmState.Opportunities[i].Product.Title, crmState.Opportunities[i].CreationDate?.ToShortDateString()));
                     if (i == (numberOfOpportunities - 2))
                     {
                         wantedData.Append($" {CulturedBot.LinkWithAnd} ");

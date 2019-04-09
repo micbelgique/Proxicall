@@ -371,8 +371,8 @@ namespace ProxiCall.Dialogs.CreateData
                 promptMessage = $"{CulturedBot.AdmitNotUnderstanding} {CulturedBot.AskIfWantToSkip}";
             }
 
-            crmState.isEligibleForPotentalSkippingStep = !string.IsNullOrEmpty(promptMessage);
-            if (crmState.isEligibleForPotentalSkippingStep)
+            crmState.IsEligibleForPotentalSkippingStep = !string.IsNullOrEmpty(promptMessage);
+            if (crmState.IsEligibleForPotentalSkippingStep)
             {
                 await _accessors.CRMStateAccessor.SetAsync(stepContext.Context, crmState);
                 var promptOptions = new PromptOptions
@@ -393,7 +393,7 @@ namespace ProxiCall.Dialogs.CreateData
             var luisState = await _accessors.LuisStateAccessor.GetAsync(stepContext.Context, () => new LuisState());
 
             //Handling when date not found
-            if (crmState.isEligibleForPotentalSkippingStep)
+            if (crmState.IsEligibleForPotentalSkippingStep)
             {
                 var retry = (bool)stepContext.Result;
                 if (retry)
@@ -411,7 +411,7 @@ namespace ProxiCall.Dialogs.CreateData
                         , cancellationToken
                     );
 
-                    crmState.isEligibleForPotentalSkippingStep = false;
+                    crmState.IsEligibleForPotentalSkippingStep = false;
                     crmState.ResetOpportunity();
                     luisState.ResetAll();
                     await _accessors.CRMStateAccessor.SetAsync(stepContext.Context, crmState);
@@ -429,8 +429,13 @@ namespace ProxiCall.Dialogs.CreateData
         {
             var crmState = await _accessors.CRMStateAccessor.GetAsync(stepContext.Context, () => new CRMState());
             var luisState = await _accessors.LuisStateAccessor.GetAsync(stepContext.Context, () => new LuisState());
+            var user = await _accessors.UserProfileAccessor.GetAsync(stepContext.Context, () => new UserProfile());
 
-            //TODO : post opportunity to crm
+            //TODO : take off hardcode
+            crmState.Opportunity.Status = "Ouvert";
+            crmState.Opportunity.OwnerId = "5e619082-8c30-4eeb-85cf-d074e1987c87";
+            var opportunityService = new OpportunityService(user.Token);
+            await opportunityService.PostOpportunityAsync(crmState.Opportunity);
 
             var message = $"{ CulturedBot.SayOpportunityWasCreated} {CulturedBot.AskForRequestAgain}";
             await stepContext.Context.SendActivityAsync(MessageFactory

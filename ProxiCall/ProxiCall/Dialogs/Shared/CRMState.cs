@@ -21,7 +21,7 @@ namespace ProxiCall.Dialogs.Shared
         }
 
 
-        public bool isEligibleForPotentalSkippingStep { get; set; }
+        public bool IsEligibleForPotentalSkippingStep { get; set; }
         public bool WantsToCallButNumberNotFound { get; set; }
         public bool IsEligibleForPotentialForwarding { get; set; }
 
