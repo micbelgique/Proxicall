@@ -169,6 +169,10 @@ namespace ProxiCall
                             case DialogTurnStatus.Empty:
                                 switch (topIntent)
                                 {
+                                    case Intents.CreateOpportunity:
+                                        await UpdateDialogStatesAsync(luisResults, topIntent, dialogContext.Context);
+                                        await dialogContext.BeginDialogAsync(nameof(CreateOpportunityDialog));
+                                        break;
                                     case Intents.SearchCompanyData:
                                         await UpdateDialogStatesAsync(luisResults, topIntent, dialogContext.Context);
                                         await dialogContext.BeginDialogAsync(nameof(SearchCompanyDataDialog));
