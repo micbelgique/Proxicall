@@ -27,18 +27,24 @@ namespace Proxicall.CRM.Models
         [ForeignKey("Product")]
         public string ProductId { get; set; }
         public Product Product { get; set; }
+
         [Display(Name = "Date created")]
+        [DisplayFormat(DataFormatString = "{0:dd/MM/yyyy}", ApplyFormatInEditMode = true)]
         public DateTime CreationDate { get; set; }
+
         [Display(Name = "Estimated closing date")]
+        [DisplayFormat(DataFormatString = "{0:dd/MM/yyyy}", ApplyFormatInEditMode = true)]
         public DateTime? EstimatedCloseDate { get; set; }
+
         public string Comments { get; set; }
         
         public string Status { get; set; }
+
         public string Confidence { get; set; }
 
         public Opportunity()
         {
-            CreationDate = DateTime.Now;
+            CreationDate = DateTime.Now.Date;
             Status = Enumeration.Opportunity.Status.Open.Name;
         }
     }

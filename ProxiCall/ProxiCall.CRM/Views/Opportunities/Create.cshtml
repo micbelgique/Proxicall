@@ -1,4 +1,6 @@
-﻿@model Proxicall.CRM.Models.Opportunity
+﻿@using Microsoft.AspNetCore.Identity
+@model Proxicall.CRM.Models.Opportunity
+@inject UserManager<IdentityUser> UserManager
 
 @{
     ViewData["Title"] = "Create";
@@ -13,21 +15,18 @@
     <div class="col-md-4">
         <form asp-action="Create">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-group">
-                <label asp-for="OwnerId" class="control-label"></label>
-                <select asp-for="OwnerId" class ="form-control" asp-items="ViewBag.OwnerId"></select>
-            </div>
+            <input type="hidden" asp-for="OwnerId" value="@UserManager.GetUserId(User)"/>
             <div class="form-group">
                 <label asp-for="LeadId" class="control-label"></label>
-                <select asp-for="LeadId" class ="form-control" asp-items="ViewBag.LeadId"></select>
+                <select asp-for="LeadId" class ="form-control" asp-items="ViewBag.LeadId"><option></option></select>
             </div>
             <div class="form-group">
                 <label asp-for="ProductId" class="control-label"></label>
-                <select asp-for="ProductId" class ="form-control" asp-items="ViewBag.ProductId"></select>
+                <select asp-for="ProductId" class ="form-control" asp-items="ViewBag.ProductId"><option></option></select>
             </div>
             <div class="form-group">
                 <label asp-for="EstimatedCloseDate" class="control-label"></label>
-                <input asp-for="EstimatedCloseDate" class="form-control" />
+                <input asp-for="EstimatedCloseDate" class="form-control"  type="date"/>
                 <span asp-validation-for="EstimatedCloseDate" class="text-danger"></span>
             </div>
             <div class="form-group">
@@ -37,12 +36,12 @@
             </div>
             <div class="form-group">
                 <label asp-for="Status" class="control-label"></label>
-                <input asp-for="Status" class="form-control" />
+                <select asp-for="Status" class="form-control" asp-items="ViewBag.Status"><option></option></select>
                 <span asp-validation-for="Status" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <label asp-for="Confidence" class="control-label"></label>
-                <input asp-for="Confidence" class="form-control" />
+                <select asp-for="Confidence" class="form-control" asp-items="ViewBag.Confidence"><option></option></select>
                 <span asp-validation-for="Confidence" class="text-danger"></span>
             </div>
             <div class="form-group">

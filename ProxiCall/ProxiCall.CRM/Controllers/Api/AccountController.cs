@@ -54,6 +54,7 @@ namespace Proxicall.CRM.Controllers.Api
             await _signInManager.SignInAsync(user, true);
 
             var response = new LoginDTO();
+            response.Id = user.Id;
             response.Email = user.Email;
             response.UserName = user.UserName;
             response.PhoneNumber = user.PhoneNumber;
