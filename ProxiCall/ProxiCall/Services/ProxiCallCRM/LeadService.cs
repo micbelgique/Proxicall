@@ -27,15 +27,15 @@ namespace ProxiCall.Services.ProxiCallCRM
             return lead;
         }
 
-        public async Task<IEnumerable<Opportunity>> GetOpportunities(string leadFirstName, string leadLastName, string ownerPhoneNumber)
+        public async Task<IEnumerable<OpportunityDetailed>> GetOpportunities(string leadFirstName, string leadLastName, string ownerPhoneNumber)
         {
-            IEnumerable<Opportunity> opportunities = new List<Opportunity>();
+            IEnumerable<OpportunityDetailed> opportunities = new List<OpportunityDetailed>();
             var path = $"api/leads/opportunities?leadfirstname={leadFirstName}&leadlastname={leadLastName}&ownerPhoneNumber={ownerPhoneNumber}";
             _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _token);
             var response = await _httpClient.GetAsync(path);
             if (response.IsSuccessStatusCode)
             {
-                opportunities = await response.Content.ReadAsAsync<IEnumerable<Opportunity>>();
+                opportunities = await response.Content.ReadAsAsync<IEnumerable<OpportunityDetailed>>();
                 return opportunities;
             }
             return null;

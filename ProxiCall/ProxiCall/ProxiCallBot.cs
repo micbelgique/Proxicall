@@ -34,7 +34,6 @@ namespace ProxiCall
     /// <seealso cref="https://docs.microsoft.com/en-us/aspnet/core/fundamentals/dependency-injection?view=aspnetcore-2.1"/>
     public class ProxiCallBot : IBot
     {
-        private const string LuisConfiguration = "proxicall-luis";
         private readonly BotServices _services;
         private readonly StateAccessors _accessors;
         private readonly ILoggerFactory _loggerFactory;
@@ -53,9 +52,9 @@ namespace ProxiCall
             _loggerFactory = loggerFactory ?? throw new ArgumentNullException(nameof(loggerFactory));
             _services = services ?? throw new ArgumentNullException(nameof(services));
 
-            if (!_services.LuisServices.ContainsKey(LuisConfiguration))
+            if (!_services.LuisServices.ContainsKey(BotServices.LUIS_APP_NAME))
             {
-                throw new System.ArgumentException($"The bot configuration does not contain a service type of `luis` with the id `{LuisConfiguration}`.");
+                throw new System.ArgumentException($"The bot configuration does not contain a service type of `luis` with the id `{BotServices.LUIS_APP_NAME}`.");
             }
 
             Dialogs = new DialogSet(_accessors.DialogStateAccessor);
@@ -90,7 +89,7 @@ namespace ProxiCall
             var dialogContext = await Dialogs.CreateContextAsync(turnContext);
 
 
-            var userProfile = await _accessors.UserProfileAccessor.GetAsync(dialogContext.Context, () => new UserProfile());
+            var userState = await _accessors.LoggedUserAccessor.GetAsync(dialogContext.Context, () => new LoggedUserState());
 
             if (activity.Type == ActivityTypes.Message)
             {
@@ -109,7 +108,7 @@ namespace ProxiCall
                         }
                     }
                 }
-                else if (userProfile.Token == null)
+                else if (userState.LoggedUser.Token == null)
                 {
                     //emulator and webchat
                     isFirstMessage = true;
@@ -122,13 +121,14 @@ namespace ProxiCall
                     //Twilio
                     //This is the first message sent by the bot on production
                     var accountService = new AccountService();
-                    userProfile = await accountService.Authenticate(phonenumber);
-                    await _accessors.UserProfileAccessor.SetAsync(dialogContext.Context, userProfile);
-                    if (userProfile != null)
+                    var loggedUser = await accountService.Authenticate(phonenumber);
+                    userState.LoggedUser = loggedUser;
+                    await _accessors.LoggedUserAccessor.SetAsync(dialogContext.Context, userState);
+                    if (userState != null)
                     {
-                        if (!isDev && !string.IsNullOrEmpty(userProfile.Token))
+                        if (!isDev && !string.IsNullOrEmpty(userState.LoggedUser.Token))
                         {
-                            var welcomingMessage = $"Bonjour {userProfile.Alias}. {CulturedBot.AskForRequest}";
+                            var welcomingMessage = $"Bonjour {userState.LoggedUser.Alias}. {CulturedBot.AskForRequest}";
                             var reply = MessageFactory.Text(welcomingMessage,
                                 welcomingMessage,
                                 InputHints.AcceptingInput);
@@ -149,7 +149,7 @@ namespace ProxiCall
                 if(isDev || !isFirstMessage)
                 {
                     // Perform a call to LUIS to retrieve results for the current activity message.
-                    var luisResults = await _services.LuisServices[LuisConfiguration].RecognizeAsync(dialogContext.Context, cancellationToken);
+                    var luisResults = await _services.LuisServices[BotServices.LUIS_APP_NAME].RecognizeAsync(dialogContext.Context, cancellationToken);
 
                     // If any entities were updated, treat as interruption.
                     // For example, "no my name is tony" will manifest as an update of the name to be "tony".

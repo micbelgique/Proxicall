@@ -7,23 +7,18 @@ namespace ProxiCall.Dialogs.Shared
     {
         public Lead Lead { get; set; }
         public Company Company { get; set; }
-        public Opportunity Opportunity { get; set; }
+        public OpportunityDetailed Opportunity { get; set; }
         public Product Product { get; set; }
-        public IList<Opportunity> Opportunities { get; set; }
+        public IList<OpportunityDetailed> Opportunities { get; set; }
 
         public CRMState()
         {
             Lead = new Lead();
             Company = new Company();
             Product = new Product();
-            Opportunity = new Opportunity();
-            Opportunities = new List<Opportunity>();
+            Opportunity = new OpportunityDetailed();
+            Opportunities = new List<OpportunityDetailed>();
         }
-
-
-        public bool IsEligibleForPotentalSkippingStep { get; set; }
-        public bool WantsToCallButNumberNotFound { get; set; }
-        public bool IsEligibleForPotentialForwarding { get; set; }
 
         public void ResetLead()
         {
@@ -52,7 +47,7 @@ namespace ProxiCall.Dialogs.Shared
         {
             Lead = new Lead();
             Product = new Product();
-            Opportunity = new Opportunity();
+            Opportunity = new OpportunityDetailed();
         }
     }
 }

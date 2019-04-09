@@ -16,12 +16,12 @@ namespace ProxiCall.Services.ProxiCallCRM
             _token = token;
         }
 
-        public async Task PostOpportunityAsync(Opportunity opportunity)
+        public async Task PostOpportunityAsync(OpportunityDetailed opportunity)
         {
             var path = $"api/opportunities";
             _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _token);
             //TODO : research good practice
-            var strictOpportunity = new OpportunityDTO(opportunity);
+            var strictOpportunity = new Opportunity(opportunity);
 
             using (var request = new HttpRequestMessage(HttpMethod.Post, path))
             {

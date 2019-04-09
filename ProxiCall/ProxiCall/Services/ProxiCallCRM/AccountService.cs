@@ -12,18 +12,14 @@ namespace ProxiCall.Services.ProxiCallCRM
         {
         }
 
-        public async Task<UserProfile> Authenticate(string phonenumber)
+        public async Task<User> Authenticate(string phonenumber)
         {
             var path = $"api/account/login?phoneNumber={phonenumber}";
             var response = await _httpClient.GetAsync(path);
 
             if (response.IsSuccessStatusCode)
             {
-                var result = await response.Content.ReadAsAsync<LoginDTO>();
-                var user = new UserProfile();
-                user.UserName = result.UserName;
-                user.Alias = result.UserName.Split('@')[0];
-                user.Token = result.Token;
+                var user = await response.Content.ReadAsAsync<User>();
                 return user;
             }
             return null;

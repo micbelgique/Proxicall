@@ -133,7 +133,7 @@ namespace ProxiCall
                 return new StateAccessors(userState, conversationState, privateConversationState)
                 {
                     DialogStateAccessor = conversationState.CreateProperty<DialogState>(nameof(DialogState)),
-                    UserProfileAccessor = privateConversationState.CreateProperty<UserProfile>(nameof(UserProfile)),
+                    LoggedUserAccessor = privateConversationState.CreateProperty<LoggedUserState>(nameof(LoggedUserState)),
                     LuisStateAccessor = userState.CreateProperty<LuisState>(nameof(LuisState)),
                     CRMStateAccessor = userState.CreateProperty<CRMState>(nameof(CRMState))
                 };
