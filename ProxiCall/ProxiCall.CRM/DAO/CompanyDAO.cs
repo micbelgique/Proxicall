@@ -7,9 +7,16 @@ namespace Proxicall.CRM.DAO
 {
     public class CompanyDAO
     {
-        public static async Task<Company> GetCompanyByName(ProxicallCRMContext context, string name)
+        private readonly ProxicallCRMContext _context;
+
+        public CompanyDAO(ProxicallCRMContext context)
         {
-            var company = await context.Companies.Where(c => c.Name == name)
+            _context = context;
+        }
+
+        public async Task<Company> GetCompanyByName(string name)
+        {
+            var company = await _context.Companies.Where(c => c.Name == name)
                 .Include(c => c.Contact)
                 .FirstOrDefaultAsync();
             return company;

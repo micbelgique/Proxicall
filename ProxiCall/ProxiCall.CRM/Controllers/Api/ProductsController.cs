@@ -18,10 +18,12 @@ namespace Proxicall.CRM.Controllers.Api
     public class ProductsController : ControllerBase
     {
         private readonly ProxicallCRMContext _context;
+        private readonly ProductDAO _productDao;
 
-        public ProductsController(ProxicallCRMContext context)
+        public ProductsController(ProxicallCRMContext context, ProductDAO productDAO)
         {
             _context = context;
+            _productDao = productDAO;
         }
 
         // GET: api/Products
@@ -48,7 +50,7 @@ namespace Proxicall.CRM.Controllers.Api
         [HttpGet("{byTitle}")]
         public async Task<ActionResult<Product>> GetProductByTitle(string title)
         {
-            var product = await ProductDAO.GetProductByTitle(_context, title);
+            var product = await _productDao.GetProductByTitle(title);
 
             if (product == null)
             {

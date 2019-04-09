@@ -11,11 +11,17 @@ namespace Proxicall.CRM.DAO
 {
     public class LeadDAO
     {
-        public static async Task<Lead> GetLeadByName(ProxicallCRMContext context, string firstName, string lastName)
+        private readonly ProxicallCRMContext _context;
+
+        public LeadDAO(ProxicallCRMContext context)
+        {
+            _context = context;
+        }
+        public async Task<Lead> GetLeadByName(string firstName, string lastName)
         {
             firstName = char.ToLower(firstName[0]) + firstName.Substring(1).ToLower();
             lastName = char.ToLower(lastName[0]) + lastName.Substring(1).ToLower();
-            var lead = await context.Leads.Where(l =>
+            var lead = await _context.Leads.Where(l =>
                 l.FirstName == firstName && l.LastName == lastName
                 ||
                 l.FirstName == lastName && l.LastName == firstName)
@@ -24,15 +30,15 @@ namespace Proxicall.CRM.DAO
 
             if (lead == null)
             {
-                return FindLeadWithLevenshtein(context, firstName, lastName);
+                return FindLeadWithLevenshtein(firstName, lastName);
             }
 
             return lead;
         }
 
-        private static Lead FindLeadWithLevenshtein(ProxicallCRMContext context, string firstName, string lastName)
+        private Lead FindLeadWithLevenshtein(string firstName, string lastName)
         {
-            var resultOfLvsDistanceDB = context
+            var resultOfLvsDistanceDB = _context
                     .Leads
                     .Include(l => l.Company)
                     .LevenshteinDistanceOf(leadInDB => leadInDB.FirstName, leadInDB => leadInDB.LastName)
@@ -53,10 +59,10 @@ namespace Proxicall.CRM.DAO
                     return lvsDistance.Item;
                 }
                 //"FirstName LastName" compared to "LastName FirstName" in the database
-                var distanceFirstNametoLastNameDB = lvsDistance.Distances[LevenshteinCompare.FirstNameToLastNameDB.Id];
+                var distanceFirstNameToLastNameDB = lvsDistance.Distances[LevenshteinCompare.FirstNameToLastNameDB.Id];
                 var distanceLastNameToFirstNameDB = lvsDistance.Distances[LevenshteinCompare.LastNameToFirstNameDB.Id];
 
-                if (distanceFirstNametoLastNameDB <= allowedDistanceForFirstName
+                if (distanceFirstNameToLastNameDB <= allowedDistanceForFirstName
                     && distanceLastNameToFirstNameDB <= allowedDistanceForLastName)
                 {
                     return lvsDistance.Item;
@@ -65,7 +71,7 @@ namespace Proxicall.CRM.DAO
             return null;
         }
 
-        private static int CalculateAllowedDistance(string name)
+        private int CalculateAllowedDistance(string name)
         {
             if (name.Length < 3)
             {

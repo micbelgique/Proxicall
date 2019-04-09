@@ -2,22 +2,20 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Proxicall.CRM.Models;
 using System;
-using System.Threading.Tasks;
 using Proxicall.CRM.Areas.Identity.Data;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Proxicall.CRM.Services;
 using System.IdentityModel.Tokens.Jwt;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.IdentityModel.Logging;
+using Proxicall.CRM.DAO;
 
 namespace Proxicall.CRM
 {
@@ -69,6 +67,10 @@ namespace Proxicall.CRM
             });
 
             services.AddSingleton<IEmailSender, EmailSender>();
+            
+            services.AddTransient<LeadDAO>();
+            services.AddTransient<ProductDAO>();
+            services.AddTransient<CompanyDAO>();
 
             // ===== Add Jwt Authentication ========
             JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear(); // => remove default claims

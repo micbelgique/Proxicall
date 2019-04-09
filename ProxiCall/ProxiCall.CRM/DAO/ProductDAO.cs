@@ -9,9 +9,15 @@ namespace Proxicall.CRM.DAO
 {
     public class ProductDAO
     {
-        public static async Task<Product> GetProductByTitle(ProxicallCRMContext context, string title)
+        private readonly ProxicallCRMContext _context;
+
+        public ProductDAO(ProxicallCRMContext context)
         {
-            var product = await context.Products.Where(p => p.Title == title)
+            _context = context;
+        }
+        public async Task<Product> GetProductByTitle(string title)
+        {
+            var product = await _context.Products.Where(p => p.Title == title)
                 .FirstOrDefaultAsync();
             return product;
         }

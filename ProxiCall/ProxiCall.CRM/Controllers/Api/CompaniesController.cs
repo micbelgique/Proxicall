@@ -19,16 +19,18 @@ namespace Proxicall.CRM.Controllers.Api
     public class CompaniesController : ControllerBase
     {
         private readonly ProxicallCRMContext _context;
+        private readonly CompanyDAO _companyDAO;
 
-        public CompaniesController(ProxicallCRMContext context)
+        public CompaniesController(ProxicallCRMContext context, CompanyDAO companyDAO)
         {
             _context = context;
+            _companyDAO = companyDAO;
         }
 
         [HttpGet("byName")]
         public async Task<ActionResult<Company>> GetFullCompanyByName(string name)
         {
-            var company = await CompanyDAO.GetCompanyByName(_context, name);
+            var company = await _companyDAO.GetCompanyByName(name);
             if (company == null)
             {
                 return BadRequest();
@@ -40,7 +42,7 @@ namespace Proxicall.CRM.Controllers.Api
         [HttpGet("getcontact")]
         public async Task<ActionResult<Lead>> GetContact(string name)
         {
-            var company = await CompanyDAO.GetCompanyByName(_context, name);
+            var company = await _companyDAO.GetCompanyByName(name);
             if (company == null)
             {
                 return BadRequest();
@@ -63,7 +65,7 @@ namespace Proxicall.CRM.Controllers.Api
             }
 
             //Searching the company
-            var company = await CompanyDAO.GetCompanyByName(_context, companyName);
+            var company = await _companyDAO.GetCompanyByName(companyName);
             if (company == null)
             {
                 return NotFound();

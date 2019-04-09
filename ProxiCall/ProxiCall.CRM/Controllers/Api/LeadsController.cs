@@ -17,10 +17,12 @@ namespace Proxicall.CRM.Controllers.Api
     public class LeadsController : ControllerBase
     {
         private readonly ProxicallCRMContext _context;
-       
-        public LeadsController(ProxicallCRMContext context)
+        private readonly LeadDAO _leadDao;
+
+        public LeadsController(ProxicallCRMContext context, LeadDAO leadDAO)
         {
             _context = context;
+            _leadDao = leadDAO;
         }
         
         // GET: api/Leads
@@ -54,7 +56,7 @@ namespace Proxicall.CRM.Controllers.Api
             }
 
             //Searching the lead
-            var lead = await LeadDAO.GetLeadByName(_context, leadFirstName, leadLastName);
+            var lead = await _leadDao.GetLeadByName(leadFirstName, leadLastName);
             if (lead == null)
             {
                 return NotFound();
@@ -85,7 +87,7 @@ namespace Proxicall.CRM.Controllers.Api
         [HttpGet("byName")]
         public async Task<ActionResult<Lead>> GetLead(string firstName, string lastName)
         {
-            var lead = await LeadDAO.GetLeadByName(_context, firstName, lastName);
+            var lead = await _leadDao.GetLeadByName(firstName, lastName);
             if (lead == null)
             {
                 return NotFound();
