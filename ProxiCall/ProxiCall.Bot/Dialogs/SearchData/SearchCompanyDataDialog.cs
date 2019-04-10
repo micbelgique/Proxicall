@@ -21,6 +21,8 @@ namespace ProxiCall.Bot.Dialogs.SearchData
         private readonly IServiceProvider _serviceProvider;
         private readonly ILoggerFactory _loggerFactory;
         private readonly StateAccessors _accessors;
+        private readonly CompanyService _companyService;
+
         private const string _searchCompanyDataWaterfall = "searchCompanyDataWaterfall";
         private const string _companyNamePrompt = "companyFullNamePrompt";
         private const string _retryFetchingMinimumDataFromUserPrompt = "retryFetchingMinimumDataFromUserPrompt";
@@ -33,6 +35,8 @@ namespace ProxiCall.Bot.Dialogs.SearchData
             _loggerFactory = loggerFactory;
             _botServices = botServices;
             _serviceProvider = serviceProvider;
+
+            _companyService = (CompanyService)_serviceProvider.GetService(typeof(CompanyService));
 
             var waterfallSteps = new WaterfallStep[]
             {
@@ -146,8 +150,7 @@ namespace ProxiCall.Bot.Dialogs.SearchData
         private async Task<Company> SearchCompanyAsync(ITurnContext turnContext, string name)
         {
             var userState = await _accessors.LoggedUserAccessor.GetAsync(turnContext, () => new LoggedUserState());
-            var companyService = new CompanyService(userState.LoggedUser.Token);
-            return await companyService.GetCompanyByName(name);
+            return await _companyService.GetCompanyByName(userState.LoggedUser.Token, name);
         }
 
         private async Task<DialogTurnResult> ResultHandlerStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
@@ -271,8 +274,7 @@ namespace ProxiCall.Bot.Dialogs.SearchData
             (WaterfallStepContext stepContext, string companyName, string ownerPhoneNumber)
         {
             var userState = await _accessors.LoggedUserAccessor.GetAsync(stepContext.Context, () => new LoggedUserState());
-            var companyService = new CompanyService(userState.LoggedUser.Token);
-            var opportunities = await companyService.GetOpportunities(companyName, ownerPhoneNumber);
+            var opportunities = await _companyService.GetOpportunities(userState.LoggedUser.Token, companyName, ownerPhoneNumber);
             return opportunities;
         }
 

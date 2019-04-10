@@ -15,6 +15,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using ProxiCall.Bot.Dialogs.Shared;
+using ProxiCall.Bot.Services.ProxiCallCRM;
 
 namespace ProxiCall.Bot
 {
@@ -127,16 +128,12 @@ namespace ProxiCall.Bot
             var privateConversationState = new PrivateConversationState(dataStore);
             services.AddSingleton(privateConversationState);
 
-            services.AddSingleton<StateAccessors>(sp =>
+            services.AddSingleton<StateAccessors>(sp => new StateAccessors(userState, conversationState, privateConversationState)
             {
-                // Create the custom state accessor.
-                return new StateAccessors(userState, conversationState, privateConversationState)
-                {
-                    DialogStateAccessor = conversationState.CreateProperty<DialogState>(nameof(DialogState)),
-                    LoggedUserAccessor = privateConversationState.CreateProperty<LoggedUserState>(nameof(LoggedUserState)),
-                    LuisStateAccessor = userState.CreateProperty<LuisState>(nameof(LuisState)),
-                    CRMStateAccessor = userState.CreateProperty<CRMState>(nameof(CRMState))
-                };
+                DialogStateAccessor = conversationState.CreateProperty<DialogState>(nameof(DialogState)),
+                LoggedUserAccessor = privateConversationState.CreateProperty<LoggedUserState>(nameof(LoggedUserState)),
+                LuisStateAccessor = userState.CreateProperty<LuisState>(nameof(LuisState)),
+                CRMStateAccessor = userState.CreateProperty<CRMState>(nameof(CRMState))
             });
 
             services.AddBot<ProxiCallBot>(options =>
@@ -153,6 +150,12 @@ namespace ProxiCall.Bot
                     await context.SendActivityAsync($"Sorry, it looks like something went wrong : {exception.Message}");
                 };
             });
+            
+            services.AddHttpClient<AccountService>();
+            services.AddHttpClient<CompanyService>();
+            services.AddHttpClient<LeadService>();
+            services.AddHttpClient<OpportunityService>();
+            services.AddHttpClient<ProductService>();
         }
 
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)

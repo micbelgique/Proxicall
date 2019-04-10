@@ -1,4 +1,5 @@
-﻿using System.Net.Http;
+﻿using System;
+using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
@@ -7,19 +8,21 @@ using ProxiCall.Bot.Models;
 
 namespace ProxiCall.Bot.Services.ProxiCallCRM
 {
-    public class OpportunityService : BaseService
+    public class OpportunityService
     {
-        private readonly string _token;
-        public OpportunityService(string token) : base()
+        private readonly HttpClient _httpClient;
+
+        public OpportunityService(HttpClient httpClient)
         {
-            _token = token;
+            _httpClient = httpClient;
+            _httpClient.BaseAddress = new Uri(Environment.GetEnvironmentVariable("ApiHost"));  
         }
 
-        public async Task PostOpportunityAsync(OpportunityDetailed opportunity)
+        public async Task PostOpportunityAsync(string token, OpportunityDetailed opportunity)
         {
             var path = $"api/opportunities";
-            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _token);
-            //TODO : research good practice
+            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
             var strictOpportunity = new Opportunity(opportunity);
 
             using (var request = new HttpRequestMessage(HttpMethod.Post, path))

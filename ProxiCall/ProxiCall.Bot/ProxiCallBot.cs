@@ -38,6 +38,7 @@ namespace ProxiCall.Bot
         private readonly StateAccessors _accessors;
         private readonly IServiceProvider _serviceProvider;
         private readonly ILoggerFactory _loggerFactory;
+        private readonly AccountService _accountService;
 
         public DialogSet Dialogs { get; private set; }
 
@@ -53,6 +54,8 @@ namespace ProxiCall.Bot
             _serviceProvider = serviceProvider;
             _loggerFactory = loggerFactory ?? throw new ArgumentNullException(nameof(loggerFactory));
             _services = services ?? throw new ArgumentNullException(nameof(services));
+
+            _accountService = (AccountService) _serviceProvider.GetService(typeof(AccountService));
 
             if (!_services.LuisServices.ContainsKey(BotServices.LUIS_APP_NAME))
             {
@@ -122,8 +125,7 @@ namespace ProxiCall.Bot
                 {
                     //Twilio
                     //This is the first message sent by the bot on production
-                    var accountService = new AccountService();
-                    var loggedUser = await accountService.Authenticate(phonenumber);
+                    var loggedUser = await _accountService.Authenticate(phonenumber);
                     userState.LoggedUser = loggedUser;
                     await _accessors.LoggedUserAccessor.SetAsync(dialogContext.Context, userState);
                     if (userState != null)
