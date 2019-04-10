@@ -2,9 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Threading.Tasks;
 
-namespace Proxicall.CRM.Models.Enumeration
+namespace ProxiCall.CRM.Models.Enumeration
 {
     public abstract class Enumeration : IComparable
     {

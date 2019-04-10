@@ -1,10 +1,9 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using System;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using System;
-using System.Threading.Tasks;
 
-namespace Proxicall.CRM.Areas.Identity.Data
+namespace ProxiCall.CRM.Areas.Identity.Data
 {
     public class RolesInitializer : IRolesInitializer
     {

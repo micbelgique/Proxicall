@@ -1,11 +1,10 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Proxicall.CRM.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
+using ProxiCall.CRM.Areas.Identity.Data;
+using ProxiCall.CRM.Models;
 
-namespace Proxicall.CRM.DAO
+namespace ProxiCall.CRM.DAO
 {
     public class ProductDAO
     {

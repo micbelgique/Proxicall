@@ -1,23 +1,22 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿using System;
+using System.IdentityModel.Tokens.Jwt;
+using System.Text;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Proxicall.CRM.Models;
-using System;
-using Proxicall.CRM.Areas.Identity.Data;
-using Microsoft.AspNetCore.Identity.UI.Services;
-using Proxicall.CRM.Services;
-using System.IdentityModel.Tokens.Jwt;
-using Microsoft.IdentityModel.Tokens;
-using System.Text;
 using Microsoft.IdentityModel.Logging;
-using Proxicall.CRM.DAO;
+using Microsoft.IdentityModel.Tokens;
+using ProxiCall.CRM.Areas.Identity.Data;
+using ProxiCall.CRM.DAO;
+using ProxiCall.CRM.Services;
 
-namespace Proxicall.CRM
+namespace ProxiCall.CRM
 {
     public class Startup
     {

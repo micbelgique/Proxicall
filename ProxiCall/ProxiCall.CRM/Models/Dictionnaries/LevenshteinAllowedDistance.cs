@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Proxicall.CRM.Models.Dictionnaries
+namespace ProxiCall.CRM.Models.Dictionnaries
 {
     public class LevenshteinAllowedDistance
     {

@@ -1,9 +1,9 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using Proxicall.CRM.Models;
+using ProxiCall.CRM.Models;
 
-namespace Proxicall.CRM.Models
+namespace ProxiCall.CRM.Areas.Identity.Data
 {
     public class ProxicallCRMContext : IdentityDbContext<IdentityUser>
     {

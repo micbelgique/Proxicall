@@ -4,13 +4,12 @@ using System.Linq;
 using System.Text.Encodings.Web;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
-using Proxicall.CRM.Models;
+using ProxiCall.CRM.Models;
 
-namespace Proxicall.CRM.Controllers
+namespace ProxiCall.CRM.Controllers
 {
     [Authorize(Roles ="Admin")]
     public class UsersController : Controller

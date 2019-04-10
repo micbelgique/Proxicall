@@ -1,13 +1,14 @@
-﻿using Microsoft.EntityFrameworkCore;
-using NinjaNye.SearchExtensions.Levenshtein;
-using Proxicall.CRM.Models;
-using Proxicall.CRM.Models.Dictionnaries;
-using Proxicall.CRM.Models.Enumeration.Levenshtein;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
+using NinjaNye.SearchExtensions.Levenshtein;
+using ProxiCall.CRM.Areas.Identity.Data;
+using ProxiCall.CRM.Models;
+using ProxiCall.CRM.Models.Dictionnaries;
+using ProxiCall.CRM.Models.Enumeration.Levenshtein;
 
-namespace Proxicall.CRM.DAO
+namespace ProxiCall.CRM.DAO
 {
     public class LeadDAO
     {

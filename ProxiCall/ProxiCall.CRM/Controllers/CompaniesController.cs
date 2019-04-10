@@ -1,12 +1,13 @@
 ﻿using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using Proxicall.CRM.Models;
-using Microsoft.AspNetCore.Authorization;
+using ProxiCall.CRM.Areas.Identity.Data;
+using ProxiCall.CRM.Models;
 
-namespace Proxicall.CRM.Controllers
+namespace ProxiCall.CRM.Controllers
 {
     [Authorize(Roles = "Admin, User")]
     public class CompaniesController : Controller

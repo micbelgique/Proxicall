@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 
-namespace Proxicall.CRM.Migrations
+namespace ProxiCall.CRM.Migrations
 {
     public partial class Init : Migration
     {

@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace Proxicall.CRM.Models
+namespace ProxiCall.CRM.Models
 {
     public class Product
     {

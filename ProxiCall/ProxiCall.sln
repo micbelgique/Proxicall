@@ -7,7 +7,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Console_Speech", "Console_S
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ProxiCall.Web", "ProxiCall.Web\ProxiCall.Web.csproj", "{4070AF1A-AB55-4130-99C2-CF79230C5C57}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Proxicall.CRM", "Proxicall.CRM\Proxicall.CRM.csproj", "{7B7EB646-6B5A-4183-A58A-8953C49C469E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ProxiCall.CRM", "Proxicall.CRM\ProxiCall.CRM.csproj", "{7B7EB646-6B5A-4183-A58A-8953C49C469E}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ProxiCall.Bot", "ProxiCall.Bot\ProxiCall.Bot.csproj", "{57FA2EC0-7760-48C6-BC73-1B7F4E3CDDB4}"
 EndProject

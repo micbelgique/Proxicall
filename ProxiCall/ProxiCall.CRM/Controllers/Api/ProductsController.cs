@@ -1,16 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Proxicall.CRM.DAO;
-using Proxicall.CRM.Models;
+using ProxiCall.CRM.Areas.Identity.Data;
+using ProxiCall.CRM.DAO;
+using ProxiCall.CRM.Models;
 
-namespace Proxicall.CRM.Controllers.Api
+namespace ProxiCall.CRM.Controllers.Api
 {
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin,User")]
     [Route("api/[controller]")]

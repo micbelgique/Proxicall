@@ -1,11 +1,10 @@
 ﻿using System.Diagnostics;
-using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
-using Proxicall.CRM.Models;
+using ProxiCall.CRM.Models;
 
-namespace Proxicall.CRM.Controllers
+namespace ProxiCall.CRM.Controllers
 {
     [Authorize]
     public class HomeController : Controller

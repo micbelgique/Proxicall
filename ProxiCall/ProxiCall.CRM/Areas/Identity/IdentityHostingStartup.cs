@@ -1,14 +1,8 @@
-﻿using System;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.UI;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Proxicall.CRM.Models;
+﻿using Microsoft.AspNetCore.Hosting;
+using ProxiCall.CRM.Areas.Identity;
 
-[assembly: HostingStartup(typeof(Proxicall.CRM.Areas.Identity.IdentityHostingStartup))]
-namespace Proxicall.CRM.Areas.Identity
+[assembly: HostingStartup(typeof(IdentityHostingStartup))]
+namespace ProxiCall.CRM.Areas.Identity
 {
     public class IdentityHostingStartup : IHostingStartup
     {

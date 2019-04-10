@@ -1,4 +1,4 @@
-﻿namespace Proxicall.CRM.Models.Enumeration.Levenshtein
+﻿namespace ProxiCall.CRM.Models.Enumeration.Levenshtein
 {
     public class LevenshteinCompare : Enumeration
     {

@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore.Migrations;
 
-namespace Proxicall.CRM.Migrations
+namespace ProxiCall.CRM.Migrations
 {
     public partial class RefLead : Migration
     {

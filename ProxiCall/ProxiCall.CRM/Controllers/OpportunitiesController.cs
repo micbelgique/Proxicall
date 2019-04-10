@@ -5,10 +5,11 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using Proxicall.CRM.Models;
-using Proxicall.CRM.Models.Enumeration.Opportunity;
+using ProxiCall.CRM.Areas.Identity.Data;
+using ProxiCall.CRM.Models;
+using ProxiCall.CRM.Models.Enumeration.Opportunity;
 
-namespace Proxicall.CRM.Controllers
+namespace ProxiCall.CRM.Controllers
 {
     [Authorize(Roles = "Admin, User")]
     public class OpportunitiesController : Controller
