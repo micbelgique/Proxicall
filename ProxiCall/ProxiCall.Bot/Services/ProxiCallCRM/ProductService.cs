@@ -1,23 +1,26 @@
-﻿using System.Net.Http;
+﻿using System;
+using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using ProxiCall.Bot.Models;
 
 namespace ProxiCall.Bot.Services.ProxiCallCRM
 {
-    public class ProductService : BaseService
+    public class ProductService
     {
-        private readonly string _token;
-        public ProductService(string token) : base()
+        private readonly HttpClient _httpClient;
+
+        public ProductService(HttpClient httpClient)
         {
-            _token = token;
+            _httpClient = httpClient;
+            _httpClient.BaseAddress = new Uri(Environment.GetEnvironmentVariable("ApiHost"));  
         }
 
-        public async Task<Product> GetProductByTitle(string title)
+        public async Task<Product> GetProductByTitle(string token, string title)
         {
             Product product = null;
             var path = $"api/products/byTitle?title={title}";
-            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _token);
+            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
             var response = await _httpClient.GetAsync(path);
             if (response.IsSuccessStatusCode)
             {

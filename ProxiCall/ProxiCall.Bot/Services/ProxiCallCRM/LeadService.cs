@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
@@ -6,19 +7,21 @@ using ProxiCall.Bot.Models;
 
 namespace ProxiCall.Bot.Services.ProxiCallCRM
 {
-    public class LeadService : BaseService
+    public class LeadService
     {
-        private readonly string _token;
-        public LeadService(string token) : base()
+        private readonly HttpClient _httpClient;
+
+        public LeadService(HttpClient httpClient)
         {
-            _token = token;
+            _httpClient = httpClient;
+            _httpClient.BaseAddress = new Uri(Environment.GetEnvironmentVariable("ApiHost"));  
         }
 
-        public async Task<Lead> GetLeadByName(string firstName, string lastName)
+        public async Task<Lead> GetLeadByName(string token, string firstName, string lastName)
         {
             Lead lead = null;
             var path = $"api/leads/byName?firstName={firstName}&lastName={lastName}";
-            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _token);
+            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
             var response = await _httpClient.GetAsync(path);
             if (response.IsSuccessStatusCode)
             {
@@ -27,11 +30,11 @@ namespace ProxiCall.Bot.Services.ProxiCallCRM
             return lead;
         }
 
-        public async Task<IEnumerable<OpportunityDetailed>> GetOpportunities(string leadFirstName, string leadLastName, string ownerPhoneNumber)
+        public async Task<IEnumerable<OpportunityDetailed>> GetOpportunities(string token, string leadFirstName, string leadLastName, string ownerPhoneNumber)
         {
             IEnumerable<OpportunityDetailed> opportunities = new List<OpportunityDetailed>();
             var path = $"api/leads/opportunities?leadfirstname={leadFirstName}&leadlastname={leadLastName}&ownerPhoneNumber={ownerPhoneNumber}";
-            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _token);
+            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
             var response = await _httpClient.GetAsync(path);
             if (response.IsSuccessStatusCode)
             {

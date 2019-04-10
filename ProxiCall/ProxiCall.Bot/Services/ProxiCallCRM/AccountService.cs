@@ -1,13 +1,18 @@
-﻿using System.Net.Http;
+﻿using System;
+using System.Net.Http;
 using System.Threading.Tasks;
 using ProxiCall.Bot.Models;
 
 namespace ProxiCall.Bot.Services.ProxiCallCRM
 {
-    public class AccountService : BaseService
+    public class AccountService
     {
-        public AccountService() : base ()
+        private readonly HttpClient _httpClient;
+
+        public AccountService(HttpClient httpClient)
         {
+            _httpClient = httpClient;
+            _httpClient.BaseAddress = new Uri(Environment.GetEnvironmentVariable("ApiHost"));   
         }
 
         public async Task<User> Authenticate(string phonenumber)

@@ -22,6 +22,9 @@ namespace ProxiCall.Bot.Dialogs.SearchData
         private readonly ILoggerFactory _loggerFactory;
         private readonly BotServices _botServices;
         private readonly IServiceProvider _serviceProvider;
+
+        private readonly LeadService _leadService;
+
         private const string _searchLeadDataWaterfall = "searchLeadDataWaterfall";
         private const string _leadFullNamePrompt = "leadFullNamePrompt";
         private const string _retryFetchingMinimumDataFromUserPrompt = "retryFetchingMinimumDataFromUserPrompt";
@@ -33,6 +36,8 @@ namespace ProxiCall.Bot.Dialogs.SearchData
             _loggerFactory = loggerFactory;
             _botServices = botServices;
             _serviceProvider = serviceProvider;
+
+            _leadService = (LeadService)_serviceProvider.GetService(typeof(LeadService));
 
             var waterfallSteps = new WaterfallStep[]
             {
@@ -161,8 +166,7 @@ namespace ProxiCall.Bot.Dialogs.SearchData
         private async Task<Lead> SearchLeadAsync(ITurnContext turnContext, string firstName, string lastName)
         {
             var userState = await _accessors.LoggedUserAccessor.GetAsync(turnContext, () => new LoggedUserState());
-            var leadService = new LeadService(userState.LoggedUser.Token);
-            return await leadService.GetLeadByName(firstName, lastName);
+            return await _leadService.GetLeadByName(userState.LoggedUser.Token, firstName, lastName);
         }
 
         private async Task<DialogTurnResult> ResultHandlerStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
@@ -356,8 +360,7 @@ namespace ProxiCall.Bot.Dialogs.SearchData
         private async Task<IEnumerable<OpportunityDetailed>> SearchOpportunitiesAsync(WaterfallStepContext stepContext, string leadFirstName, string leadLastName, string ownerPhoneNumber)
         {
             var userState = await _accessors.LoggedUserAccessor.GetAsync(stepContext.Context, () => new LoggedUserState());
-            var leadService = new LeadService(userState.LoggedUser.Token);
-            var opportunities = await leadService.GetOpportunities(leadFirstName, leadLastName, ownerPhoneNumber);
+            var opportunities = await _leadService.GetOpportunities(userState.LoggedUser.Token, leadFirstName, leadLastName, ownerPhoneNumber);
             return opportunities;
         }
 
