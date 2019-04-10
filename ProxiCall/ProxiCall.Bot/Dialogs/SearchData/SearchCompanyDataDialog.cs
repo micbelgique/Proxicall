@@ -1,10 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Bot.Builder;
 using Microsoft.Bot.Builder.Dialogs;
 using Microsoft.Bot.Schema;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using ProxiCall.Bot.Dialogs.Shared;
 using ProxiCall.Bot.Models;
@@ -16,6 +18,7 @@ namespace ProxiCall.Bot.Dialogs.SearchData
     public class SearchCompanyDataDialog : ComponentDialog
     {
         private readonly BotServices _botServices;
+        private readonly IServiceProvider _serviceProvider;
         private readonly ILoggerFactory _loggerFactory;
         private readonly StateAccessors _accessors;
         private const string _searchCompanyDataWaterfall = "searchCompanyDataWaterfall";
@@ -24,11 +27,12 @@ namespace ProxiCall.Bot.Dialogs.SearchData
         private const string _confirmForwardingPrompt = "confirmForwardingPrompt";
 
 
-        public SearchCompanyDataDialog(StateAccessors accessors, ILoggerFactory loggerFactory, BotServices botServices) : base(nameof(SearchCompanyDataDialog))
+        public SearchCompanyDataDialog(StateAccessors accessors, ILoggerFactory loggerFactory, BotServices botServices, IServiceProvider serviceProvider) : base(nameof(SearchCompanyDataDialog))
         {
             _accessors = accessors;
             _loggerFactory = loggerFactory;
             _botServices = botServices;
+            _serviceProvider = serviceProvider;
 
             var waterfallSteps = new WaterfallStep[]
             {
@@ -48,53 +52,53 @@ namespace ProxiCall.Bot.Dialogs.SearchData
         private async Task<DialogTurnResult> InitializeStateStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
         {
             //Initializing CRMStateAccessor
-            var crmState = await _accessors.CRMStateAccessor.GetAsync(stepContext.Context, () => null);
+            var crmState = await _accessors.CRMStateAccessor.GetAsync(stepContext.Context, () => null, cancellationToken);
             if (crmState == null)
             {
                 if (stepContext.Options is CRMState callStateOpt)
                 {
-                    await _accessors.CRMStateAccessor.SetAsync(stepContext.Context, callStateOpt);
+                    await _accessors.CRMStateAccessor.SetAsync(stepContext.Context, callStateOpt, cancellationToken);
                 }
                 else
                 {
-                    await _accessors.CRMStateAccessor.SetAsync(stepContext.Context, new CRMState());
+                    await _accessors.CRMStateAccessor.SetAsync(stepContext.Context, new CRMState(), cancellationToken);
                 }
             }
 
             //Initializing LuisStateAccessor
-            var luisState = await _accessors.LuisStateAccessor.GetAsync(stepContext.Context, () => null);
+            var luisState = await _accessors.LuisStateAccessor.GetAsync(stepContext.Context, () => null, cancellationToken);
             if (luisState == null)
             {
                 if (stepContext.Options is LuisState callStateOpt)
                 {
-                    await _accessors.LuisStateAccessor.SetAsync(stepContext.Context, callStateOpt);
+                    await _accessors.LuisStateAccessor.SetAsync(stepContext.Context, callStateOpt, cancellationToken);
                 }
                 else
                 {
-                    await _accessors.LuisStateAccessor.SetAsync(stepContext.Context, new LuisState());
+                    await _accessors.LuisStateAccessor.SetAsync(stepContext.Context, new LuisState(), cancellationToken);
                 }
             }
 
             //Initializing CurrentUserAccessor
-            var currentUser = await _accessors.LoggedUserAccessor.GetAsync(stepContext.Context, () => null);
+            var currentUser = await _accessors.LoggedUserAccessor.GetAsync(stepContext.Context, () => null, cancellationToken);
             if (currentUser == null)
             {
                 if (stepContext.Options is LoggedUserState callStateOpt)
                 {
-                    await _accessors.LoggedUserAccessor.SetAsync(stepContext.Context, callStateOpt);
+                    await _accessors.LoggedUserAccessor.SetAsync(stepContext.Context, callStateOpt, cancellationToken);
                 }
                 else
                 {
-                    await _accessors.LoggedUserAccessor.SetAsync(stepContext.Context, new LoggedUserState());
+                    await _accessors.LoggedUserAccessor.SetAsync(stepContext.Context, new LoggedUserState(), cancellationToken);
                 }
             }
 
-            return await stepContext.NextAsync();
+            return await stepContext.NextAsync(cancellationToken: cancellationToken);
         }
 
         private async Task<DialogTurnResult> AskForCompanyFullNameStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
         {
-            var crmState = await _accessors.CRMStateAccessor.GetAsync(stepContext.Context, () => new CRMState());
+            var crmState = await _accessors.CRMStateAccessor.GetAsync(stepContext.Context, () => new CRMState(), cancellationToken);
 
             //Asking for the name of the company if not already given
             if (string.IsNullOrEmpty(crmState.Company.Name))
@@ -104,13 +108,13 @@ namespace ProxiCall.Bot.Dialogs.SearchData
                     Prompt = MessageFactory.Text(CulturedBot.AskCompanyName)
                 }, cancellationToken);
             }
-            return await stepContext.NextAsync();
+            return await stepContext.NextAsync(cancellationToken: cancellationToken);
         }
 
         private async Task<DialogTurnResult> SearchCompanyStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
         {
-            var crmState = await _accessors.CRMStateAccessor.GetAsync(stepContext.Context, () => new CRMState());
-            var luisState = await _accessors.LuisStateAccessor.GetAsync(stepContext.Context, () => new LuisState());
+            var crmState = await _accessors.CRMStateAccessor.GetAsync(stepContext.Context, () => new CRMState(), cancellationToken);
+            var luisState = await _accessors.LuisStateAccessor.GetAsync(stepContext.Context, () => new LuisState(), cancellationToken);
 
             //Gathering the name of the company if not already given
             if (string.IsNullOrEmpty(crmState.Company.Name))
@@ -125,7 +129,7 @@ namespace ProxiCall.Bot.Dialogs.SearchData
             //Asking for retry if necessary
             if (crmState.Company == null || string.IsNullOrEmpty(crmState.Company.Name))
             {
-                await _accessors.CRMStateAccessor.SetAsync(stepContext.Context, crmState);
+                await _accessors.CRMStateAccessor.SetAsync(stepContext.Context, crmState, cancellationToken);
                 var promptMessage = $"{string.Format(CulturedBot.NamedObjectNotFound, companyNameGivenByUser)} {CulturedBot.AskIfWantRetry}";
                 var promptOptions = new PromptOptions
                 {
@@ -135,8 +139,8 @@ namespace ProxiCall.Bot.Dialogs.SearchData
                 return await stepContext.PromptAsync(_retryFetchingMinimumDataFromUserPrompt, promptOptions, cancellationToken);
             }
 
-            await _accessors.CRMStateAccessor.SetAsync(stepContext.Context, crmState);
-            return await stepContext.NextAsync();
+            await _accessors.CRMStateAccessor.SetAsync(stepContext.Context, crmState, cancellationToken);
+            return await stepContext.NextAsync(cancellationToken: cancellationToken);
         }
 
         private async Task<Company> SearchCompanyAsync(ITurnContext turnContext, string name)
@@ -148,8 +152,8 @@ namespace ProxiCall.Bot.Dialogs.SearchData
 
         private async Task<DialogTurnResult> ResultHandlerStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
         {
-            var crmState = await _accessors.CRMStateAccessor.GetAsync(stepContext.Context, () => new CRMState());
-            var luisState = await _accessors.LuisStateAccessor.GetAsync(stepContext.Context, () => new LuisState());
+            var crmState = await _accessors.CRMStateAccessor.GetAsync(stepContext.Context, () => new CRMState(), cancellationToken);
+            var luisState = await _accessors.LuisStateAccessor.GetAsync(stepContext.Context, () => new LuisState(), cancellationToken);
 
             //Handling when company not found
             if (crmState.Company == null || string.IsNullOrEmpty(crmState.Company.Name))
@@ -159,8 +163,8 @@ namespace ProxiCall.Bot.Dialogs.SearchData
                 {
                     //Restarting dialog if user decides to retry
                     crmState.ResetCompany();
-                    await _accessors.CRMStateAccessor.SetAsync(stepContext.Context, crmState);
-                    return await stepContext.ReplaceDialogAsync(_searchCompanyDataWaterfall, cancellationToken);
+                    await _accessors.CRMStateAccessor.SetAsync(stepContext.Context, crmState, cancellationToken);
+                    return await stepContext.ReplaceDialogAsync(_searchCompanyDataWaterfall, cancellationToken, cancellationToken);
                 }
                 else
                 {
@@ -173,9 +177,9 @@ namespace ProxiCall.Bot.Dialogs.SearchData
 
                     crmState.ResetCompany();
                     luisState.ResetAll();
-                    await _accessors.CRMStateAccessor.SetAsync(stepContext.Context, crmState);
-                    await _accessors.LuisStateAccessor.SetAsync(stepContext.Context, luisState);
-                    return await stepContext.EndDialogAsync();
+                    await _accessors.CRMStateAccessor.SetAsync(stepContext.Context, crmState, cancellationToken);
+                    await _accessors.LuisStateAccessor.SetAsync(stepContext.Context, luisState, cancellationToken);
+                    return await stepContext.EndDialogAsync(cancellationToken: cancellationToken);
                 }
             }
             
@@ -186,15 +190,14 @@ namespace ProxiCall.Bot.Dialogs.SearchData
             //Redirect to SearchLeadDataDialog
             if (luisState.Entities.Contains(LuisState.SEARCH_CONTACT_ENTITYNAME))
             {
-                AddDialog(new SearchLeadDataDialog(_accessors, _loggerFactory, _botServices));
+                AddDialog(ActivatorUtilities.CreateInstance<SearchLeadDataDialog>(_serviceProvider));
                 crmState.Lead = crmState.Company.Contact;
                 if(crmState.Lead.Company==null)
                 {
-                    //TODO : ask Renaud : Creating a clone to prevent looping ok?
                     crmState.Lead = Lead.CloneWithCompany(crmState.Lead,crmState.Company);
                 }
-                await _accessors.CRMStateAccessor.SetAsync(stepContext.Context, crmState);
-                return await stepContext.ReplaceDialogAsync(nameof(SearchLeadDataDialog));
+                await _accessors.CRMStateAccessor.SetAsync(stepContext.Context, crmState, cancellationToken);
+                return await stepContext.ReplaceDialogAsync(nameof(SearchLeadDataDialog), cancellationToken: cancellationToken);
             }
             else if (wantOppornunities || wantNumberOppornunities)
             {
@@ -210,7 +213,7 @@ namespace ProxiCall.Bot.Dialogs.SearchData
                 );
             }
 
-            return await stepContext.NextAsync();
+            return await stepContext.NextAsync(cancellationToken: cancellationToken);
         }
 
 
@@ -238,7 +241,7 @@ namespace ProxiCall.Bot.Dialogs.SearchData
             //Number of Opportunities
             if (wantNumberOppornunities || wantOppornunities)
             {
-                var numberOfOpportunities = (crmState.Opportunities != null ? crmState.Opportunities.Count : 0);
+                var numberOfOpportunities = crmState.Opportunities?.Count ?? 0;
                 wantedData.AppendLine($"{string.Format(CulturedBot.GivenNumberOfOpportunitiesByCompany, numberOfOpportunities)}");
             }
 
@@ -275,8 +278,8 @@ namespace ProxiCall.Bot.Dialogs.SearchData
 
         private async Task<DialogTurnResult> EndSearchDialogStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
         {
-            var crmState = await _accessors.CRMStateAccessor.GetAsync(stepContext.Context, () => new CRMState());
-            var luisState = await _accessors.LuisStateAccessor.GetAsync(stepContext.Context, () => new LuisState());
+            var crmState = await _accessors.CRMStateAccessor.GetAsync(stepContext.Context, () => new CRMState(), cancellationToken);
+            var luisState = await _accessors.LuisStateAccessor.GetAsync(stepContext.Context, () => new LuisState(), cancellationToken);
 
             var message = CulturedBot.AskForRequest;
             await stepContext.Context.SendActivityAsync(MessageFactory
@@ -286,9 +289,9 @@ namespace ProxiCall.Bot.Dialogs.SearchData
 
             crmState.ResetCompany();
             luisState.ResetAll();
-            await _accessors.CRMStateAccessor.SetAsync(stepContext.Context, crmState);
-            await _accessors.LuisStateAccessor.SetAsync(stepContext.Context, luisState);
-            return await stepContext.EndDialogAsync();
+            await _accessors.CRMStateAccessor.SetAsync(stepContext.Context, crmState, cancellationToken);
+            await _accessors.LuisStateAccessor.SetAsync(stepContext.Context, luisState, cancellationToken);
+            return await stepContext.EndDialogAsync(cancellationToken: cancellationToken);
         }
     }
 }
