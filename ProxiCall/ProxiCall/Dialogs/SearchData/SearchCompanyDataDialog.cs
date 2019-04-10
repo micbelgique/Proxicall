@@ -76,16 +76,16 @@ namespace ProxiCall.Dialogs.SearchData
             }
 
             //Initializing CurrentUserAccessor
-            var currentUser = await _accessors.UserProfileAccessor.GetAsync(stepContext.Context, () => null);
+            var currentUser = await _accessors.LoggedUserAccessor.GetAsync(stepContext.Context, () => null);
             if (currentUser == null)
             {
-                if (stepContext.Options is UserProfile callStateOpt)
+                if (stepContext.Options is LoggedUserState callStateOpt)
                 {
-                    await _accessors.UserProfileAccessor.SetAsync(stepContext.Context, callStateOpt);
+                    await _accessors.LoggedUserAccessor.SetAsync(stepContext.Context, callStateOpt);
                 }
                 else
                 {
-                    await _accessors.UserProfileAccessor.SetAsync(stepContext.Context, new UserProfile());
+                    await _accessors.LoggedUserAccessor.SetAsync(stepContext.Context, new LoggedUserState());
                 }
             }
 
@@ -141,8 +141,8 @@ namespace ProxiCall.Dialogs.SearchData
 
         private async Task<Company> SearchCompanyAsync(ITurnContext turnContext, string name)
         {
-            var user = await _accessors.UserProfileAccessor.GetAsync(turnContext, () => new UserProfile());
-            var companyService = new CompanyService(user.Token);
+            var userState = await _accessors.LoggedUserAccessor.GetAsync(turnContext, () => new LoggedUserState());
+            var companyService = new CompanyService(userState.LoggedUser.Token);
             return await companyService.GetCompanyByName(name);
         }
 
@@ -227,7 +227,7 @@ namespace ProxiCall.Dialogs.SearchData
             if (wantOppornunities || wantNumberOppornunities)
             {
                 //Searching opportunities with this lead
-                crmState.Opportunities = (List<Opportunity>)await SearchOpportunitiesAsync
+                crmState.Opportunities = (List<OpportunityDetailed>)await SearchOpportunitiesAsync
                     (stepContext, crmState.Company.Name, "32491180031");
                 await _accessors.CRMStateAccessor.SetAsync(stepContext.Context, crmState);
                 hasOppornunities = crmState.Opportunities != null && crmState.Opportunities.Count != 0;
@@ -249,7 +249,7 @@ namespace ProxiCall.Dialogs.SearchData
                 for (int i = 0; i < crmState.Opportunities.Count; i++)
                 {
                     wantedData.Append(string.Format(CulturedBot.ListOpportunitiesOfCompany,
-                        crmState.Opportunities[i].Lead.FullName, crmState.Opportunities[i].Product.Title, crmState.Opportunities[i].CreationDate.ToShortDateString()));
+                        crmState.Opportunities[i].Lead.FullName, crmState.Opportunities[i].Product.Title, crmState.Opportunities[i].CreationDate?.ToShortDateString()));
                     if (i == (numberOfOpportunities - 2))
                     {
                         wantedData.Append($" {CulturedBot.LinkWithAnd} ");
@@ -264,11 +264,11 @@ namespace ProxiCall.Dialogs.SearchData
         }
 
         //Searching Opportunities in Database
-        private async Task<IEnumerable<Opportunity>> SearchOpportunitiesAsync
+        private async Task<IEnumerable<OpportunityDetailed>> SearchOpportunitiesAsync
             (WaterfallStepContext stepContext, string companyName, string ownerPhoneNumber)
         {
-            var user = await _accessors.UserProfileAccessor.GetAsync(stepContext.Context, () => new UserProfile());
-            var companyService = new CompanyService(user.Token);
+            var userState = await _accessors.LoggedUserAccessor.GetAsync(stepContext.Context, () => new LoggedUserState());
+            var companyService = new CompanyService(userState.LoggedUser.Token);
             var opportunities = await companyService.GetOpportunities(companyName, ownerPhoneNumber);
             return opportunities;
         }

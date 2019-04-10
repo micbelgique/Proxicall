@@ -9,7 +9,7 @@ namespace ProxiCall.Dialogs.Shared
 {
     public class StateAccessors
     {
-        public IStatePropertyAccessor<UserProfile> UserProfileAccessor { get; set; }
+        public IStatePropertyAccessor<LoggedUserState> LoggedUserAccessor { get; set; }
         public IStatePropertyAccessor<LuisState> LuisStateAccessor { get; set; }
         public IStatePropertyAccessor<CRMState> CRMStateAccessor { get; set; }
         public IStatePropertyAccessor<DialogState> DialogStateAccessor { get; set; }

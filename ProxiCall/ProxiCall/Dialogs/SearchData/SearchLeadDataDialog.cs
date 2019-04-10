@@ -77,16 +77,16 @@ namespace ProxiCall.Dialogs.SearchData
             }
 
             //Initializing CurrentUserAccessor
-            var currentUser = await _accessors.UserProfileAccessor.GetAsync(stepContext.Context, () => null);
+            var currentUser = await _accessors.LoggedUserAccessor.GetAsync(stepContext.Context, () => null);
             if (currentUser == null)
             {
-                if (stepContext.Options is UserProfile callStateOpt)
+                if (stepContext.Options is LoggedUserState callStateOpt)
                 {
-                    await _accessors.UserProfileAccessor.SetAsync(stepContext.Context, callStateOpt);
+                    await _accessors.LoggedUserAccessor.SetAsync(stepContext.Context, callStateOpt);
                 }
                 else
                 {
-                    await _accessors.UserProfileAccessor.SetAsync(stepContext.Context, new UserProfile());
+                    await _accessors.LoggedUserAccessor.SetAsync(stepContext.Context, new LoggedUserState());
                 }
             }
 
@@ -110,6 +110,7 @@ namespace ProxiCall.Dialogs.SearchData
         {
             var crmState = await _accessors.CRMStateAccessor.GetAsync(stepContext.Context, () => new CRMState());
             var luisState = await _accessors.LuisStateAccessor.GetAsync(stepContext.Context, () => new LuisState());
+            var userState = await _accessors.LoggedUserAccessor.GetAsync(stepContext.Context, () => new LoggedUserState());
 
             //Gathering the name of the lead if not already given
             if (string.IsNullOrEmpty(crmState.Lead.FullName))
@@ -131,13 +132,14 @@ namespace ProxiCall.Dialogs.SearchData
             {
                 if(crmState.Lead.PhoneNumber == null)
                 {
-                    crmState.WantsToCallButNumberNotFound=true;
+                    userState.WantsToCallButNumberNotFound=true;
                     promptMessage = $"{string.Format(CulturedBot.PhoneNumberNotFound, fullNameGivenByUser)} {CulturedBot.AskIfWantRetry}";
                 }
             }
             var needsRetry = !string.IsNullOrEmpty(promptMessage);
             if (needsRetry)
             {
+                await _accessors.LoggedUserAccessor.SetAsync(stepContext.Context, userState);
                 await _accessors.CRMStateAccessor.SetAsync(stepContext.Context, crmState);
                 var promptOptions = new PromptOptions
                 {
@@ -147,6 +149,7 @@ namespace ProxiCall.Dialogs.SearchData
                 return await stepContext.PromptAsync(_retryFetchingMinimumDataFromUserPrompt, promptOptions, cancellationToken);
             }
 
+            await _accessors.LoggedUserAccessor.SetAsync(stepContext.Context, userState);
             await _accessors.CRMStateAccessor.SetAsync(stepContext.Context, crmState);
             return await stepContext.NextAsync();
         }
@@ -154,8 +157,8 @@ namespace ProxiCall.Dialogs.SearchData
         //Searching Lead in Database
         private async Task<Lead> SearchLeadAsync(ITurnContext turnContext, string firstName, string lastName)
         {
-            var user = await _accessors.UserProfileAccessor.GetAsync(turnContext, () => new UserProfile());
-            var leadService = new LeadService(user.Token);
+            var userState = await _accessors.LoggedUserAccessor.GetAsync(turnContext, () => new LoggedUserState());
+            var leadService = new LeadService(userState.LoggedUser.Token);
             return await leadService.GetLeadByName(firstName, lastName);
         }
 
@@ -163,9 +166,10 @@ namespace ProxiCall.Dialogs.SearchData
         {
             var crmState = await _accessors.CRMStateAccessor.GetAsync(stepContext.Context, () => new CRMState());
             var luisState = await _accessors.LuisStateAccessor.GetAsync(stepContext.Context, () => new LuisState());
+            var userState = await _accessors.LoggedUserAccessor.GetAsync(stepContext.Context, () => new LoggedUserState());
 
             //Handling when lead not found
-            if (crmState.Lead == null || crmState.WantsToCallButNumberNotFound)
+            if (crmState.Lead == null || userState.WantsToCallButNumberNotFound)
             {
                 var retry = (bool)stepContext.Result;
                 if (retry)
@@ -212,8 +216,8 @@ namespace ProxiCall.Dialogs.SearchData
                 var wantPhoneOnly = wantPhone && hasOnlyPhoneEntity;
                 var wantPhoneOfContact = wantPhoneOnly && luisState.IntentName == Intents.SearchCompanyData;
 
-                crmState.IsEligibleForPotentialForwarding = (wantPhoneOnly || wantPhoneOfContact) && !string.IsNullOrEmpty(crmState.Lead.PhoneNumber);
-                await _accessors.CRMStateAccessor.SetAsync(stepContext.Context, crmState);
+                userState.IsEligibleForPotentialForwarding = (wantPhoneOnly || wantPhoneOfContact) && !string.IsNullOrEmpty(crmState.Lead.PhoneNumber);
+                await _accessors.LoggedUserAccessor.SetAsync(stepContext.Context, userState);
 
                 //Creating adapted response
                 var textMessage = await FormatMessageWithWantedData(stepContext);
@@ -226,7 +230,7 @@ namespace ProxiCall.Dialogs.SearchData
                 );
 
                 //Asking if user wants to forward the call
-                if (crmState.IsEligibleForPotentialForwarding)
+                if (userState.IsEligibleForPotentialForwarding)
                 {
                     var forwardPromptOptions = new PromptOptions
                     {
@@ -244,6 +248,7 @@ namespace ProxiCall.Dialogs.SearchData
         {
             var crmState = await _accessors.CRMStateAccessor.GetAsync(stepContext.Context, () => new CRMState());
             var luisState = await _accessors.LuisStateAccessor.GetAsync(stepContext.Context, () => new LuisState());
+            var userState = await _accessors.LoggedUserAccessor.GetAsync(stepContext.Context, () => new LoggedUserState());
 
             var wantPhone = luisState.Entities.Contains(LuisState.SEARCH_PHONENUMBER_ENTITYNAME);
             var wantAddress = luisState.Entities.Contains(LuisState.SEARCH_ADDRESS_ENTITYNAME);
@@ -263,8 +268,9 @@ namespace ProxiCall.Dialogs.SearchData
             if (wantOppornunities || wantNumberOppornunities)
             {
                 //Searching opportunities with this lead
-                crmState.Opportunities = (List<Opportunity>) await SearchOpportunitiesAsync
-                    (stepContext, crmState.Lead.FirstName, crmState.Lead.LastName, "32491180031");
+                //TODO : take off hardcode
+                crmState.Opportunities = (List<OpportunityDetailled>) await SearchOpportunitiesAsync
+                    (stepContext, crmState.Lead.FirstName, crmState.Lead.LastName, userState.LoggedUser.PhoneNumber);
                 await _accessors.CRMStateAccessor.SetAsync(stepContext.Context, crmState);
                 hasOppornunities = crmState.Opportunities != null && crmState.Opportunities.Count != 0;
             }
@@ -315,7 +321,7 @@ namespace ProxiCall.Dialogs.SearchData
                 for (int i = 0; i < crmState.Opportunities.Count; i++)
                 {
                     wantedData.Append(string.Format(CulturedBot.ListOpportunities,
-                        crmState.Opportunities[i].Product.Title, crmState.Opportunities[i].CreationDate.ToShortDateString()));
+                        crmState.Opportunities[i].Product.Title, crmState.Opportunities[i].CreationDate?.ToShortDateString()));
                     if (i == (numberOfOpportunities - 2))
                     {
                         wantedData.Append($" {CulturedBot.LinkWithAnd} ");
@@ -331,11 +337,11 @@ namespace ProxiCall.Dialogs.SearchData
             if (hasNoResults)
             {
                 var hasMoreThanOneWantedInfos = luisState.Entities.Count > 1;
-                if (hasMoreThanOneWantedInfos)
+                if (hasMoreThanOneWantedInfos && !wantOppornunities)
                 {
                     wantedData.Append($"{CulturedBot.NoDataFoundInDB}.");
                 }
-                else
+                else if(!wantOppornunities)
                 {
                     wantedData.Append($"{CulturedBot.ThisDataNotFoundInDB}");
                 }
@@ -344,10 +350,10 @@ namespace ProxiCall.Dialogs.SearchData
         }
         
         //Searching Opportunities in Database
-        private async Task<IEnumerable<Opportunity>> SearchOpportunitiesAsync(WaterfallStepContext stepContext, string leadFirstName, string leadLastName, string ownerPhoneNumber)
+        private async Task<IEnumerable<OpportunityDetailled>> SearchOpportunitiesAsync(WaterfallStepContext stepContext, string leadFirstName, string leadLastName, string ownerPhoneNumber)
         {
-            var user = await _accessors.UserProfileAccessor.GetAsync(stepContext.Context, () => new UserProfile());
-            var leadService = new LeadService(user.Token);
+            var userState = await _accessors.LoggedUserAccessor.GetAsync(stepContext.Context, () => new LoggedUserState());
+            var leadService = new LeadService(userState.LoggedUser.Token);
             var opportunities = await leadService.GetOpportunities(leadFirstName, leadLastName, ownerPhoneNumber);
             return opportunities;
         }
@@ -356,6 +362,7 @@ namespace ProxiCall.Dialogs.SearchData
         {
             var crmState = await _accessors.CRMStateAccessor.GetAsync(stepContext.Context, () => new CRMState());
             var luisState = await _accessors.LuisStateAccessor.GetAsync(stepContext.Context, () => new LuisState());
+            var userState = await _accessors.LoggedUserAccessor.GetAsync(stepContext.Context, () => new LoggedUserState());
 
             var isSearchLeadData =
                 luisState.IntentName == Intents.SearchLeadData
@@ -366,7 +373,7 @@ namespace ProxiCall.Dialogs.SearchData
 
             if (isSearchLeadData)
             {
-                if(crmState.IsEligibleForPotentialForwarding)
+                if(userState.IsEligibleForPotentialForwarding)
                 {
                     forward = (bool)stepContext.Result;
                 }
@@ -379,9 +386,10 @@ namespace ProxiCall.Dialogs.SearchData
                         , cancellationToken
                     );
 
-                    crmState.IsEligibleForPotentialForwarding = false;
+                    userState.IsEligibleForPotentialForwarding = false;
                     crmState.ResetLead();
                     luisState.ResetAll();
+                    await _accessors.LoggedUserAccessor.SetAsync(stepContext.Context, userState);
                     await _accessors.CRMStateAccessor.SetAsync(stepContext.Context, crmState);
                     await _accessors.LuisStateAccessor.SetAsync(stepContext.Context, luisState);
                 }
@@ -401,10 +409,11 @@ namespace ProxiCall.Dialogs.SearchData
 
                 await stepContext.Context.SendActivityAsync(activity, cancellationToken);
 
-                crmState.IsEligibleForPotentialForwarding = false;
+                userState.IsEligibleForPotentialForwarding = false;
                 crmState.ResetLead();
                 luisState.ResetAll();
                 luisState.ResetIntentIfNoEntities();
+                await _accessors.LoggedUserAccessor.SetAsync(stepContext.Context, userState);
                 await _accessors.CRMStateAccessor.SetAsync(stepContext.Context, crmState);
                 await _accessors.LuisStateAccessor.SetAsync(stepContext.Context, luisState);
             }

@@ -4,10 +4,9 @@ namespace ProxiCall.Models
 {
     public class Opportunity
     {
-        public string Id { get; set; }
-        public Lead Lead { get; set; }
-        public Product Product { get; set; }
-        public DateTime CreationDate { get; set; }
+        public string OwnerId { get; set; }
+        public string LeadId { get; set; }
+        public string ProductId { get; set; }
         public DateTime? EstimatedCloseDate { get; set; }
         public string Comments { get; set; }
         public string Status { get; set; }
@@ -15,18 +14,18 @@ namespace ProxiCall.Models
 
         public Opportunity()
         {
-            Lead = new Lead();
-            Product = new Product();
+
         }
 
-        public void ResetLead()
+        public Opportunity(Opportunity opportunity)
         {
-            Lead = new Lead();
-        }
-
-        public void ResetProduct()
-        {
-            Product = new Product();
+            OwnerId = opportunity.OwnerId;
+            LeadId = opportunity.LeadId;
+            ProductId = opportunity.ProductId;
+            EstimatedCloseDate = opportunity.EstimatedCloseDate;
+            Comments = opportunity.Comments;
+            Status = opportunity.Status;
+            Confidence = opportunity.Confidence;
         }
     }
 }
