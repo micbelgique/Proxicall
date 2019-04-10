@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Microsoft.Bot.Builder;
 using Microsoft.Bot.Builder.Dialogs;
 using Microsoft.Bot.Schema;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
 using ProxiCall.Bot.Dialogs.CreateData;
@@ -35,6 +36,7 @@ namespace ProxiCall.Bot
     {
         private readonly BotServices _services;
         private readonly StateAccessors _accessors;
+        private readonly IServiceProvider _serviceProvider;
         private readonly ILoggerFactory _loggerFactory;
 
         public DialogSet Dialogs { get; private set; }
@@ -45,9 +47,10 @@ namespace ProxiCall.Bot
         /// <param name="conversationState">The managed conversation state.</param>
         /// <param name="loggerFactory">A <see cref="ILoggerFactory"/> that is hooked to the Azure App Service provider.</param>
         /// <seealso cref="https://docs.microsoft.com/en-us/aspnet/core/fundamentals/logging/?view=aspnetcore-2.1#windows-eventlog-provider"/>
-        public ProxiCallBot(BotServices services, StateAccessors accessors, ILoggerFactory loggerFactory)
+        public ProxiCallBot(BotServices services, StateAccessors accessors, IServiceProvider serviceProvider, ILoggerFactory loggerFactory)
         {
             _accessors = accessors ?? throw new System.ArgumentNullException(nameof(accessors));
+            _serviceProvider = serviceProvider;
             _loggerFactory = loggerFactory ?? throw new ArgumentNullException(nameof(loggerFactory));
             _services = services ?? throw new ArgumentNullException(nameof(services));
 
@@ -57,9 +60,9 @@ namespace ProxiCall.Bot
             }
 
             Dialogs = new DialogSet(_accessors.DialogStateAccessor);
-            Dialogs.Add(new SearchLeadDataDialog(_accessors, _loggerFactory, _services));
-            Dialogs.Add(new SearchCompanyDataDialog(_accessors, _loggerFactory, _services));
-            Dialogs.Add(new CreateOpportunityDialog(_accessors, _loggerFactory, _services));
+            Dialogs.Add(ActivatorUtilities.CreateInstance<SearchLeadDataDialog>(_serviceProvider));
+            Dialogs.Add(ActivatorUtilities.CreateInstance<SearchCompanyDataDialog>(_serviceProvider));
+            Dialogs.Add(ActivatorUtilities.CreateInstance<CreateOpportunityDialog>(_serviceProvider));
         }
         
         /// <summary>

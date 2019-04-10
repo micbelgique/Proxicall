@@ -16,6 +16,7 @@ namespace ProxiCall.Bot.Dialogs.CreateData
     public class CreateOpportunityDialog : ComponentDialog
     {
         private readonly BotServices _botServices;
+        private readonly IServiceProvider _serviceProvider;
         private readonly ILoggerFactory _loggerFactory;
         private readonly StateAccessors _accessors;
 
@@ -31,11 +32,12 @@ namespace ProxiCall.Bot.Dialogs.CreateData
         private const string _retryFetchingClosingDateFromUserPrompt = "retryFetchingClosingDateFromUserPrompt";
 
 
-        public CreateOpportunityDialog(StateAccessors accessors, ILoggerFactory loggerFactory, BotServices botServices) : base(nameof(CreateOpportunityDialog))
+        public CreateOpportunityDialog(StateAccessors accessors, ILoggerFactory loggerFactory, BotServices botServices, IServiceProvider serviceProvider) : base(nameof(CreateOpportunityDialog))
         {
             _accessors = accessors;
             _loggerFactory = loggerFactory;
             _botServices = botServices;
+            _serviceProvider = serviceProvider;
 
             var waterfallSteps = new WaterfallStep[]
             {

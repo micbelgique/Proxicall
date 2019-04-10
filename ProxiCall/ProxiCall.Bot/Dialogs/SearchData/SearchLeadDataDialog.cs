@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -20,16 +21,18 @@ namespace ProxiCall.Bot.Dialogs.SearchData
         private readonly StateAccessors _accessors;
         private readonly ILoggerFactory _loggerFactory;
         private readonly BotServices _botServices;
+        private readonly IServiceProvider _serviceProvider;
         private const string _searchLeadDataWaterfall = "searchLeadDataWaterfall";
         private const string _leadFullNamePrompt = "leadFullNamePrompt";
         private const string _retryFetchingMinimumDataFromUserPrompt = "retryFetchingMinimumDataFromUserPrompt";
         private const string _confirmForwardingPrompt = "confirmForwardingPrompt";
 
-        public SearchLeadDataDialog(StateAccessors accessors, ILoggerFactory loggerFactory, BotServices botServices) : base(nameof(SearchLeadDataDialog))
+        public SearchLeadDataDialog(StateAccessors accessors, ILoggerFactory loggerFactory, BotServices botServices, IServiceProvider serviceProvider) : base(nameof(SearchLeadDataDialog))
         {
             _accessors = accessors;
             _loggerFactory = loggerFactory;
             _botServices = botServices;
+            _serviceProvider = serviceProvider;
 
             var waterfallSteps = new WaterfallStep[]
             {
