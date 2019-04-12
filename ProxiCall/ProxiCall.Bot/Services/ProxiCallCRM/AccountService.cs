@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Net.Http;
 using System.Threading.Tasks;
+using ProxiCall.Bot.Exceptions.ProxiCallCRM;
 using ProxiCall.Bot.Models;
 
 namespace ProxiCall.Bot.Services.ProxiCallCRM
@@ -15,7 +16,7 @@ namespace ProxiCall.Bot.Services.ProxiCallCRM
             _httpClient.BaseAddress = new Uri(Environment.GetEnvironmentVariable("ApiHost"));   
         }
 
-        public async Task<User> Authenticate(string phonenumber)
+        public async Task<User> Authenticate(string phonenumber) 
         {
             var path = $"api/account/login?phoneNumber={phonenumber}";
             var response = await _httpClient.GetAsync(path);
@@ -25,7 +26,7 @@ namespace ProxiCall.Bot.Services.ProxiCallCRM
                 var user = await response.Content.ReadAsAsync<User>();
                 return user;
             }
-            return null;
+            throw new UserNotFoundException($"Status code : {response.StatusCode} - {response.ReasonPhrase}");
         }
     }
 }

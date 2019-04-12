@@ -43,8 +43,4 @@
       <LastGenOutput>CulturedBot.Designer.cs</LastGenOutput>
     </EmbeddedResource>
   </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Exceptions\" />
-  </ItemGroup>
 </Project>
