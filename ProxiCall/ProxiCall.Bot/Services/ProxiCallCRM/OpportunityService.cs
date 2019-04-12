@@ -4,6 +4,7 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
+using ProxiCall.Bot.Exceptions.ProxiCallCRM;
 using ProxiCall.Bot.Models;
 
 namespace ProxiCall.Bot.Services.ProxiCallCRM
@@ -20,6 +21,11 @@ namespace ProxiCall.Bot.Services.ProxiCallCRM
 
         public async Task PostOpportunityAsync(string token, OpportunityDetailed opportunity)
         {
+            if (token == null)
+            {
+                throw new InvalidTokenException("Token is null");
+            }
+
             var path = $"api/opportunities";
             _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
