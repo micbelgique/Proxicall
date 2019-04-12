@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Bot.Builder;
@@ -91,15 +92,16 @@ namespace ProxiCall.Bot
             var activity = turnContext.Activity;
 
             // Create a dialog context
-            var dialogContext = await Dialogs.CreateContextAsync(turnContext);
+            var dialogContext = await Dialogs.CreateContextAsync(turnContext, cancellationToken);
+            
+            // Check if development environment
+            var isDevelopmentEnvironment = activity.ChannelId == "webchat" || activity.ChannelId == "emulator";
 
-
-            var userState = await _accessors.LoggedUserAccessor.GetAsync(dialogContext.Context, () => new LoggedUserState());
+            var userState = await _accessors.LoggedUserAccessor.GetAsync(dialogContext.Context, () => new LoggedUserState(), cancellationToken);
 
             if (activity.Type == ActivityTypes.Message)
             {
                 var isFirstMessage = false;
-                var isDev = false;
                 var phonenumber = string.Empty;
 
                 if (activity.ChannelId == "directline")
@@ -110,47 +112,49 @@ namespace ProxiCall.Bot
                         {
                             isFirstMessage = entity.Properties.TryGetValue("firstmessage", out var jtoken);
                             phonenumber = isFirstMessage ? jtoken.ToString() : string.Empty;
+                            if(isFirstMessage)
+                                break;
                         }
                     }
                 }
-                else if (userState.LoggedUser.Token == null)
+                else if (userState.LoggedUser.Token == null && isDevelopmentEnvironment)
                 {
-                    //emulator and webchat
+                    // Admin login for development purposes
                     isFirstMessage = true;
-                    isDev = true;
                     phonenumber = "1234567890";
                 }
 
                 if(isFirstMessage)
                 {
-                    //Twilio
-                    //This is the first message sent by the bot on production
-                    var loggedUser = await _accountService.Authenticate(phonenumber);
-                    userState.LoggedUser = loggedUser;
-                    await _accessors.LoggedUserAccessor.SetAsync(dialogContext.Context, userState);
-                    if (userState != null)
+                    // This is the first message sent by the bot on production
+                    try
                     {
-                        if (!isDev && !string.IsNullOrEmpty(userState.LoggedUser.Token))
+                        var loggedUser = await _accountService.Authenticate(phonenumber);
+                        userState.LoggedUser = loggedUser;
+                        await _accessors.LoggedUserAccessor.SetAsync(dialogContext.Context, userState,
+                            cancellationToken);
+
+                        if (!isDevelopmentEnvironment && !string.IsNullOrEmpty(userState.LoggedUser.Token))
                         {
+                            //TODO add message to resx
                             var welcomingMessage = $"Bonjour {userState.LoggedUser.Alias}. {CulturedBot.AskForRequest}";
-                            var reply = MessageFactory.Text(welcomingMessage,
-                                welcomingMessage,
-                                InputHints.AcceptingInput);
+                            var reply = MessageFactory.Text(welcomingMessage, welcomingMessage, InputHints.AcceptingInput);
                             await turnContext.SendActivityAsync(reply, cancellationToken);
                         }
                     }
-                    else
+                    catch (Exception ex)
                     {
-                        string errorMessage = "Désolé, vous n'avez pas accès.";
+                        //TODO add message to resx
+                        var errorMessage = "Désolé, vous n'avez pas accès.";
                         var reply = MessageFactory.Text(errorMessage, errorMessage, InputHints.AcceptingInput);
                         var entity = new Entity();
-                        entity.Properties.Add("error", JToken.Parse("{\"hangup\":\"unauthorized\"}"));
+                        entity.Properties.Add("error", JToken.Parse("{\"hangup\":\"" + ex.Message + "\"}"));
                         reply.Entities.Add(entity);
                         await turnContext.SendActivityAsync(reply, cancellationToken);
                     }
                 }
                 
-                if(isDev || !isFirstMessage)
+                if(!isFirstMessage || isDevelopmentEnvironment)
                 {
                     // Perform a call to LUIS to retrieve results for the current activity message.
                     var luisResults = await _services.LuisServices[BotServices.LUIS_APP_NAME].RecognizeAsync(dialogContext.Context, cancellationToken);
@@ -162,7 +166,7 @@ namespace ProxiCall.Bot
                     var topIntent = topScoringIntent.Value.intent;
 
                     // Continue the current dialog
-                    var dialogResult = await dialogContext.ContinueDialogAsync();
+                    var dialogResult = await dialogContext.ContinueDialogAsync(cancellationToken);
 
                     // If no one has responded,
                     if (!dialogContext.Context.Responded)
@@ -175,21 +179,21 @@ namespace ProxiCall.Bot
                                 {
                                     case Intents.CreateOpportunity:
                                         await UpdateDialogStatesAsync(luisResults, topIntent, dialogContext.Context);
-                                        await dialogContext.BeginDialogAsync(nameof(CreateOpportunityDialog));
+                                        await dialogContext.BeginDialogAsync(nameof(CreateOpportunityDialog), cancellationToken: cancellationToken);
                                         break;
                                     case Intents.SearchCompanyData:
                                         await UpdateDialogStatesAsync(luisResults, topIntent, dialogContext.Context);
-                                        await dialogContext.BeginDialogAsync(nameof(SearchCompanyDataDialog));
+                                        await dialogContext.BeginDialogAsync(nameof(SearchCompanyDataDialog), cancellationToken: cancellationToken);
                                         break;
                                     case Intents.SearchLeadData:
                                     case Intents.MakeACall:
                                         await UpdateDialogStatesAsync(luisResults, topIntent, dialogContext.Context);
-                                        await dialogContext.BeginDialogAsync(nameof(SearchLeadDataDialog));
+                                        await dialogContext.BeginDialogAsync(nameof(SearchLeadDataDialog), cancellationToken: cancellationToken);
                                         break;
 
                                     case Intents.None:
                                     default:
-                                        await dialogContext.Context.SendActivityAsync(CulturedBot.NoIntentFound);
+                                        await dialogContext.Context.SendActivityAsync(CulturedBot.NoIntentFound, cancellationToken: cancellationToken);
                                         break;
                                 }
 
@@ -200,15 +204,21 @@ namespace ProxiCall.Bot
                                 break;
 
                             case DialogTurnStatus.Complete:
-                                await dialogContext.EndDialogAsync();
+                                await dialogContext.EndDialogAsync(cancellationToken: cancellationToken);
                                 break;
 
                             default:
-                                await dialogContext.CancelAllDialogsAsync();
+                                await dialogContext.CancelAllDialogsAsync(cancellationToken);
                                 break;
                         }
                     }
                 }
+            }
+            else if (isDevelopmentEnvironment && activity.Type == ActivityTypes.ConversationUpdate && activity.MembersAdded.FirstOrDefault()?.Id == activity.Recipient.Id)
+            {
+                var message = $"{CulturedBot.Greet}. {CulturedBot.AskForRequest}";
+                var reply = MessageFactory.Text(message, message, InputHints.AcceptingInput);
+                await turnContext.SendActivityAsync(reply, cancellationToken);
             }
 
             await _accessors.UserState.SaveChangesAsync(turnContext, false, cancellationToken);

@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
+using ProxiCall.Bot.Exceptions.ProxiCallCRM;
 using ProxiCall.Bot.Models;
 
 namespace ProxiCall.Bot.Services.ProxiCallCRM
@@ -19,6 +21,11 @@ namespace ProxiCall.Bot.Services.ProxiCallCRM
 
         public async Task<Company> GetCompanyByName(string token, string name)
         {
+            if (token == null)
+            {
+                throw new InvalidTokenException("Token is null");
+            }
+
             var path = $"api/companies/byName?name={name}";
             _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
             var response = await _httpClient.GetAsync(path);
@@ -31,6 +38,11 @@ namespace ProxiCall.Bot.Services.ProxiCallCRM
 
         public async Task<IEnumerable<OpportunityDetailed>> GetOpportunities(string token, string companyName, string ownerPhoneNumber)
         {
+            if (token == null)
+            {
+                throw new InvalidTokenException("Token is null");
+            }
+
             IEnumerable<OpportunityDetailed> opportunities = new List<OpportunityDetailed>();
             var path = $"api/companies/opportunities?companyName={companyName}&ownerPhoneNumber={ownerPhoneNumber}";
             _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
