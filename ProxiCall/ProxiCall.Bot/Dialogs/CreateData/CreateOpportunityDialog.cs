@@ -34,9 +34,13 @@ namespace ProxiCall.Bot.Dialogs.CreateData
         //Checking the closing date
         private const string _closingDatePrompt = "closingDatePrompt";
         private const string _retryFetchingClosingDateFromUserPrompt = "retryFetchingClosingDateFromUserPrompt";
+        //Checking for comment
+        private const string _commentPrompt = "commentPrompt";
+        private const string _fetchingCommentFromUserPrompt = "fetchingCommentFromUserPrompt";
 
 
-        public CreateOpportunityDialog(StateAccessors accessors, ILoggerFactory loggerFactory, BotServices botServices, IServiceProvider serviceProvider) : base(nameof(CreateOpportunityDialog))
+        public CreateOpportunityDialog(StateAccessors accessors, ILoggerFactory loggerFactory,
+            BotServices botServices,IServiceProvider serviceProvider) : base(nameof(CreateOpportunityDialog))
         {
             _accessors = accessors;
             _loggerFactory = loggerFactory;
@@ -63,6 +67,10 @@ namespace ProxiCall.Bot.Dialogs.CreateData
                 AskForClosingDateStepAsync,
                 SearchClosingDateStepAsync,
                 ClosingDateResultHandlerStepAsync,
+                //Checking for comment
+                AskIfUserWantsToCommentStepAsync,
+                AskToCommentStepAsync,
+                FetchingCommentFromUserStepAsync,
                 //End of Dialog
                 EndSearchDialogStepAsync
 
@@ -77,6 +85,9 @@ namespace ProxiCall.Bot.Dialogs.CreateData
             //Checking the closing date
             AddDialog(new TextPrompt(_closingDatePrompt));
             AddDialog(new ConfirmPrompt(_retryFetchingClosingDateFromUserPrompt, defaultLocale: "fr-fr"));
+            //Checking for comment
+            AddDialog(new ConfirmPrompt(_commentPrompt, defaultLocale: "fr-fr"));
+            AddDialog(new TextPrompt(_fetchingCommentFromUserPrompt));
         }
 
         //-------------------------
@@ -165,27 +176,19 @@ namespace ProxiCall.Bot.Dialogs.CreateData
             //Searching the lead
             var fullNameGivenByUser = crmState.Opportunity.Lead.FullName;
             crmState.Opportunity.Lead = await SearchLeadAsync(stepContext.Context, crmState.Opportunity.Lead.FirstName, crmState.Opportunity.Lead.LastName);
+            await _accessors.CRMStateAccessor.SetAsync(stepContext.Context, crmState, cancellationToken);
 
             //Asking for retry if necessary
-            var promptMessage = "";
             if (crmState.Opportunity.Lead == null)
             {
-                promptMessage = $"{string.Format(CulturedBot.NamedObjectNotFound, fullNameGivenByUser)} {CulturedBot.AskIfWantRetry}";
-            }
-
-            var needsRetry = !string.IsNullOrEmpty(promptMessage);
-            if (needsRetry)
-            {
-                await _accessors.CRMStateAccessor.SetAsync(stepContext.Context, crmState, cancellationToken);
                 var promptOptions = new PromptOptions
                 {
-                    Prompt = MessageFactory.Text(promptMessage),
+                    Prompt = MessageFactory.Text($"{string.Format(CulturedBot.NamedObjectNotFound, fullNameGivenByUser)} {CulturedBot.AskIfWantRetry}"),
                     RetryPrompt = MessageFactory.Text(CulturedBot.AskYesOrNo),
                 };
                 return await stepContext.PromptAsync(_retryFetchingLeadFromUserPrompt, promptOptions, cancellationToken);
             }
-
-            await _accessors.CRMStateAccessor.SetAsync(stepContext.Context, crmState, cancellationToken);
+           
             return await stepContext.NextAsync(cancellationToken: cancellationToken);
         }
 
@@ -239,19 +242,18 @@ namespace ProxiCall.Bot.Dialogs.CreateData
         private async Task<DialogTurnResult> AskForProductNameStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
         {
             var crmState = await _accessors.CRMStateAccessor.GetAsync(stepContext.Context, cancellationToken: cancellationToken);
-
-            if(!string.IsNullOrEmpty(crmState.Product.Title))
-            {
-                crmState.Opportunity.Product = crmState.Product;
-            }
-
+            
             //Asking for the name of the product if not already given
-            if (string.IsNullOrEmpty(crmState.Opportunity.Product.Title))
+            if (string.IsNullOrEmpty(crmState.Product.Title))
             {
                 return await stepContext.PromptAsync(_productNamePrompt, new PromptOptions
                 {
                     Prompt = MessageFactory.Text(CulturedBot.AskForWhichProduct)
                 }, cancellationToken);
+            }
+            else
+            {
+                crmState.Opportunity.Product = crmState.Product;
             }
             return await stepContext.NextAsync(cancellationToken: cancellationToken);
         }
@@ -261,7 +263,7 @@ namespace ProxiCall.Bot.Dialogs.CreateData
             var crmState = await _accessors.CRMStateAccessor.GetAsync(stepContext.Context, () => new CRMState(), cancellationToken);
 
             //Gathering the name of the product if not already given
-            if (string.IsNullOrEmpty(crmState.Opportunity.Product.Title))
+            if (string.IsNullOrEmpty(crmState.Product.Title))
             {
                 crmState.Opportunity.Product.Title = (string)stepContext.Result;
             }
@@ -430,11 +432,57 @@ namespace ProxiCall.Bot.Dialogs.CreateData
             }
             return await stepContext.NextAsync(cancellationToken: cancellationToken);
         }
-        
-        //-----------------------
-        //-----End of dialog-----
-        //-----------------------
-        private async Task<DialogTurnResult> EndSearchDialogStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
+
+        //------------------------------
+        //-----Checking for Comment-----
+        //------------------------------
+        private async Task<DialogTurnResult> AskIfUserWantsToCommentStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
+        {
+            var crmState = await _accessors.CRMStateAccessor.GetAsync(stepContext.Context, () => new CRMState(), cancellationToken);
+            var luisState = await _accessors.LuisStateAccessor.GetAsync(stepContext.Context, () => new LuisState(), cancellationToken);
+            var userState = await _accessors.LoggedUserAccessor.GetAsync(stepContext.Context, () => new LoggedUserState(), cancellationToken);
+            
+            var promptOptions = new PromptOptions
+            {
+                Prompt = MessageFactory.Text("Avez-vous un commentaire a ajouté?"),
+                RetryPrompt = MessageFactory.Text(CulturedBot.AskYesOrNo),
+            };
+            return await stepContext.PromptAsync(_commentPrompt, promptOptions, cancellationToken);
+        }
+
+        private async Task<DialogTurnResult> AskToCommentStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
+        {
+            var userState = await _accessors.LoggedUserAccessor.GetAsync(stepContext.Context, () => new LoggedUserState(), cancellationToken);
+
+            userState.WantsToComment = (bool)stepContext.Result;
+            await _accessors.LoggedUserAccessor.SetAsync(stepContext.Context, userState, cancellationToken);
+
+            if (userState.WantsToComment)
+            {
+                return await stepContext.PromptAsync(_fetchingCommentFromUserPrompt, new PromptOptions
+                {
+                    Prompt = MessageFactory.Text(CulturedBot.SayGoAhead)
+                }, cancellationToken);
+            }
+            return await stepContext.NextAsync(cancellationToken: cancellationToken);
+        }
+
+        private async Task<DialogTurnResult> FetchingCommentFromUserStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
+        {
+            var crmState = await _accessors.CRMStateAccessor.GetAsync(stepContext.Context, () => new CRMState(), cancellationToken);
+            var userState = await _accessors.LoggedUserAccessor.GetAsync(stepContext.Context, () => new LoggedUserState(), cancellationToken);
+            if (userState.WantsToComment)
+            {
+                crmState.Opportunity.Comments = (string)stepContext.Result;
+                await _accessors.CRMStateAccessor.SetAsync(stepContext.Context, crmState, cancellationToken);
+            }
+            return await stepContext.NextAsync(cancellationToken: cancellationToken);
+        }
+
+            //-----------------------
+            //-----End of dialog-----
+            //-----------------------
+            private async Task<DialogTurnResult> EndSearchDialogStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
         {
             var crmState = await _accessors.CRMStateAccessor.GetAsync(stepContext.Context, () => new CRMState(), cancellationToken);
             var luisState = await _accessors.LuisStateAccessor.GetAsync(stepContext.Context, () => new LuisState(), cancellationToken);
