@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
@@ -28,9 +29,14 @@ namespace ProxiCall.Bot.Services.ProxiCallCRM
             var path = $"api/products/byTitle?title={title}";
             _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
             var response = await _httpClient.GetAsync(path);
-            if (response.IsSuccessStatusCode)
+            switch (response.StatusCode)
             {
-                product = await response.Content.ReadAsAsync<Product>();
+                case HttpStatusCode.Accepted:
+                    product = await response.Content.ReadAsAsync<Product>();
+                    break;
+                case HttpStatusCode.Forbidden:
+                    throw new AccessForbiddenException();
+
             }
             return product;
         }

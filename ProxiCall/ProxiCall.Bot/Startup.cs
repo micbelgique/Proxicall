@@ -181,6 +181,9 @@ namespace ProxiCall.Bot
                     errorMessage = "Aucun utilisateur n'a été trouvé";
                     break;
                 case InvalidTokenException _:
+                    errorMessage = "L'authentification a échoué";
+                    break;
+                case AccessForbiddenException _:
                     errorMessage = "Vous n'avez pas accès à cette ressource";
                     break;
                 default:

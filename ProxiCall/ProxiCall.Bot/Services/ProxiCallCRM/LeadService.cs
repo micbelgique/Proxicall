@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
@@ -47,11 +48,15 @@ namespace ProxiCall.Bot.Services.ProxiCallCRM
             var path = $"api/leads/opportunities?leadfirstname={leadFirstName}&leadlastname={leadLastName}&ownerPhoneNumber={ownerPhoneNumber}";
             _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
             var response = await _httpClient.GetAsync(path);
-            if (response.IsSuccessStatusCode)
+            switch (response.StatusCode)
             {
-                opportunities = await response.Content.ReadAsAsync<IEnumerable<OpportunityDetailed>>();
-                return opportunities;
+                case HttpStatusCode.Accepted:
+                    opportunities = await response.Content.ReadAsAsync<IEnumerable<OpportunityDetailed>>();
+                    return opportunities;
+                case HttpStatusCode.Forbidden:
+                    throw new AccessForbiddenException();
             }
+
             return null;
         }
     }

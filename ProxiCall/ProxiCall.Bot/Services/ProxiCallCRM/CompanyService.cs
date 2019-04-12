@@ -47,10 +47,13 @@ namespace ProxiCall.Bot.Services.ProxiCallCRM
             var path = $"api/companies/opportunities?companyName={companyName}&ownerPhoneNumber={ownerPhoneNumber}";
             _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
             var response = await _httpClient.GetAsync(path);
-            if (response.IsSuccessStatusCode)
+            switch (response.StatusCode)
             {
-                opportunities = await response.Content.ReadAsAsync<IEnumerable<OpportunityDetailed>>();
-                return opportunities;
+                case HttpStatusCode.Accepted:
+                    opportunities = await response.Content.ReadAsAsync<IEnumerable<OpportunityDetailed>>();
+                    return opportunities;
+                case HttpStatusCode.Forbidden:
+                    throw new AccessForbiddenException();
             }
             return null;
         }
