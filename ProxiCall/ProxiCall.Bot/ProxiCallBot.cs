@@ -246,6 +246,7 @@ namespace ProxiCall.Bot
                 string luisExpectedCompanyName = "companyName";
                 string luisExpectedDateTime = "datetime";
                 string luisExpectedProductTitle = "productTitle";
+                string luisExpectedConfidenceOpportunity = "confidenceOpportunity";
 
                 string luisHintSearchLeadAddress = "searchaddress";
                 string luisHintSearchLeadCompany = "searchcompany";
@@ -289,6 +290,20 @@ namespace ProxiCall.Bot
                 {
                     var productTitle = (string)entities[luisExpectedProductTitle][0];
                     crmState.Product.Title = productTitle;
+                }
+
+                if(intentName == Intents.CreateOpportunity)
+                {
+                    if (entities[luisExpectedConfidenceOpportunity] != null)
+                    {
+                        var confidenceOpportunity = (string)entities[luisExpectedConfidenceOpportunity][0].First;
+                        crmState.Opportunity.Confidence = confidenceOpportunity;
+                    }
+                    else
+                    {
+                        //TODO : remove hardcoded part
+                        crmState.Opportunity.Confidence = "Moyenne";
+                    }
                 }
 
                 //Hints

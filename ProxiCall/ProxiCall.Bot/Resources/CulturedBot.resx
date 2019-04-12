@@ -213,4 +213,7 @@
   <data name="AskIfWantToSkip" xml:space="preserve">
     <value>Voulez-vous passer cette étape?</value>
   </data>
+  <data name="SayGoAhead" xml:space="preserve">
+    <value>Allez-y!</value>
+  </data>
 </root>

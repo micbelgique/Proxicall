@@ -10,7 +10,30 @@ namespace ProxiCall.Bot.Models
         public DateTime? EstimatedCloseDate { get; set; }
         public string Comments { get; set; }
         public string Status { get; set; }
-        public string Confidence { get; set; }
+        private string confidence;
+
+        public string Confidence
+        {
+            get { return confidence; }
+            set
+            {
+                switch(value)
+                {
+                    //TODO : remove hardcoded part
+                    case "incertaine":
+                        confidence = "Basse";
+                        break;
+                    case "certaine":
+                        confidence = "Haute";
+                        break;
+                    case "potentiel":
+                    default:
+                        confidence = "Moyenne";
+                        break;
+                }
+            }
+        }
+
 
         public Opportunity()
         {
