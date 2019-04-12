@@ -11,10 +11,12 @@ using Microsoft.Bot.Builder.Dialogs;
 using Microsoft.Bot.Builder.Integration.AspNet.Core;
 using Microsoft.Bot.Configuration;
 using Microsoft.Bot.Connector.Authentication;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using ProxiCall.Bot.Dialogs.Shared;
+using ProxiCall.Bot.Exceptions.ProxiCallCRM;
 using ProxiCall.Bot.Services.ProxiCallCRM;
 
 namespace ProxiCall.Bot
@@ -146,8 +148,10 @@ namespace ProxiCall.Bot
 
                 options.OnTurnError = async (context, exception) =>
                 {
+                    var errorMessage = ExceptionHandler(exception);
+                    
                     logger.LogError($"Exception caught : {exception}");
-                    await context.SendActivityAsync($"Sorry, it looks like something went wrong : {exception.Message}");
+                    await context.SendActivityAsync(errorMessage);
                 };
             });
             
@@ -165,6 +169,26 @@ namespace ProxiCall.Bot
             app.UseDefaultFiles()
                 .UseStaticFiles()
                 .UseBotFramework();
+        }
+
+        private string ExceptionHandler(Exception exception)
+        {
+            var errorMessage = string.Empty;
+            switch (exception)
+            {
+                // TODO add error messages to resx
+                case UserNotFoundException _:
+                    errorMessage = "Aucun utilisateur n'a été trouvé";
+                    break;
+                case InvalidTokenException _:
+                    errorMessage = "Vous n'avez pas accès à cette ressource";
+                    break;
+                default:
+                    errorMessage = $"Sorry, it looks like something went wrong : {exception.Message}";
+                    break;
+            }
+
+            return errorMessage;
         }
     }
 }
