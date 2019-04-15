@@ -53,21 +53,21 @@ namespace ProxiCall.CRM.Controllers.Api
         {
             if(string.IsNullOrEmpty(leadFirstName) || string.IsNullOrEmpty(leadLastName) || string.IsNullOrEmpty(ownerPhoneNumber))
             {
-                return NotFound();
+                return BadRequest();
             }
 
             //Searching the lead
             var lead = await _leadDao.GetLeadByName(leadFirstName, leadLastName);
             if (lead == null)
             {
-                return NotFound();
+                return NotFound("lead-not-found");
             }
 
             //Searching the owner
             var owner = _context.Set<IdentityUser>().FirstOrDefault(u => u.PhoneNumber == ownerPhoneNumber);
             if (owner == null)
             {
-                return NotFound();
+                return NotFound("owner-not-found");
             }
 
             var opportunities = await _context.Opportunities
@@ -79,7 +79,7 @@ namespace ProxiCall.CRM.Controllers.Api
 
             if (opportunities == null || opportunities.Count == 0)
             {
-                return NotFound();
+                return NotFound("opportunities-not-found");
             }
 
             return opportunities;

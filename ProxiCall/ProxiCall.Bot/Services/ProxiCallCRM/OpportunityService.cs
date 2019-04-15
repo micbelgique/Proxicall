@@ -49,6 +49,8 @@ namespace ProxiCall.Bot.Services.ProxiCallCRM
                                 break;
                             case HttpStatusCode.Forbidden:
                                 throw new AccessForbiddenException();
+                            default:
+                                throw new OpportunityNotCreatedException();
                         }
                     }
                 }

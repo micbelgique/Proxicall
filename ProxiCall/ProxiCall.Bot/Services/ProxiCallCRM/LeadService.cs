@@ -30,11 +30,15 @@ namespace ProxiCall.Bot.Services.ProxiCallCRM
             var path = $"api/leads/byName?firstName={firstName}&lastName={lastName}";
             _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
             var response = await _httpClient.GetAsync(path);
-            if (response.IsSuccessStatusCode)
+            switch (response.StatusCode)
             {
-                lead = await response.Content.ReadAsAsync<Lead>();
+                case HttpStatusCode.Accepted:
+                    lead = await response.Content.ReadAsAsync<Lead>();
+                    return lead;
+                case HttpStatusCode.NotFound:
+                default:
+                    throw new LeadNotFoundException();
             }
-            return lead;
         }
 
         public async Task<IEnumerable<OpportunityDetailed>> GetOpportunities(string token, string leadFirstName, string leadLastName, string ownerPhoneNumber)
@@ -55,9 +59,21 @@ namespace ProxiCall.Bot.Services.ProxiCallCRM
                     return opportunities;
                 case HttpStatusCode.Forbidden:
                     throw new AccessForbiddenException();
+                case HttpStatusCode.NotFound:
+                    switch (response.ReasonPhrase)
+                    {
+                        case "lead-not-found":
+                            throw new LeadNotFoundException();
+                        case "owner-not-found":
+                            throw new OwnerNotFoundException();
+                        case "opportunities-not-found":
+                        default:
+                            throw new OpportunitiesNotFoundException();
+                    }
+                case HttpStatusCode.BadRequest:
+                default:
+                    throw new OpportunitiesNotFoundException();
             }
-
-            return null;
         }
     }
 }

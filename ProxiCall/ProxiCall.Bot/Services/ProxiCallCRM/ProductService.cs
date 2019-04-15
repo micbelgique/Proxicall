@@ -25,20 +25,21 @@ namespace ProxiCall.Bot.Services.ProxiCallCRM
                 throw new InvalidTokenException("Token is null");
             }
 
-            Product product = null;
             var path = $"api/products/byTitle?title={title}";
             _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
             var response = await _httpClient.GetAsync(path);
             switch (response.StatusCode)
             {
                 case HttpStatusCode.Accepted:
-                    product = await response.Content.ReadAsAsync<Product>();
-                    break;
+                    var product = await response.Content.ReadAsAsync<Product>();
+                    return product;
                 case HttpStatusCode.Forbidden:
                     throw new AccessForbiddenException();
+                case HttpStatusCode.NotFound:
+                default:
+                    throw new ProductNotFoundException();
 
             }
-            return product;
         }
     }
 }

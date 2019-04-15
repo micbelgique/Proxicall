@@ -67,14 +67,14 @@ namespace ProxiCall.CRM.Controllers.Api
             var company = await _companyDAO.GetCompanyByName(companyName);
             if (company == null)
             {
-                return NotFound();
+                return NotFound("company-not-found");
             }
 
             //Searching the owner
             var owner = _context.Set<IdentityUser>().FirstOrDefault(u => u.PhoneNumber == ownerPhoneNumber);
             if (owner == null)
             {
-                return  NotFound();
+                return  NotFound("owner-not-found");
             }
             
             //Searching the opportunities
@@ -87,7 +87,7 @@ namespace ProxiCall.CRM.Controllers.Api
 
             if (opportunities == null || opportunities.Count == 0)
             {
-                return NotFound();
+                return NotFound("opportunities-not-found");
             }
             return Ok(opportunities);
         }
