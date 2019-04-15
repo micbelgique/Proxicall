@@ -21,19 +21,19 @@ namespace ProxiCall.Library.Enumeration.Opportunity
 
         private class OpenStatus : OpportunityStatus
         {
-            public OpenStatus() : base(1, "Ouverte")
+            public OpenStatus() : base(1, OpportunityStatusValue.Open)
             { }
         }
 
         private class ClosedStatus : OpportunityStatus
         {
-            public ClosedStatus() : base(2, "Fermée")
+            public ClosedStatus() : base(2, OpportunityStatusValue.Closed)
             { }
         }
 
         private class CanceledStatus : OpportunityStatus
         {
-            public CanceledStatus() : base(3, "Annulée")
+            public CanceledStatus() : base(3, OpportunityStatusValue.Canceled)
             { }
         }
     }

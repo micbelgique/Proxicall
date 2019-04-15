@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Collections;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -6,6 +7,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using ProxiCall.CRM.Areas.Identity.Data;
 using ProxiCall.CRM.Models;
+using ProxiCall.Library.Dictionnaries.Lead;
 
 namespace ProxiCall.CRM.Controllers
 {
@@ -49,6 +51,7 @@ namespace ProxiCall.CRM.Controllers
         public IActionResult Create()
         {
             ViewData["CompanyId"] = new SelectList(_context.Companies, "Id", "Name");
+            ViewData["GenderName"] = new SelectList((IEnumerable)LeadGender.AllGender, "Key", "Value");
             return View();
         }
 
@@ -57,7 +60,7 @@ namespace ProxiCall.CRM.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,FirstName,LastName,PhoneNumber,Email,Address,CompanyId")] Lead lead)
+        public async Task<IActionResult> Create([Bind("Id,FirstName,LastName,PhoneNumber,Email,Address,CompanyId,Gender")] Lead lead)
         {
             if (ModelState.IsValid)
             {
@@ -66,6 +69,7 @@ namespace ProxiCall.CRM.Controllers
                 return RedirectToAction(nameof(Index));
             }
             ViewData["CompanyId"] = new SelectList(_context.Companies, "Id", "Name", lead.CompanyId);
+            ViewData["GenderName"] = new SelectList((IEnumerable)LeadGender.AllGender, "Key", "Value");
             return View(lead);
         }
 
@@ -83,6 +87,7 @@ namespace ProxiCall.CRM.Controllers
                 return NotFound();
             }
             ViewData["CompanyId"] = new SelectList(_context.Companies, "Id", "Name", lead.CompanyId);
+            ViewData["GenderName"] = new SelectList((IEnumerable)LeadGender.AllGender, "Key", "Value");
             return View(lead);
         }
 
@@ -91,7 +96,7 @@ namespace ProxiCall.CRM.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(string id, [Bind("Id,FirstName,LastName,PhoneNumber,Email,Address,CompanyId")] Lead lead)
+        public async Task<IActionResult> Edit(string id, [Bind("Id,FirstName,LastName,PhoneNumber,Email,Address,CompanyId,Gender")] Lead lead)
         {
             if (id != lead.Id)
             {
@@ -119,6 +124,7 @@ namespace ProxiCall.CRM.Controllers
                 return RedirectToAction(nameof(Index));
             }
             ViewData["CompanyId"] = new SelectList(_context.Companies, "Id", "Name", lead.CompanyId);
+            ViewData["GenderName"] = new SelectList((IEnumerable)LeadGender.AllGender, "Key", "Value");
             return View(lead);
         }
 

@@ -21,19 +21,19 @@ namespace ProxiCall.Library.Enumeration.Opportunity
 
         private class HighConfidence : OpportunityConfidence
         {
-            public HighConfidence() : base(1, "Haute")
+            public HighConfidence() : base(1, OpportunityConfidenceValue.High)
             { }
         }
 
         private class AverageConfidence : OpportunityConfidence
         {
-            public AverageConfidence() : base(2, "Moyenne")
+            public AverageConfidence() : base(2, OpportunityConfidenceValue.Average)
             { }
         }
 
         private class LowConfidence : OpportunityConfidence
         {
-            public LowConfidence() : base(3, "Basse")
+            public LowConfidence() : base(3, OpportunityConfidenceValue.Low)
             { }
         }
     }
