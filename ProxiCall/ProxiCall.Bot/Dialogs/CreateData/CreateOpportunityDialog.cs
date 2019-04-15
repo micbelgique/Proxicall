@@ -4,13 +4,13 @@ using System.Threading.Tasks;
 using Microsoft.Bot.Builder;
 using Microsoft.Bot.Builder.Dialogs;
 using Microsoft.Bot.Schema;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using ProxiCall.Bot.Dialogs.Shared;
 using ProxiCall.Bot.Models;
 using ProxiCall.Bot.Resources;
-using ProxiCall.Bot.Services;
 using ProxiCall.Bot.Services.ProxiCallCRM;
+using ProxiCall.Library.Enumeration.Opportunity;
+using ProxiCall.Library.Services;
 
 namespace ProxiCall.Bot.Dialogs.CreateData
 {
@@ -369,7 +369,8 @@ namespace ProxiCall.Bot.Dialogs.CreateData
 
                 var entities = luisResult.Entities;
                 string timex = (string)entities["datetime"]?[0]?["timex"]?.First;
-                crmState.Opportunity.EstimatedCloseDate = FormatConvertor.TimexToDateTime(timex);
+                var formatConvertor = new FormatConvertor();
+                crmState.Opportunity.EstimatedCloseDate = formatConvertor.TurnTimexToDateTime(timex);
             }
             //Asking for retry if necessary
             var promptMessage = "";
@@ -488,9 +489,11 @@ namespace ProxiCall.Bot.Dialogs.CreateData
             var luisState = await _accessors.LuisStateAccessor.GetAsync(stepContext.Context, () => new LuisState(), cancellationToken);
             var userState = await _accessors.LoggedUserAccessor.GetAsync(stepContext.Context, () => new LoggedUserState(), cancellationToken);
 
-            //TODO : take off hardcode
-            crmState.Opportunity.Status = "Ouvert";
+            //Finalizing the created opportunity
+            crmState.Opportunity.Status = OpportunityStatus.Open.Name;
             crmState.Opportunity.OwnerId = userState.LoggedUser.Id;
+
+            //Posting the created opportunity
             await _opportunityService.PostOpportunityAsync(userState.LoggedUser.Token, crmState.Opportunity);
 
             var message = $"{ CulturedBot.SayOpportunityWasCreated} {CulturedBot.AskForRequestAgain}";

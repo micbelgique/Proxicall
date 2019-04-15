@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.28729.10
+# Visual Studio 15
+VisualStudioVersion = 15.0.28307.421
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Console_Speech", "Console_Speech\Console_Speech.csproj", "{750415ED-51E0-4445-B00F-2B2C8A0DAA24}"
 EndProject
@@ -10,6 +10,8 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ProxiCall.CRM", "Proxicall.CRM\ProxiCall.CRM.csproj", "{7B7EB646-6B5A-4183-A58A-8953C49C469E}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ProxiCall.Bot", "ProxiCall.Bot\ProxiCall.Bot.csproj", "{57FA2EC0-7760-48C6-BC73-1B7F4E3CDDB4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProxiCall.Library", "ProxiCall.Library\ProxiCall.Library.csproj", "{367056F7-97B4-427D-AD5E-B8163FCDDC15}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +35,10 @@ Global
 		{57FA2EC0-7760-48C6-BC73-1B7F4E3CDDB4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{57FA2EC0-7760-48C6-BC73-1B7F4E3CDDB4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{57FA2EC0-7760-48C6-BC73-1B7F4E3CDDB4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{367056F7-97B4-427D-AD5E-B8163FCDDC15}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{367056F7-97B4-427D-AD5E-B8163FCDDC15}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{367056F7-97B4-427D-AD5E-B8163FCDDC15}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{367056F7-97B4-427D-AD5E-B8163FCDDC15}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

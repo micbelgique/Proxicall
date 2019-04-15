@@ -30,6 +30,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\ProxiCall.Library\ProxiCall.Library.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Compile Update="Resources\CulturedBot.Designer.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>

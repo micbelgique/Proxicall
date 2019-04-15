@@ -4,16 +4,6 @@ namespace ProxiCall.Bot.Dialogs.Shared
 {
     public class LuisState
     {
-        public static readonly string SEARCH_PHONENUMBER_ENTITYNAME = "searchPhoneNumber";
-        public static readonly string SEARCH_ADDRESS_ENTITYNAME = "searchAddress";
-        public static readonly string SEARCH_COMPANY_ENTITYNAME = "searchCompany";
-        public static readonly string SEARCH_EMAIL_ENTITYNAME = "searchEmail";
-        public static readonly string SEARCH_CONTACT_ENTITYNAME = "searchContact";
-        public static readonly string SEARCH_CONTACT_NAME_ENTITYNAME = "searchContactName";
-        public static readonly string SEARCH_OPPORTUNITIES_NAME_ENTITYNAME = "searchopportunities";
-        public static readonly string SEARCH_NUMBER_OPPORTUNITIES_ENTITYNAME = "searchnumberopportunities";
-        public static readonly string GIVEN_DATETIMEV2 = "datetime";
-
         public string IntentName { get; set; }
 
         private IList<string> entities;

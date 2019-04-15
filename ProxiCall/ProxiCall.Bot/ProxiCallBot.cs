@@ -15,10 +15,11 @@ using ProxiCall.Bot.Dialogs.CreateData;
 using ProxiCall.Bot.Dialogs.SearchData;
 using ProxiCall.Bot.Dialogs.Shared;
 using ProxiCall.Bot.Models;
-using ProxiCall.Bot.Models.Intents;
 using ProxiCall.Bot.Resources;
-using ProxiCall.Bot.Services;
 using ProxiCall.Bot.Services.ProxiCallCRM;
+using ProxiCall.Library.Enumeration.Opportunity;
+using ProxiCall.Library.ProxiCallLuis;
+using ProxiCall.Library.Services;
 
 namespace ProxiCall.Bot
 {
@@ -177,21 +178,21 @@ namespace ProxiCall.Bot
                             case DialogTurnStatus.Empty:
                                 switch (topIntent)
                                 {
-                                    case Intents.CreateOpportunity:
+                                    case ProxiCallIntents.CreateOpportunity:
                                         await UpdateDialogStatesAsync(luisResults, topIntent, dialogContext.Context);
                                         await dialogContext.BeginDialogAsync(nameof(CreateOpportunityDialog), cancellationToken: cancellationToken);
                                         break;
-                                    case Intents.SearchCompanyData:
+                                    case ProxiCallIntents.SearchCompanyData:
                                         await UpdateDialogStatesAsync(luisResults, topIntent, dialogContext.Context);
                                         await dialogContext.BeginDialogAsync(nameof(SearchCompanyDataDialog), cancellationToken: cancellationToken);
                                         break;
-                                    case Intents.SearchLeadData:
-                                    case Intents.MakeACall:
+                                    case ProxiCallIntents.SearchLeadData:
+                                    case ProxiCallIntents.MakeACall:
                                         await UpdateDialogStatesAsync(luisResults, topIntent, dialogContext.Context);
                                         await dialogContext.BeginDialogAsync(nameof(SearchLeadDataDialog), cancellationToken: cancellationToken);
                                         break;
 
-                                    case Intents.None:
+                                    case ProxiCallIntents.None:
                                     default:
                                         await dialogContext.Context.SendActivityAsync(CulturedBot.NoIntentFound, cancellationToken: cancellationToken);
                                         break;
@@ -283,7 +284,8 @@ namespace ProxiCall.Bot
                 if (entities[luisExpectedDateTime] != null)
                 {
                     string timex = (string)entities[luisExpectedDateTime]?[0]?["timex"]?.First;
-                    crmState.Opportunity.EstimatedCloseDate = FormatConvertor.TimexToDateTime(timex);
+                    var formatConvertor = new FormatConvertor();
+                    crmState.Opportunity.EstimatedCloseDate = formatConvertor.TurnTimexToDateTime(timex);
                 }
 
                 if (entities[luisExpectedProductTitle] != null)
@@ -292,7 +294,7 @@ namespace ProxiCall.Bot
                     crmState.Product.Title = productTitle;
                 }
 
-                if(intentName == Intents.CreateOpportunity)
+                if(intentName == ProxiCallIntents.CreateOpportunity)
                 {
                     if (entities[luisExpectedConfidenceOpportunity] != null)
                     {
@@ -301,81 +303,80 @@ namespace ProxiCall.Bot
                     }
                     else
                     {
-                        //TODO : remove hardcoded part
-                        crmState.Opportunity.Confidence = "Moyenne";
+                        crmState.Opportunity.Confidence = OpportunityConfidence.Average.Name;
                     }
                 }
 
                 //Hints
                 if (entities[luisHintSearchLeadAddress] != null)
                 {
-                    luisState.AddDetectedEntity(LuisState.SEARCH_ADDRESS_ENTITYNAME);
+                    luisState.AddDetectedEntity(ProxiCallEntities.SEARCH_ADDRESS_ENTITYNAME);
                 }
 
                 if (entities[luisHintSearchLeadCompany] != null)
                 {
-                    luisState.AddDetectedEntity(LuisState.SEARCH_COMPANY_ENTITYNAME);
+                    luisState.AddDetectedEntity(ProxiCallEntities.SEARCH_COMPANY_ENTITYNAME);
                 }
 
                 if (entities[luisHintSearchLeadPhone] != null)
                 {
-                    luisState.AddDetectedEntity(LuisState.SEARCH_PHONENUMBER_ENTITYNAME);
+                    luisState.AddDetectedEntity(ProxiCallEntities.SEARCH_PHONENUMBER_ENTITYNAME);
                 }
 
                 if (entities[luisHintSearchLeadEmail] != null)
                 {
-                    luisState.AddDetectedEntity(LuisState.SEARCH_EMAIL_ENTITYNAME);
+                    luisState.AddDetectedEntity(ProxiCallEntities.SEARCH_EMAIL_ENTITYNAME);
                 }
                 
                 if (entities[luisHintSearchCompanyContact] != null)
                 {
-                    luisState.AddDetectedEntity(LuisState.SEARCH_CONTACT_ENTITYNAME);
+                    luisState.AddDetectedEntity(ProxiCallEntities.SEARCH_CONTACT_ENTITYNAME);
                 }
 
                 if (entities[luisHintSearchContactName] != null)
                 {
-                    luisState.AddDetectedEntity(LuisState.SEARCH_CONTACT_NAME_ENTITYNAME);
+                    luisState.AddDetectedEntity(ProxiCallEntities.SEARCH_CONTACT_NAME_ENTITYNAME);
                 }
                 
                 if (entities[luisHintSearchOpportunites] != null)
                 {
-                    luisState.AddDetectedEntity(LuisState.SEARCH_OPPORTUNITIES_NAME_ENTITYNAME);
+                    luisState.AddDetectedEntity(ProxiCallEntities.SEARCH_OPPORTUNITIES_NAME_ENTITYNAME);
                 }
                 
                 if (entities[luisHintSearchNumberOpportunites] != null)
                 {
-                    luisState.AddDetectedEntity(LuisState.SEARCH_NUMBER_OPPORTUNITIES_ENTITYNAME);
+                    luisState.AddDetectedEntity(ProxiCallEntities.SEARCH_NUMBER_OPPORTUNITIES_ENTITYNAME);
                 }
 
                 //Searching for "informations" about leads
                 var searchInformationsOnLead =
-                    intentName == Intents.SearchLeadData 
+                    intentName == ProxiCallIntents.SearchLeadData 
                     && (luisState.Entities == null || luisState.Entities.Count == 0);
 
                 var searchInformationsOnCompany =
-                   intentName == Intents.SearchCompanyData
+                   intentName == ProxiCallIntents.SearchCompanyData
                    && (luisState.Entities == null || luisState.Entities.Count == 0);
 
                 var searchInformationsOnContactLead =
-                    intentName == Intents.SearchCompanyData
+                    intentName == ProxiCallIntents.SearchCompanyData
                     && luisState.Entities != null
-                    && luisState.Entities.Contains(LuisState.SEARCH_CONTACT_ENTITYNAME)
+                    && luisState.Entities.Contains(ProxiCallEntities.SEARCH_CONTACT_ENTITYNAME)
                     && luisState.Entities.Count == 1;
 
                 if (searchInformationsOnLead)
                 {
-                    luisState.AddDetectedEntity(LuisState.SEARCH_COMPANY_ENTITYNAME);
-                    luisState.AddDetectedEntity(LuisState.SEARCH_NUMBER_OPPORTUNITIES_ENTITYNAME);
+                    luisState.AddDetectedEntity(ProxiCallEntities.SEARCH_COMPANY_ENTITYNAME);
+                    luisState.AddDetectedEntity(ProxiCallEntities.SEARCH_NUMBER_OPPORTUNITIES_ENTITYNAME);
                 }
 
                 if(searchInformationsOnCompany)
                 {
-                    luisState.AddDetectedEntity(LuisState.SEARCH_NUMBER_OPPORTUNITIES_ENTITYNAME);
+                    luisState.AddDetectedEntity(ProxiCallEntities.SEARCH_NUMBER_OPPORTUNITIES_ENTITYNAME);
                 }
 
                 if(searchInformationsOnContactLead)
                 {
-                    luisState.AddDetectedEntity(LuisState.SEARCH_NUMBER_OPPORTUNITIES_ENTITYNAME);
+                    luisState.AddDetectedEntity(ProxiCallEntities.SEARCH_NUMBER_OPPORTUNITIES_ENTITYNAME);
                 }
 
                 // Set the new values into state.

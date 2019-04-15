@@ -10,9 +10,9 @@ using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
 using ProxiCall.Bot.Dialogs.Shared;
 using ProxiCall.Bot.Models;
-using ProxiCall.Bot.Models.Intents;
 using ProxiCall.Bot.Resources;
 using ProxiCall.Bot.Services.ProxiCallCRM;
+using ProxiCall.Library.ProxiCallLuis;
 
 namespace ProxiCall.Bot.Dialogs.SearchData
 {
@@ -136,7 +136,7 @@ namespace ProxiCall.Bot.Dialogs.SearchData
             {
                 promptMessage = $"{string.Format(CulturedBot.NamedObjectNotFound, fullNameGivenByUser)} {CulturedBot.AskIfWantRetry}";
             }
-            else if (luisState.IntentName == Intents.MakeACall)
+            else if (luisState.IntentName == ProxiCallIntents.MakeACall)
             {
                 if(crmState.Lead.PhoneNumber == null)
                 {
@@ -204,24 +204,24 @@ namespace ProxiCall.Bot.Dialogs.SearchData
             }
 
             //Giving informations to User
-            if (luisState.IntentName == Intents.SearchLeadData || luisState.IntentName == Intents.SearchCompanyData)
+            if (luisState.IntentName == ProxiCallIntents.SearchLeadData || luisState.IntentName == ProxiCallIntents.SearchCompanyData)
             {
-                var wantPhone = luisState.Entities.Contains(LuisState.SEARCH_PHONENUMBER_ENTITYNAME);
+                var wantPhone = luisState.Entities.Contains(ProxiCallEntities.SEARCH_PHONENUMBER_ENTITYNAME);
                 var hasOnlyPhoneEntity =
-                    !(luisState.Entities.Contains(LuisState.SEARCH_ADDRESS_ENTITYNAME)
+                    !(luisState.Entities.Contains(ProxiCallEntities.SEARCH_ADDRESS_ENTITYNAME)
                     ||
-                    luisState.Entities.Contains(LuisState.SEARCH_COMPANY_ENTITYNAME)
+                    luisState.Entities.Contains(ProxiCallEntities.SEARCH_COMPANY_ENTITYNAME)
                     ||
-                    luisState.Entities.Contains(LuisState.SEARCH_EMAIL_ENTITYNAME)
+                    luisState.Entities.Contains(ProxiCallEntities.SEARCH_EMAIL_ENTITYNAME)
                     ||
-                    luisState.Entities.Contains(LuisState.SEARCH_PHONENUMBER_ENTITYNAME)
+                    luisState.Entities.Contains(ProxiCallEntities.SEARCH_PHONENUMBER_ENTITYNAME)
                     ||
-                    luisState.Entities.Contains(LuisState.SEARCH_NUMBER_OPPORTUNITIES_ENTITYNAME)
+                    luisState.Entities.Contains(ProxiCallEntities.SEARCH_NUMBER_OPPORTUNITIES_ENTITYNAME)
                     ||
-                    luisState.Entities.Contains(LuisState.SEARCH_OPPORTUNITIES_NAME_ENTITYNAME));
+                    luisState.Entities.Contains(ProxiCallEntities.SEARCH_OPPORTUNITIES_NAME_ENTITYNAME));
 
                 var wantPhoneOnly = wantPhone && hasOnlyPhoneEntity;
-                var wantPhoneOfContact = wantPhoneOnly && luisState.IntentName == Intents.SearchCompanyData;
+                var wantPhoneOfContact = wantPhoneOnly && luisState.IntentName == ProxiCallIntents.SearchCompanyData;
 
                 userState.IsEligibleForPotentialForwarding = (wantPhoneOnly || wantPhoneOfContact) && !string.IsNullOrEmpty(crmState.Lead.PhoneNumber);
                 await _accessors.LoggedUserAccessor.SetAsync(stepContext.Context, userState);
@@ -257,14 +257,14 @@ namespace ProxiCall.Bot.Dialogs.SearchData
             var luisState = await _accessors.LuisStateAccessor.GetAsync(stepContext.Context, () => new LuisState());
             var userState = await _accessors.LoggedUserAccessor.GetAsync(stepContext.Context, () => new LoggedUserState());
 
-            var wantPhone = luisState.Entities.Contains(LuisState.SEARCH_PHONENUMBER_ENTITYNAME);
-            var wantAddress = luisState.Entities.Contains(LuisState.SEARCH_ADDRESS_ENTITYNAME);
-            var wantCompany = luisState.Entities.Contains(LuisState.SEARCH_COMPANY_ENTITYNAME);
-            var wantEmail = luisState.Entities.Contains(LuisState.SEARCH_EMAIL_ENTITYNAME);
-            var wantContact = luisState.Entities.Contains(LuisState.SEARCH_CONTACT_ENTITYNAME);
-            var wantContactName = luisState.Entities.Contains(LuisState.SEARCH_CONTACT_NAME_ENTITYNAME);
-            var wantOppornunities = luisState.Entities.Contains(LuisState.SEARCH_OPPORTUNITIES_NAME_ENTITYNAME);
-            var wantNumberOppornunities = luisState.Entities.Contains(LuisState.SEARCH_NUMBER_OPPORTUNITIES_ENTITYNAME);
+            var wantPhone = luisState.Entities.Contains(ProxiCallEntities.SEARCH_PHONENUMBER_ENTITYNAME);
+            var wantAddress = luisState.Entities.Contains(ProxiCallEntities.SEARCH_ADDRESS_ENTITYNAME);
+            var wantCompany = luisState.Entities.Contains(ProxiCallEntities.SEARCH_COMPANY_ENTITYNAME);
+            var wantEmail = luisState.Entities.Contains(ProxiCallEntities.SEARCH_EMAIL_ENTITYNAME);
+            var wantContact = luisState.Entities.Contains(ProxiCallEntities.SEARCH_CONTACT_ENTITYNAME);
+            var wantContactName = luisState.Entities.Contains(ProxiCallEntities.SEARCH_CONTACT_NAME_ENTITYNAME);
+            var wantOppornunities = luisState.Entities.Contains(ProxiCallEntities.SEARCH_OPPORTUNITIES_NAME_ENTITYNAME);
+            var wantNumberOppornunities = luisState.Entities.Contains(ProxiCallEntities.SEARCH_NUMBER_OPPORTUNITIES_ENTITYNAME);
 
             var hasPhone = !string.IsNullOrEmpty(crmState.Lead.PhoneNumber);
             var hasAddress = !string.IsNullOrEmpty(crmState.Lead.Address);
@@ -275,7 +275,6 @@ namespace ProxiCall.Bot.Dialogs.SearchData
             if (wantOppornunities || wantNumberOppornunities)
             {
                 //Searching opportunities with this lead
-                //TODO : take off hardcode
                 crmState.Opportunities = (List<OpportunityDetailed>) await SearchOpportunitiesAsync
                     (stepContext, crmState.Lead.FirstName, crmState.Lead.LastName, userState.LoggedUser.PhoneNumber);
                 await _accessors.CRMStateAccessor.SetAsync(stepContext.Context, crmState);
@@ -371,9 +370,9 @@ namespace ProxiCall.Bot.Dialogs.SearchData
             var userState = await _accessors.LoggedUserAccessor.GetAsync(stepContext.Context, () => new LoggedUserState());
 
             var isSearchLeadData =
-                luisState.IntentName == Intents.SearchLeadData
+                luisState.IntentName == ProxiCallIntents.SearchLeadData
                 ||
-                luisState.IntentName == Intents.SearchCompanyData && luisState.Entities.Contains(LuisState.SEARCH_CONTACT_ENTITYNAME);
+                luisState.IntentName == ProxiCallIntents.SearchCompanyData && luisState.Entities.Contains(ProxiCallEntities.SEARCH_CONTACT_ENTITYNAME);
             
             var forward = false;
 
@@ -401,7 +400,7 @@ namespace ProxiCall.Bot.Dialogs.SearchData
                 }
             }
 
-            var isMakeACall = luisState.IntentName == Intents.MakeACall;
+            var isMakeACall = luisState.IntentName == ProxiCallIntents.MakeACall;
             var hasPhoneNumber = !string.IsNullOrEmpty(crmState.Lead.PhoneNumber);
 
             if (forward || (isMakeACall && hasPhoneNumber))

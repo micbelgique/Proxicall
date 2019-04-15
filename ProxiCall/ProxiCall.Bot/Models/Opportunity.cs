@@ -1,4 +1,6 @@
-﻿using System;
+﻿using ProxiCall.Library.Enumeration.Opportunity;
+using ProxiCall.Library.ProxiCallLuis;
+using System;
 
 namespace ProxiCall.Bot.Models
 {
@@ -10,8 +12,8 @@ namespace ProxiCall.Bot.Models
         public DateTime? EstimatedCloseDate { get; set; }
         public string Comments { get; set; }
         public string Status { get; set; }
-        private string confidence;
 
+        private string confidence;
         public string Confidence
         {
             get { return confidence; }
@@ -21,14 +23,14 @@ namespace ProxiCall.Bot.Models
                 {
                     //TODO : remove hardcoded part
                     case "incertaine":
-                        confidence = "Basse";
+                        confidence = OpportunityConfidence.Low.Name;
                         break;
                     case "certaine":
-                        confidence = "Haute";
+                        confidence = OpportunityConfidence.High.Name;
                         break;
                     case "potentiel":
                     default:
-                        confidence = "Moyenne";
+                        confidence = OpportunityConfidence.Average.Name;
                         break;
                 }
             }
