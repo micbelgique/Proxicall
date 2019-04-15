@@ -12,6 +12,7 @@ using ProxiCall.Bot.Dialogs.Shared;
 using ProxiCall.Bot.Models;
 using ProxiCall.Bot.Resources;
 using ProxiCall.Bot.Services.ProxiCallCRM;
+using ProxiCall.Library.Dictionnaries.Lead;
 using ProxiCall.Library.ProxiCallLuis;
 
 namespace ProxiCall.Bot.Dialogs.SearchData
@@ -317,7 +318,16 @@ namespace ProxiCall.Bot.Dialogs.SearchData
             if (wantNumberOppornunities || wantOppornunities)
             {
                 var numberOfOpportunities = (crmState.Opportunities!=null? crmState.Opportunities.Count : 0);
-                wantedData.AppendLine($"{string.Format(CulturedBot.GivenNumberOfOpportunities, numberOfOpportunities)}");
+                var chosenPronoun = string.Empty;
+                switch (crmState.Lead.Gender)
+                {
+                    //TODO : to be improved
+                    case 1: chosenPronoun = $"{CulturedBot.SayHim}";  break;
+                    case 2: chosenPronoun = $"{CulturedBot.SayHer}"; break;
+                    default: chosenPronoun = $"{CulturedBot.SayHim} {CulturedBot.SayHer}"; break;
+
+                }
+                wantedData.AppendLine($"{string.Format(CulturedBot.GivenNumberOfOpportunities, numberOfOpportunities, chosenPronoun)}");
             }
 
             //Opportunities

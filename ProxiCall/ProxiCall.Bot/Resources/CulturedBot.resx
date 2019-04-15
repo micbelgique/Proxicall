@@ -151,7 +151,7 @@
     <value>Il/Elle habite au {0}.</value>
   </data>
   <data name="GivenNumberOfOpportunities" xml:space="preserve">
-    <value>Vous avez en ce moment {0} opportunités avec lui/elle.</value>
+    <value>Vous avez en ce moment {0} opportunités avec {1}.</value>
   </data>
   <data name="GivePhoneNumber" xml:space="preserve">
     <value>Son numéro de téléphone est le {0}</value>
@@ -215,5 +215,11 @@
   </data>
   <data name="SayGoAhead" xml:space="preserve">
     <value>Allez-y!</value>
+  </data>
+  <data name="SayHer" xml:space="preserve">
+    <value>elle</value>
+  </data>
+  <data name="SayHim" xml:space="preserve">
+    <value>lui</value>
   </data>
 </root>

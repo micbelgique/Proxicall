@@ -214,7 +214,7 @@ namespace ProxiCall.Bot.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Vous avez en ce moment {0} opportunités avec lui/elle..
+        ///   Looks up a localized string similar to Vous avez en ce moment {0} opportunités avec {1}..
         /// </summary>
         public static string GivenNumberOfOpportunities {
             get {
@@ -336,6 +336,24 @@ namespace ProxiCall.Bot.Resources {
         public static string SayGoAhead {
             get {
                 return ResourceManager.GetString("SayGoAhead", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to elle.
+        /// </summary>
+        public static string SayHer {
+            get {
+                return ResourceManager.GetString("SayHer", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to lui.
+        /// </summary>
+        public static string SayHim {
+            get {
+                return ResourceManager.GetString("SayHim", resourceCulture);
             }
         }
         
