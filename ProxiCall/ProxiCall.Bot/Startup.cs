@@ -181,7 +181,28 @@ namespace ProxiCall.Bot
                     errorMessage = "Aucun utilisateur n'a été trouvé";
                     break;
                 case InvalidTokenException _:
+                    errorMessage = "L'authentification a échoué";
+                    break;
+                case AccessForbiddenException _:
                     errorMessage = "Vous n'avez pas accès à cette ressource";
+                    break;
+                case OpportunityNotCreatedException _:
+                    errorMessage = "Une erreur est survenue lors de la création de cette opportunité";
+                    break;
+                case OpportunitiesNotFoundException _:
+                    errorMessage = "Aucune opportunité correspondante n'a été trouvée";
+                    break;
+                case ProductNotFoundException _:
+                    errorMessage = "Aucun produit n'a été trouvé";
+                    break;
+                case LeadNotFoundException _:
+                    errorMessage = "Aucun lead n'a été trouvé";
+                    break;
+                case OwnerNotFoundException _:
+                    errorMessage = "Aucun owner n'a été trouvé";
+                    break;
+                case CompanyNotFoundException _:
+                    errorMessage = "Aucune compagnie n'a été trouvée";
                     break;
                 default:
                     errorMessage = $"Sorry, it looks like something went wrong : {exception.Message}";

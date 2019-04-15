@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
@@ -42,7 +43,15 @@ namespace ProxiCall.Bot.Services.ProxiCallCRM
                         .SendAsync(request, HttpCompletionOption.ResponseHeadersRead)
                         .ConfigureAwait(false))
                     {
-                        response.EnsureSuccessStatusCode();
+                        switch (response.StatusCode)
+                        {
+                            case HttpStatusCode.Accepted:
+                                break;
+                            case HttpStatusCode.Forbidden:
+                                throw new AccessForbiddenException();
+                            default:
+                                throw new OpportunityNotCreatedException();
+                        }
                     }
                 }
             }
