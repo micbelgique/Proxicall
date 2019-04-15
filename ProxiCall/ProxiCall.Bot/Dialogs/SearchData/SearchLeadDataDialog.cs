@@ -318,14 +318,23 @@ namespace ProxiCall.Bot.Dialogs.SearchData
             if (wantNumberOppornunities || wantOppornunities)
             {
                 var numberOfOpportunities = (crmState.Opportunities!=null? crmState.Opportunities.Count : 0);
-                var chosenPronoun = string.Empty;
-                switch (crmState.Lead.Gender)
-                {
-                    //TODO : to be improved
-                    case 1: chosenPronoun = $"{CulturedBot.SayHim}";  break;
-                    case 2: chosenPronoun = $"{CulturedBot.SayHer}"; break;
-                    default: chosenPronoun = $"{CulturedBot.SayHim} {CulturedBot.SayHer}"; break;
 
+                var chosenPronoun = string.Empty;
+                LeadGender.AllGender.TryGetValue(crmState.Lead.Gender, out string genderName);
+                var isMale = genderName == LeadGender.MALE;
+                var isFemale = genderName == LeadGender.FEMALE;
+
+                if(isMale)
+                {
+                    chosenPronoun = $"{CulturedBot.SayHim}";
+                }
+                else if (isFemale)
+                {
+                    chosenPronoun = $"{CulturedBot.SayHer}";
+                }
+                else
+                {
+                    chosenPronoun = $"{CulturedBot.SayHim} {CulturedBot.SayHer}";
                 }
                 wantedData.AppendLine($"{string.Format(CulturedBot.GivenNumberOfOpportunities, numberOfOpportunities, chosenPronoun)}");
             }
