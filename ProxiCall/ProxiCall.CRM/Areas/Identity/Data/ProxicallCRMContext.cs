@@ -5,7 +5,7 @@ using ProxiCall.CRM.Models;
 
 namespace ProxiCall.CRM.Areas.Identity.Data
 {
-    public class ProxicallCRMContext : IdentityDbContext<IdentityUser>
+    public class ProxicallCRMContext : IdentityDbContext<ApplicationUser>
     {
         public ProxicallCRMContext(DbContextOptions<ProxicallCRMContext> options)
             : base(options)

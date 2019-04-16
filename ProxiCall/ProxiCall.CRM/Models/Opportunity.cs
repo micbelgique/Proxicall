@@ -14,7 +14,7 @@ namespace ProxiCall.CRM.Models
         [Display(Name = "Owner")]
         [ForeignKey("Owner")]
         public string OwnerId { get; set; }
-        public IdentityUser  Owner { get; set; }
+        public ApplicationUser  Owner { get; set; }
 
         [Required]
         [Display(Name = "Lead")]

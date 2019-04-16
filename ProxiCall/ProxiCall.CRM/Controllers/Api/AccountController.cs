@@ -22,11 +22,11 @@ namespace ProxiCall.CRM.Controllers.Api
     public class AccountController : ControllerBase
     {
         private readonly ProxicallCRMContext _context;
-        private readonly SignInManager<IdentityUser> _signInManager;
-        private readonly UserManager<IdentityUser> _userManager;
+        private readonly SignInManager<ApplicationUser> _signInManager;
+        private readonly UserManager<ApplicationUser> _userManager;
         private readonly IConfiguration _configuration;
 
-        public AccountController(ProxicallCRMContext context, UserManager<IdentityUser> userManager, SignInManager<IdentityUser> signInManager, IConfiguration configuration)
+        public AccountController(ProxicallCRMContext context, UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, IConfiguration configuration)
         {
             _userManager = userManager;
             _signInManager = signInManager;
@@ -45,7 +45,7 @@ namespace ProxiCall.CRM.Controllers.Api
 
             phonenumber = phonenumber.Trim();
 
-            var user = _context.Set<IdentityUser>().FirstOrDefault(u => u.PhoneNumber == phonenumber);
+            var user = _context.Set<ApplicationUser>().FirstOrDefault(u => u.PhoneNumber == phonenumber);
                        
             if (user == null)
             {
@@ -54,18 +54,21 @@ namespace ProxiCall.CRM.Controllers.Api
 
             await _signInManager.SignInAsync(user, true);
 
-            var response = new LoginDTO();
-            response.Id = user.Id;
-            response.Email = user.Email;
-            response.UserName = user.UserName;
-            response.PhoneNumber = user.PhoneNumber;
-            response.Roles = await _userManager.GetRolesAsync(user);
-            response.Token = await GenerateJwtToken(phonenumber, user);
+            var response = new LoginDTO
+            {
+                Id = user.Id,
+                Email = user.Email,
+                Alias = user.Alias,
+                UserName = user.UserName,
+                PhoneNumber = user.PhoneNumber,
+                Roles = await _userManager.GetRolesAsync(user),
+                Token = await GenerateJwtToken(phonenumber, user)
+            };
 
             return response;
         }
 
-        private async Task<string> GenerateJwtToken(string phonenumber, IdentityUser user)
+        private async Task<string> GenerateJwtToken(string phonenumber, ApplicationUser user)
         {
             var roles = await _userManager.GetRolesAsync(user);
             var claims = new List<Claim>

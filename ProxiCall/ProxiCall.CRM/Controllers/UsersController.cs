@@ -14,10 +14,10 @@ namespace ProxiCall.CRM.Controllers
     [Authorize(Roles ="Admin")]
     public class UsersController : Controller
     {
-        private readonly UserManager<IdentityUser> _userManager;
+        private readonly UserManager<ApplicationUser> _userManager;
         private readonly IEmailSender _emailSender;
 
-        public UsersController(UserManager<IdentityUser> userManager, IEmailSender emailSender)
+        public UsersController(UserManager<ApplicationUser> userManager, IEmailSender emailSender)
         {
             _userManager = userManager;
             _emailSender = emailSender;
@@ -38,10 +38,11 @@ namespace ProxiCall.CRM.Controllers
         {
             if(ModelState.IsValid)
             {
-                var user = new IdentityUser
+                var user = new ApplicationUser
                 {
                     UserName = userForm.Email,
-                    Email = userForm.Email
+                    Email = userForm.Email, 
+                    Alias = userForm.Alias
                 };
                 var password = GenerateRandomPassword(_userManager.Options.Password);
                 var result = await _userManager.CreateAsync(user, password.ToString());
@@ -49,8 +50,6 @@ namespace ProxiCall.CRM.Controllers
                 {
                     var role = userForm.IsAdmin ? "Admin" : "User";
                     await _userManager.AddToRoleAsync(user, role);
-                    //await _emailSender.SendEmailAsync(userForm.Email, "Finish creating your account", "One CRM to rule them all, One CRM to find them, One CRM to bring them all and in the darkness bind them.");
-
                     await SendEmailConfirmation(user);
                     //TODO add view for new user details -> username, email, role, isConfirmed
                     return View("Index");
@@ -63,7 +62,7 @@ namespace ProxiCall.CRM.Controllers
             return View();
         }
 
-        private async Task SendEmailConfirmation(IdentityUser user)
+        private async Task SendEmailConfirmation(ApplicationUser user)
         {
             // For more information on how to enable account confirmation and password reset please 
             // visit https://go.microsoft.com/fwlink/?LinkID=532713

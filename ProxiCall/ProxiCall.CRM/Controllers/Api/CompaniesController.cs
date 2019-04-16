@@ -71,7 +71,7 @@ namespace ProxiCall.CRM.Controllers.Api
             }
 
             //Searching the owner
-            var owner = _context.Set<IdentityUser>().FirstOrDefault(u => u.PhoneNumber == ownerPhoneNumber);
+            var owner = _context.Set<ApplicationUser>().FirstOrDefault(u => u.PhoneNumber == ownerPhoneNumber);
             if (owner == null)
             {
                 return  NotFound("owner-not-found");

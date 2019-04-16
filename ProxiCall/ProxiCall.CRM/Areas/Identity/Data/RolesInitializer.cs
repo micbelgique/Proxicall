@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using ProxiCall.CRM.Models;
 
 namespace ProxiCall.CRM.Areas.Identity.Data
 {
@@ -18,7 +19,7 @@ namespace ProxiCall.CRM.Areas.Identity.Data
 
         public void Initialize()
         {
-            var userManager = _serviceProvider.GetRequiredService<UserManager<IdentityUser>>();
+            var userManager = _serviceProvider.GetRequiredService<UserManager<ApplicationUser>>();
             var roleManager = _serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
             string[] roleNames = { "Admin", "User" };
             IdentityResult roleResult;
@@ -32,10 +33,12 @@ namespace ProxiCall.CRM.Areas.Identity.Data
                 }
             }
 
-            var admin = new IdentityUser
+            var admin = new ApplicationUser
             {
                 UserName = Configuration.GetSection("UserSettings")["Email"],
-                Email = Configuration.GetSection("UserSettings")["Email"]
+                Email = Configuration.GetSection("UserSettings")["Email"],
+                Alias = Configuration.GetSection("UserSettings")["Alias"],
+                PhoneNumber = Configuration.GetSection("UserSettings")["PhoneNumber"]
             };
 
             var userPassword = Configuration.GetSection("UserSettings")["Password"];

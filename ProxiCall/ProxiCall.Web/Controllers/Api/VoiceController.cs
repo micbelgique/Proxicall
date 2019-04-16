@@ -75,9 +75,15 @@ namespace ProxiCall.Web.Controllers.Api
                 Text = string.Empty,
                 Entities = new List<Entity>()
             };
-            var entity = new Entity();
-            entity.Properties = new JObject();
-            entity.Properties.Add("firstmessage", JToken.Parse(From.Substring(1)));
+            var entity = new Entity
+            {
+                Properties = new JObject
+                {
+                    {
+                        "firstmessage", JToken.Parse(From.Substring(1))
+                    }
+                }
+            };
             activity.Entities.Add(entity);
 
             await _botConnector.SendMessageToBotAsync(activity);
