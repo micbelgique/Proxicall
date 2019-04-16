@@ -1,5 +1,7 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using ProxiCall.Library.Dictionnaries.Lead;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Linq;
 
 namespace ProxiCall.CRM.Models
 {
@@ -22,8 +24,34 @@ namespace ProxiCall.CRM.Models
         [Display(Name = "Company")]
         [ForeignKey("Company")]
         public string CompanyId { get; set; }
-        public Company Company { get; set; }    
-        
+        public Company Company { get; set; }
+
+        public int Gender { get; set; }
+        private string genderName;
+
+        [NotMapped]
+        [Display(Name = "Gender")]
+        public string GenderName
+        {
+            get
+            {
+                LeadGender.AllGender.TryGetValue(Gender, out string genderName);
+                return genderName;
+            }
+            set
+            {
+                if (LeadGender.AllGender.ContainsValue(value))
+                {
+                    genderName = value;
+                }
+                else
+                {
+                    genderName = LeadGender.UNDETERMINED;
+                }
+            }
+        }
+
+
         [NotMapped]
         [Display(Name = "Full name")]
         public string FullName
@@ -32,6 +60,11 @@ namespace ProxiCall.CRM.Models
             {
                 return $"{FirstName} {LastName}";
             }
+        }
+
+        public Lead()
+        {
+            Gender = LeadGender.AllGender.Keys.Where(k => LeadGender.AllGender[k] == LeadGender.UNDETERMINED).First();
         }
 
         public override string ToString()

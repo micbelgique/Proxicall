@@ -1,13 +1,20 @@
 ﻿using System;
 using System.Globalization;
+using System.IO;
+using System.Threading.Tasks;
 
-namespace ProxiCall.Bot.Services
+namespace ProxiCall.Library.Services
 {
     public class FormatConvertor
     {
-        public static DateTime TimexToDateTime(string timex)
+        public FormatConvertor()
         {
-            if(string.IsNullOrEmpty(timex) || timex.Length < 9)
+
+        }
+
+        public DateTime TurnTimexToDateTime(string timex)
+        {
+            if (string.IsNullOrEmpty(timex) || timex.Length < 9)
             {
                 return DateTime.MinValue;
             }
@@ -42,6 +49,36 @@ namespace ProxiCall.Bot.Services
             }
 
             return DateTime.MinValue;
+        }
+
+        public async Task TurnAudioURLStreamToFile(string url, string path)
+        {
+            byte[] audioData = null;
+            using (var wc = new System.Net.WebClient())
+            {
+                audioData = wc.DownloadData(url);
+            }
+
+            using (MemoryStream audiostream = new MemoryStream(audioData))
+            {
+                using (var fileStream = new FileStream(path, FileMode.Create, FileAccess.Write, FileShare.Write))
+                {
+                    await audiostream.CopyToAsync(fileStream).ConfigureAwait(false);
+                    fileStream.Close();
+                }
+            }
+        }
+
+        public async Task TurnAudioStreamToFile(byte[] bytes, string path)
+        {
+            using (MemoryStream audiostream = new MemoryStream(bytes))
+            {
+                using (var fileStream = new FileStream(path, FileMode.Create, FileAccess.Write, FileShare.Write))
+                {
+                    await audiostream.CopyToAsync(fileStream).ConfigureAwait(false);
+                    fileStream.Close();
+                }
+            }
         }
     }
 }

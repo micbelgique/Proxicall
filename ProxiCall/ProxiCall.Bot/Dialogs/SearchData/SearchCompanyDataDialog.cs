@@ -12,6 +12,7 @@ using ProxiCall.Bot.Dialogs.Shared;
 using ProxiCall.Bot.Models;
 using ProxiCall.Bot.Resources;
 using ProxiCall.Bot.Services.ProxiCallCRM;
+using ProxiCall.Library.ProxiCallLuis;
 
 namespace ProxiCall.Bot.Dialogs.SearchData
 {
@@ -186,12 +187,12 @@ namespace ProxiCall.Bot.Dialogs.SearchData
                 }
             }
             
-            var wantOppornunities = luisState.Entities.Contains(LuisState.SEARCH_OPPORTUNITIES_NAME_ENTITYNAME);
-            var wantNumberOppornunities = luisState.Entities.Contains(LuisState.SEARCH_NUMBER_OPPORTUNITIES_ENTITYNAME);
+            var wantOppornunities = luisState.Entities.Contains(ProxiCallEntities.SEARCH_OPPORTUNITIES_NAME_ENTITYNAME);
+            var wantNumberOppornunities = luisState.Entities.Contains(ProxiCallEntities.SEARCH_NUMBER_OPPORTUNITIES_ENTITYNAME);
 
             //Searching for lead contact
             //Redirect to SearchLeadDataDialog
-            if (luisState.Entities.Contains(LuisState.SEARCH_CONTACT_ENTITYNAME))
+            if (luisState.Entities.Contains(ProxiCallEntities.SEARCH_CONTACT_ENTITYNAME))
             {
                 AddDialog(ActivatorUtilities.CreateInstance<SearchLeadDataDialog>(_serviceProvider));
                 crmState.Lead = crmState.Company.Contact;
@@ -225,8 +226,8 @@ namespace ProxiCall.Bot.Dialogs.SearchData
             var crmState = await _accessors.CRMStateAccessor.GetAsync(stepContext.Context, () => new CRMState());
             var luisState = await _accessors.LuisStateAccessor.GetAsync(stepContext.Context, () => new LuisState());
 
-            var wantOppornunities = luisState.Entities.Contains(LuisState.SEARCH_OPPORTUNITIES_NAME_ENTITYNAME);
-            var wantNumberOppornunities = luisState.Entities.Contains(LuisState.SEARCH_NUMBER_OPPORTUNITIES_ENTITYNAME);
+            var wantOppornunities = luisState.Entities.Contains(ProxiCallEntities.SEARCH_OPPORTUNITIES_NAME_ENTITYNAME);
+            var wantNumberOppornunities = luisState.Entities.Contains(ProxiCallEntities.SEARCH_NUMBER_OPPORTUNITIES_ENTITYNAME);
 
             var hasOppornunities = false;
 

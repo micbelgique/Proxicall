@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using ProxiCall.CRM.Areas.Identity.Data;
 
 namespace ProxiCall.CRM.Migrations
 {
     [DbContext(typeof(ProxicallCRMContext))]
-    partial class ProxicallCRMContextModelSnapshot : ModelSnapshot
+    [Migration("20190415090408_leadhasagender2")]
+    partial class leadhasagender2
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

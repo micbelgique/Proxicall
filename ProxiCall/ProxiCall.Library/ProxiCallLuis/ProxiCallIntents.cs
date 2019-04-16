@@ -1,6 +1,6 @@
-﻿namespace ProxiCall.Bot.Models.Intents
+﻿namespace ProxiCall.Library.ProxiCallLuis
 {
-    public static class Intents
+    public static class ProxiCallIntents
     {
         public const string MakeACall = "MakeACall";
         public const string SearchLeadData = "SearchLeadData";

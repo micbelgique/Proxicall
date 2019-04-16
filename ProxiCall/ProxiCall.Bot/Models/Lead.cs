@@ -11,6 +11,15 @@ namespace ProxiCall.Bot.Models
         public string PhoneNumber { get; set; }
         public string Address { get; set; }
 
+        private int gender;
+
+        public int Gender
+        {
+            get { return gender; }
+            set { gender = value; }
+        }
+
+
         public Company Company { get; set; }
 
         public Lead()
@@ -27,7 +36,8 @@ namespace ProxiCall.Bot.Models
                 Email = lead.Email,
                 PhoneNumber = lead.PhoneNumber,
                 Address = lead.Address,
-                Company = company
+                Company = company,
+                Gender = lead.Gender
             };
 
             return newLead;

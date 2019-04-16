@@ -15,4 +15,9 @@
     <PackageReference Include="SendGrid" Version="9.10.0" />
   </ItemGroup>
 
+
+  <ItemGroup>
+    <ProjectReference Include="..\ProxiCall.Library\ProxiCall.Library.csproj" />
+  </ItemGroup>
+
 </Project>
