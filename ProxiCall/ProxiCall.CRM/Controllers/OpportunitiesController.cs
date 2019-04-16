@@ -15,9 +15,9 @@ namespace ProxiCall.CRM.Controllers
     public class OpportunitiesController : Controller
     {
         private readonly ProxicallCRMContext _context;
-        private readonly UserManager<IdentityUser> _userManager;
+        private readonly UserManager<ApplicationUser> _userManager;
 
-        public OpportunitiesController(ProxicallCRMContext context, UserManager<IdentityUser> userManager)
+        public OpportunitiesController(ProxicallCRMContext context, UserManager<ApplicationUser> userManager)
         {
             _context = context;
             _userManager = userManager;

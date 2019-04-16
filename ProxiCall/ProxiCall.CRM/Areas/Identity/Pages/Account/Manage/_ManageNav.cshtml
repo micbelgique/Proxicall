@@ -1,6 +1,7 @@
 ﻿@using Microsoft.AspNetCore.Identity
 @using ProxiCall.CRM.Areas.Identity.Pages.Account.Manage
-@inject SignInManager<IdentityUser> SignInManager
+@using ProxiCall.CRM.Models
+@inject SignInManager<ApplicationUser> SignInManager
 @{
     var hasExternalLogins = (await SignInManager.GetExternalAuthenticationSchemesAsync()).Any();
 }

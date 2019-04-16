@@ -14,6 +14,7 @@ using Microsoft.IdentityModel.Logging;
 using Microsoft.IdentityModel.Tokens;
 using ProxiCall.CRM.Areas.Identity.Data;
 using ProxiCall.CRM.DAO;
+using ProxiCall.CRM.Models;
 using ProxiCall.CRM.Services;
 
 namespace ProxiCall.CRM
@@ -41,7 +42,7 @@ namespace ProxiCall.CRM
                     options.UseSqlServer(
                         Configuration.GetConnectionString("ProxicallCRMContextConnection")));
 
-            services.AddIdentity<IdentityUser, IdentityRole>()
+            services.AddIdentity<ApplicationUser, IdentityRole>()
                 .AddEntityFrameworkStores<ProxicallCRMContext>()
                 .AddDefaultTokenProviders();
 
