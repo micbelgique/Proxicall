@@ -45,7 +45,7 @@ namespace ProxiCall.Bot.Services.ProxiCallCRM
                     {
                         switch (response.StatusCode)
                         {
-                            case HttpStatusCode.Accepted:
+                            case HttpStatusCode.OK:
                                 break;
                             case HttpStatusCode.Forbidden:
                                 throw new AccessForbiddenException();

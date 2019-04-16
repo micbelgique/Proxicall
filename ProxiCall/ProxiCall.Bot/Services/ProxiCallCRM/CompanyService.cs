@@ -49,7 +49,7 @@ namespace ProxiCall.Bot.Services.ProxiCallCRM
             var response = await _httpClient.GetAsync(path);
             switch (response.StatusCode)
             {
-                case HttpStatusCode.Accepted:
+                case HttpStatusCode.OK:
                     opportunities = await response.Content.ReadAsAsync<IEnumerable<OpportunityDetailed>>();
                     return opportunities;
                 case HttpStatusCode.Forbidden:

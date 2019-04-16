@@ -32,7 +32,7 @@ namespace ProxiCall.Bot.Services.ProxiCallCRM
             var response = await _httpClient.GetAsync(path);
             switch (response.StatusCode)
             {
-                case HttpStatusCode.Accepted:
+                case HttpStatusCode.OK:
                     lead = await response.Content.ReadAsAsync<Lead>();
                     return lead;
                 case HttpStatusCode.NotFound:
@@ -54,7 +54,7 @@ namespace ProxiCall.Bot.Services.ProxiCallCRM
             var response = await _httpClient.GetAsync(path);
             switch (response.StatusCode)
             {
-                case HttpStatusCode.Accepted:
+                case HttpStatusCode.OK:
                     opportunities = await response.Content.ReadAsAsync<IEnumerable<OpportunityDetailed>>();
                     return opportunities;
                 case HttpStatusCode.Forbidden:
