@@ -16,6 +16,7 @@ using Twilio.Rest.Api.V2010.Account;
 using ProxiCall.Web.Services.Speech;
 using Twilio.Http;
 using Newtonsoft.Json.Linq;
+using ProxiCall.Web.Services.MsGraph;
 
 namespace ProxiCall.Web.Controllers.Api
 {
@@ -178,31 +179,6 @@ namespace ProxiCall.Web.Controllers.Api
                 From = new ChannelAccount("TwilioUserId", "TwilioUser"),
                 Type = ActivityTypes.Message,
                 Text = SpeechResult
-            };
-            
-            await _botConnector.SendMessageToBotAsync(activityToSend);
-
-            //Preventing the call from hanging up
-            var response = new VoiceResponse();
-            response.Pause(15);
-
-            //DEBUG
-            response.Say("Aucune réponse de ProxiCall", voice: "alice", language: Say.LanguageEnum.FrFr);
-
-            return TwiML(response);
-        }
-
-        [HttpGet("record")]
-        public async Task<IActionResult> RecordVoiceOfUserAsync([FromQuery] string RecordingUrl)
-        {
-            //var resultSTT = await SpeechToText.RecognizeSpeechFromUrlAsync(RecordingUrl, "fr-FR");
-            var resultSTT = CloudSpeechToText.RecognizeSpeechFromUrl(RecordingUrl); 
-
-            var activityToSend = new Activity
-            {
-                From = new ChannelAccount("TwilioUserId", "TwilioUser"),
-                Type = "message",
-                Text = resultSTT
             };
             
             await _botConnector.SendMessageToBotAsync(activityToSend);
