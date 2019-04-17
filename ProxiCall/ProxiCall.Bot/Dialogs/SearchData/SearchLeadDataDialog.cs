@@ -58,16 +58,16 @@ namespace ProxiCall.Bot.Dialogs.SearchData
         private async Task<DialogTurnResult> InitializeStateStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
         {
             //Initializing CRMStateAccessor
-            var crmState = await _accessors.CRMStateAccessor.GetAsync(stepContext.Context, () => null);
+            var crmState = await _accessors.CRMStateAccessor.GetAsync(stepContext.Context, () => null, cancellationToken);
             if (crmState == null)
             {
                 if (stepContext.Options is CRMState callStateOpt)
                 {
-                    await _accessors.CRMStateAccessor.SetAsync(stepContext.Context, callStateOpt);
+                    await _accessors.CRMStateAccessor.SetAsync(stepContext.Context, callStateOpt, cancellationToken);
                 }
                 else
                 {
-                    await _accessors.CRMStateAccessor.SetAsync(stepContext.Context, new CRMState());
+                    await _accessors.CRMStateAccessor.SetAsync(stepContext.Context, new CRMState(), cancellationToken);
                 }
             }
 
@@ -184,8 +184,8 @@ namespace ProxiCall.Bot.Dialogs.SearchData
                 {
                     //Restarting dialog if user decides to retry
                     crmState.ResetLead();
-                    await _accessors.CRMStateAccessor.SetAsync(stepContext.Context, crmState);
-                    return await stepContext.ReplaceDialogAsync(_searchLeadDataWaterfall, cancellationToken);
+                    await _accessors.CRMStateAccessor.SetAsync(stepContext.Context, crmState, cancellationToken);
+                    return await stepContext.ReplaceDialogAsync(_searchLeadDataWaterfall, cancellationToken: cancellationToken);
                 }
                 else
                 {

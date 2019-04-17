@@ -35,9 +35,10 @@ namespace ProxiCall.Bot.Services.ProxiCallCRM
                 case HttpStatusCode.OK:
                     lead = await response.Content.ReadAsAsync<Lead>();
                     return lead;
-                case HttpStatusCode.NotFound:
+                case HttpStatusCode.Forbidden:
+                    throw new AccessForbiddenException();
                 default:
-                    throw new LeadNotFoundException();
+                    return null;
             }
         }
 
@@ -59,20 +60,8 @@ namespace ProxiCall.Bot.Services.ProxiCallCRM
                     return opportunities;
                 case HttpStatusCode.Forbidden:
                     throw new AccessForbiddenException();
-                case HttpStatusCode.NotFound:
-                    switch (response.ReasonPhrase)
-                    {
-                        case "lead-not-found":
-                            throw new LeadNotFoundException();
-                        case "owner-not-found":
-                            throw new OwnerNotFoundException();
-                        case "opportunities-not-found":
-                        default:
-                            throw new OpportunitiesNotFoundException();
-                    }
-                case HttpStatusCode.BadRequest:
                 default:
-                    throw new OpportunitiesNotFoundException();
+                    return null;
             }
         }
     }

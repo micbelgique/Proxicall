@@ -6,6 +6,7 @@ using Microsoft.Bot.Builder.Dialogs;
 using Microsoft.Bot.Schema;
 using Microsoft.Extensions.Logging;
 using ProxiCall.Bot.Dialogs.Shared;
+using ProxiCall.Bot.Exceptions.ProxiCallCRM;
 using ProxiCall.Bot.Models;
 using ProxiCall.Bot.Resources;
 using ProxiCall.Bot.Services.ProxiCallCRM;
@@ -493,10 +494,20 @@ namespace ProxiCall.Bot.Dialogs.CreateData
             crmState.Opportunity.Status = OpportunityStatus.Open.Name;
             crmState.Opportunity.OwnerId = userState.LoggedUser.Id;
 
+            var message = string.Empty;
+            
             //Posting the created opportunity
-            await _opportunityService.PostOpportunityAsync(userState.LoggedUser.Token, crmState.Opportunity);
+            try
+            {
+                await _opportunityService.PostOpportunityAsync(userState.LoggedUser.Token, crmState.Opportunity);
+                message = $"{ CulturedBot.SayOpportunityWasCreated} {CulturedBot.AskForRequestAgain}";
+            }
+            catch (OpportunityNotCreatedException ex)
+            {
+                //TODO add message to resx
+                message = "La création de l'opportunité a échoué";
+            }
 
-            var message = $"{ CulturedBot.SayOpportunityWasCreated} {CulturedBot.AskForRequestAgain}";
             await stepContext.Context.SendActivityAsync(MessageFactory
                 .Text(message, message, InputHints.AcceptingInput)
                 , cancellationToken

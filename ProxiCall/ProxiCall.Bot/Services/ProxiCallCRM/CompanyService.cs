@@ -54,20 +54,8 @@ namespace ProxiCall.Bot.Services.ProxiCallCRM
                     return opportunities;
                 case HttpStatusCode.Forbidden:
                     throw new AccessForbiddenException();
-                case HttpStatusCode.NotFound:
-                    switch (response.ReasonPhrase)
-                    {
-                        case "owner-not-found":
-                            throw new OwnerNotFoundException();
-                        case "company-not-found":
-                            throw new CompanyNotFoundException();
-                        case "opportunities-not-found":
-                        default:
-                            throw new OpportunitiesNotFoundException();
-                    }
-                case HttpStatusCode.BadRequest:
                 default:
-                    throw new OpportunitiesNotFoundException();
+                    return null;
             }
         }
     }

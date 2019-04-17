@@ -37,8 +37,7 @@ namespace ProxiCall.Bot.Services.ProxiCallCRM
                     throw new AccessForbiddenException();
                 case HttpStatusCode.NotFound:
                 default:
-                    throw new ProductNotFoundException();
-
+                    return null;
             }
         }
     }
