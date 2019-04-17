@@ -20,9 +20,10 @@
       "commandName": "Project",
       "launchBrowser": true,
       "environmentVariables": {
+        "ApiHost": "https://proxicall-crm.azurewebsites.net",
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
-      "applicationUrl": "http://localhost:10277/"
+      "applicationUrl": "http://localhost:3978/"
     }
   }
 }
