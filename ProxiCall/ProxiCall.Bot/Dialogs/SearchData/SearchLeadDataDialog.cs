@@ -352,7 +352,7 @@ namespace ProxiCall.Bot.Dialogs.SearchData
                 for (int i = 0; i < crmState.Opportunities.Count; i++)
                 {
                     wantedData.Append(string.Format(CulturedBot.ListOpportunities,
-                        crmState.Opportunities[i].Product.Title, crmState.Opportunities[i].CreationDate?.ToShortDateString()));
+                        crmState.Opportunities[i].Product.Title, crmState.Opportunities[i].CreationDate?.ToString("dd MMMM")));
                     if (i == (numberOfOpportunities - 2))
                     {
                         wantedData.Append($" {CulturedBot.LinkWithAnd} ");
