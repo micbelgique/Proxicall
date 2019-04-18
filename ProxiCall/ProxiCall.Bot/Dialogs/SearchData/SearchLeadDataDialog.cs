@@ -267,6 +267,8 @@ namespace ProxiCall.Bot.Dialogs.SearchData
             var wantOppornunities = luisState.Entities.Contains(ProxiCallEntities.SEARCH_OPPORTUNITIES_NAME_ENTITYNAME);
             var wantNumberOppornunities = luisState.Entities.Contains(ProxiCallEntities.SEARCH_NUMBER_OPPORTUNITIES_ENTITYNAME);
             var wantAnyInfoAboutOpportunities = wantOppornunities || wantNumberOppornunities;
+            var onlyWantAnyInfoAboutOpportunities =
+                wantAnyInfoAboutOpportunities && !( wantPhone || wantAddress || wantCompany || wantEmail || wantContact || wantContactName );
 
             var hasPhone = !string.IsNullOrEmpty(crmState.Lead.PhoneNumber);
             var hasAddress = !string.IsNullOrEmpty(crmState.Lead.Address);
@@ -320,24 +322,27 @@ namespace ProxiCall.Bot.Dialogs.SearchData
             {
                 var numberOfOpportunities = (crmState.Opportunities!=null? crmState.Opportunities.Count : 0);
 
-                var chosenPronoun = string.Empty;
-                LeadGender.AllGender.TryGetValue(crmState.Lead.Gender, out string genderName);
-                var isMale = genderName == LeadGender.MALE;
-                var isFemale = genderName == LeadGender.FEMALE;
+                if(numberOfOpportunities>0 || onlyWantAnyInfoAboutOpportunities)
+                {
+                    var chosenPronoun = string.Empty;
+                    LeadGender.AllGender.TryGetValue(crmState.Lead.Gender, out string genderName);
+                    var isMale = genderName == LeadGender.MALE;
+                    var isFemale = genderName == LeadGender.FEMALE;
 
-                if(isMale)
-                {
-                    chosenPronoun = $"{CulturedBot.SayHim}";
+                    if (isMale)
+                    {
+                        chosenPronoun = $"{CulturedBot.SayHim}";
+                    }
+                    else if (isFemale)
+                    {
+                        chosenPronoun = $"{CulturedBot.SayHer}";
+                    }
+                    else
+                    {
+                        chosenPronoun = $"{CulturedBot.SayHim} {CulturedBot.SayHer}";
+                    }
+                    wantedData.AppendLine($"{string.Format(CulturedBot.GivenNumberOfOpportunities, numberOfOpportunities, chosenPronoun)}");
                 }
-                else if (isFemale)
-                {
-                    chosenPronoun = $"{CulturedBot.SayHer}";
-                }
-                else
-                {
-                    chosenPronoun = $"{CulturedBot.SayHim} {CulturedBot.SayHer}";
-                }
-                wantedData.AppendLine($"{string.Format(CulturedBot.GivenNumberOfOpportunities, numberOfOpportunities, chosenPronoun)}");
             }
 
             //Opportunities
@@ -363,7 +368,7 @@ namespace ProxiCall.Bot.Dialogs.SearchData
             if (hasNoResults)
             {
                 var hasMoreThanOneWantedInfos = luisState.Entities.Count > 1;
-                if(!wantAnyInfoAboutOpportunities)
+                if(!wantAnyInfoAboutOpportunities || !onlyWantAnyInfoAboutOpportunities)
                 {
                     if (hasMoreThanOneWantedInfos)
                     {
