@@ -22,7 +22,7 @@ namespace ProxiCall.Web.Controllers.Api
         [HttpGet("events")]
         public async Task<IActionResult> GetEvents()
         {
-            var result = await _msGraphClient.GetEvents();
+            var result = await _msGraphClient.GetEventsOfUser("melissa.fontesse@mic-belgique.be");
             return Ok(result);
         }
     }

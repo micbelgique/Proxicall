@@ -40,7 +40,7 @@ namespace ProxiCall.Web.Services.MsGraph
             }
         }
 
-        public async Task<string> GetEvents()
+        public async Task<List<OutlookCalendarEvent>> GetEventsOfUser(string userEmailAddress)
         {
             var httpClient = new HttpClient
             {
@@ -50,22 +50,16 @@ namespace ProxiCall.Web.Services.MsGraph
             ConfidentialClientApplication daemonClient = new ConfidentialClientApplication(msGraphConfig.ClientId, String.Format(msGraphConfig.AuthorityFormat, msGraphConfig.TenantId), msGraphConfig.RedirectUri, new ClientCredential(msGraphConfig.ClientSecret), null, new TokenCache());
             AuthenticationResult authResult = await daemonClient.AcquireTokenForClientAsync(new string[] { msGraphConfig.Scope });
 
-            var request = new HttpRequestMessage(HttpMethod.Get, $"https://graph.microsoft.com/v1.0/users/melissa.fontesse@mic-belgique.be/calendar/events/");
+            //var path = $"https://graph.microsoft.com/v1.0/users/{userEmailAddress}/calendar/events/";
+            var path = $"https://graph.microsoft.com/v1.0/users/{userEmailAddress}/calendar/events?startdatetime=2019-04-17T14:17:21.238Z&enddatetime=2019-04-26T14:17:21.238Z";
             httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", authResult.AccessToken);
-            var response = await httpClient.SendAsync(request);
-
-            //var path = $"https://graph.microsoft.com/v1.0/users/melissa.fontesse@mic-belgique.be/calendar/events/";
-            //httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", authResult.AccessToken);
-            //var response = await httpClient.GetAsync(path);
-
-            //parsing du json
+            var response = await httpClient.GetAsync(path);
+            
             var responseBody = await new StringContent(JsonConvert.SerializeObject(response.Content.ReadAsStringAsync()), Encoding.UTF8, "application/json").ReadAsStringAsync(); //await response.Content.ReadAsStringAsync();
             
-            OutlookCalendarResult test = await response.Content.ReadAsAsync<OutlookCalendarResult>();
-            string[] startTab = responseBody.Split("\"start\":{\"dateTime\":\"");
-            string[] endTab = responseBody.Split("end\":{\"dateTime\":\"");
-            string[] idTab = responseBody.Split("\"id\":\"");
-            return responseBody;
+            OutlookCalendarResult events = await response.Content.ReadAsAsync<OutlookCalendarResult>();
+
+            return events.OutlookCalendarEventValue;
         }
     }
 }
