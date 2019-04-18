@@ -13,6 +13,8 @@
     <PackageReference Include="Microsoft.AspNetCore.Razor.Design" Version="2.2.0" PrivateAssets="All" />
     <PackageReference Include="Microsoft.Bot.Connector.DirectLine" Version="3.0.2" />
     <PackageReference Include="Microsoft.CognitiveServices.Speech" Version="1.2.0" />
+    <PackageReference Include="Microsoft.Graph.Core" Version="1.14.1" />
+    <PackageReference Include="Microsoft.Identity.Client" Version="1.1.2-preview0008" />
     <PackageReference Include="Microsoft.Rest.ClientRuntime" Version="2.3.20" />
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="2.2.0" />
     <PackageReference Include="Twilio.AspNet.Core" Version="5.20.1" />

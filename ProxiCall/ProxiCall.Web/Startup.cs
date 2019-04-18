@@ -30,6 +30,8 @@ namespace ProxiCall.Web
                 options.MinimumSameSitePolicy = SameSiteMode.None;
             });
 
+            services.Configure<Services.MsGraph.MsGraphConfig>(Configuration.GetSection("MsGraphSettings"));
+            services.AddScoped<Services.MsGraph.MsGraphClient>();
 
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
 
