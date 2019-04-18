@@ -26,6 +26,18 @@ namespace ProxiCall.CRM.Controllers.Api
             _leadDao = leadDAO;
         }
         
+        [HttpGet("allnames")]
+        public async Task<ActionResult<IEnumerable<string>>> GetLeadsNames()
+        {
+            var leads = await _context.Leads.ToListAsync();
+            var names = new List<string>();
+            foreach(var lead in leads)
+            {
+                names.Add(lead.FullName);
+            }
+            return names;
+        }
+        
         // GET: api/Leads
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Lead>>> GetLead()
