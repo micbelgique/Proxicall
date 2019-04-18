@@ -25,6 +25,20 @@ namespace ProxiCall.CRM.Controllers.Api
             _productDao = productDAO;
         }
 
+        [HttpGet("allnames")]
+        public async Task<ActionResult<IEnumerable<string>>> GetProductsNames()
+        {
+            var products = await _context.Products.ToListAsync();
+            var names = new List<string>();
+
+            foreach (var product in products)
+            {
+                names.Add(product.Title);
+            }
+
+            return names;
+        }
+
         // GET: api/Products
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Product>>> GetProducts()

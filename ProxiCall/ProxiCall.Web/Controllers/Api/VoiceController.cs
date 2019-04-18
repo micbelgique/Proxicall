@@ -28,10 +28,23 @@ namespace ProxiCall.Web.Controllers.Api
         private static BotConnector _botConnector;
         private readonly IActionContextAccessor _actionContextAccessor;
         private readonly IHostingEnvironment _hostingEnvironment;
-        private readonly string[] _names = new string[] {"Mélissa Fontesse","Arthur Grailet","Stéphanie Bémelmans","Renaud Dumont","Vivien Preser","Massimo Gentile","Thomas D'Hollander","Simon Gauthier","Laura Lieu","Tinaël Devresse",
-                                                        "Andy Dautricourt","Julien Dendauw","Martine Meunier","Nathan Pire","Maxime Hempte","Victor Pastorani","Tobias Jetzen","Xavier Tordoir","Loris Rossi","Jessy Delhaye","Sylvain Duhant",
-                                                        "David Vanni","Simon Fauconnier","Chloé Michaux","Xavier Vercruysse","Xavier Bastin","Guillaume Rigaux","Romain Blondeau","Laïla Valenti","Ryan Büttner","Pierre Mayeur","Guillaume Servais",
-                                                        "Frédéric Carbonnelle","Valentin Chevalier","Alain Musoni","Smart Richesse","Microsoft Innovation Center","Doctor Love","Proximus EnCo","Seeing AI"};
+        private readonly string[] _names = 
+        {
+            // Leads
+            "Mélissa Fontesse","Arthur Grailet","Stéphanie Bémelmans","Renaud Dumont","Vivien Preser","Massimo Gentile","Thomas D'Hollander","Simon Gauthier","Laura Lieu","Tinaël Devresse",
+            "Andy Dautricourt","Julien Dendauw","Martine Meunier","Nathan Pire","Maxime Hempte","Victor Pastorani","Tobias Jetzen","Xavier Tordoir","Loris Rossi","Jessy Delhaye","Sylvain Duhant",
+            "David Vanni","Simon Fauconnier","Chloé Michaux","Xavier Vercruysse","Xavier Bastin","Guillaume Rigaux","Romain Blondeau","Laïla Valenti","Ryan Büttner","Pierre Mayeur","Guillaume Servais",
+            "Frédéric Carbonnelle","Valentin Chevalier","Alain Musoni",
+            // Companies
+            "Smart Richesse","Microsoft Innovation Center","Doctor Love","Proximus EnCo","Seeing AI",
+            // Products
+            "BotBot",
+            "SpeakAnotherDayBot",
+            "OnceUponADreamBot",
+            "CheerlyBot",
+            "TormentorBot",
+            "SpiderBot"
+        };
 
         private readonly string _hints;
 
