@@ -27,7 +27,14 @@ namespace ProxiCall.Bot.Models
             set
             {
                 product = value;
-                ProductId = product.Id;
+                if(product!=null)
+                {
+                    ProductId = product.Id;
+                }
+                else
+                {
+                    ProductId = string.Empty;
+                }
             }
         }
 

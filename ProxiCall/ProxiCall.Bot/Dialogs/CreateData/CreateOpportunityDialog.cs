@@ -348,7 +348,7 @@ namespace ProxiCall.Bot.Dialogs.CreateData
             var crmState = await _accessors.CRMStateAccessor.GetAsync(stepContext.Context, cancellationToken: cancellationToken);
 
             //Asking for date if not already given
-            if (crmState.Opportunity.EstimatedCloseDate == DateTime.MinValue)
+            if (crmState.Opportunity.EstimatedCloseDate == null || crmState.Opportunity.EstimatedCloseDate == DateTime.MinValue)
             {
                 return await stepContext.PromptAsync(_closingDatePrompt, new PromptOptions
                 {
@@ -364,7 +364,7 @@ namespace ProxiCall.Bot.Dialogs.CreateData
             var userState = await _accessors.LoggedUserAccessor.GetAsync(stepContext.Context, () => new LoggedUserState(), cancellationToken);
 
             //Gathering the date if not already given
-            if (crmState.Opportunity.EstimatedCloseDate == DateTime.MinValue)
+            if (crmState.Opportunity.EstimatedCloseDate == null || crmState.Opportunity.EstimatedCloseDate == DateTime.MinValue)
             {
                 var luisResult = await _botServices.LuisServices[BotServices.LUIS_APP_NAME].RecognizeAsync(stepContext.Context, cancellationToken);
 
@@ -375,7 +375,7 @@ namespace ProxiCall.Bot.Dialogs.CreateData
             }
             //Asking for retry if necessary
             var promptMessage = "";
-            if (crmState.Opportunity.EstimatedCloseDate == DateTime.MinValue)
+            if (crmState.Opportunity.EstimatedCloseDate == null || crmState.Opportunity.EstimatedCloseDate == DateTime.MinValue)
             {
                 promptMessage = $"{CulturedBot.AdmitNotUnderstanding} {CulturedBot.AskIfWantToSkip}";
             }

@@ -266,6 +266,9 @@ namespace ProxiCall.Bot.Dialogs.SearchData
             var wantContactName = luisState.Entities.Contains(ProxiCallEntities.SEARCH_CONTACT_NAME_ENTITYNAME);
             var wantOppornunities = luisState.Entities.Contains(ProxiCallEntities.SEARCH_OPPORTUNITIES_NAME_ENTITYNAME);
             var wantNumberOppornunities = luisState.Entities.Contains(ProxiCallEntities.SEARCH_NUMBER_OPPORTUNITIES_ENTITYNAME);
+            var wantAnyInfoAboutOpportunities = wantOppornunities || wantNumberOppornunities;
+            var onlyWantAnyInfoAboutOpportunities =
+                wantAnyInfoAboutOpportunities && !( wantPhone || wantAddress || wantCompany || wantEmail || wantContact || wantContactName );
 
             var hasPhone = !string.IsNullOrEmpty(crmState.Lead.PhoneNumber);
             var hasAddress = !string.IsNullOrEmpty(crmState.Lead.Address);
@@ -319,24 +322,27 @@ namespace ProxiCall.Bot.Dialogs.SearchData
             {
                 var numberOfOpportunities = (crmState.Opportunities!=null? crmState.Opportunities.Count : 0);
 
-                var chosenPronoun = string.Empty;
-                LeadGender.AllGender.TryGetValue(crmState.Lead.Gender, out string genderName);
-                var isMale = genderName == LeadGender.MALE;
-                var isFemale = genderName == LeadGender.FEMALE;
+                if(numberOfOpportunities>0 || onlyWantAnyInfoAboutOpportunities)
+                {
+                    var chosenPronoun = string.Empty;
+                    LeadGender.AllGender.TryGetValue(crmState.Lead.Gender, out string genderName);
+                    var isMale = genderName == LeadGender.MALE;
+                    var isFemale = genderName == LeadGender.FEMALE;
 
-                if(isMale)
-                {
-                    chosenPronoun = $"{CulturedBot.SayHim}";
+                    if (isMale)
+                    {
+                        chosenPronoun = $"{CulturedBot.SayHim}";
+                    }
+                    else if (isFemale)
+                    {
+                        chosenPronoun = $"{CulturedBot.SayHer}";
+                    }
+                    else
+                    {
+                        chosenPronoun = $"{CulturedBot.SayHim} {CulturedBot.SayHer}";
+                    }
+                    wantedData.AppendLine($"{string.Format(CulturedBot.GivenNumberOfOpportunities, numberOfOpportunities, chosenPronoun)}");
                 }
-                else if (isFemale)
-                {
-                    chosenPronoun = $"{CulturedBot.SayHer}";
-                }
-                else
-                {
-                    chosenPronoun = $"{CulturedBot.SayHim} {CulturedBot.SayHer}";
-                }
-                wantedData.AppendLine($"{string.Format(CulturedBot.GivenNumberOfOpportunities, numberOfOpportunities, chosenPronoun)}");
             }
 
             //Opportunities
@@ -346,7 +352,7 @@ namespace ProxiCall.Bot.Dialogs.SearchData
                 for (int i = 0; i < crmState.Opportunities.Count; i++)
                 {
                     wantedData.Append(string.Format(CulturedBot.ListOpportunities,
-                        crmState.Opportunities[i].Product.Title, crmState.Opportunities[i].CreationDate?.ToShortDateString()));
+                        crmState.Opportunities[i].Product.Title, crmState.Opportunities[i].CreationDate?.ToString("dd MMMM")));
                     if (i == (numberOfOpportunities - 2))
                     {
                         wantedData.Append($" {CulturedBot.LinkWithAnd} ");
@@ -362,13 +368,16 @@ namespace ProxiCall.Bot.Dialogs.SearchData
             if (hasNoResults)
             {
                 var hasMoreThanOneWantedInfos = luisState.Entities.Count > 1;
-                if (hasMoreThanOneWantedInfos && !wantOppornunities)
+                if(!wantAnyInfoAboutOpportunities || !onlyWantAnyInfoAboutOpportunities)
                 {
-                    wantedData.Append($"{CulturedBot.NoDataFoundInDB}.");
-                }
-                else if(!wantOppornunities)
-                {
-                    wantedData.Append($"{CulturedBot.ThisDataNotFoundInDB}");
+                    if (hasMoreThanOneWantedInfos)
+                    {
+                        wantedData.Append($"{CulturedBot.NoDataFoundInDB}.");
+                    }
+                    else
+                    {
+                        wantedData.Append($"{CulturedBot.ThisDataNotFoundInDB}");
+                    }
                 }
             }
             return $"{wantedData.ToString()}";
