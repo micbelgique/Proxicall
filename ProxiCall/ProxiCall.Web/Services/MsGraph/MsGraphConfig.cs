@@ -10,8 +10,6 @@
         public string AuthorityFormat { get; set; }
         public string Scope { get; set; }
 
-        public string RoomId { get; set; }
-
         public string QueryCalendarView { get; set; }
         public string QueryEvents { get; set; }
     }

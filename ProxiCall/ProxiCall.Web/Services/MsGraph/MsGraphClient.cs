@@ -40,26 +40,26 @@ namespace ProxiCall.Web.Services.MsGraph
             }
         }
 
-        public async Task<List<OutlookCalendarEvent>> GetEventsOfUser(string userEmailAddress)
+        public async Task<List<OutlookCalendarEvent>> GetEventsOfUser(string userEmailAddress, DateTime start, DateTime end)
         {
-            var httpClient = new HttpClient
+            using (HttpClient httpClient = new HttpClient() { BaseAddress = new Uri(Environment.GetEnvironmentVariable("Host")) })
             {
-                BaseAddress = new Uri("http://localhost:65115/")
-            };
+                ConfidentialClientApplication daemonClient = new ConfidentialClientApplication(msGraphConfig.ClientId, String.Format(msGraphConfig.AuthorityFormat, msGraphConfig.TenantId), msGraphConfig.RedirectUri, new ClientCredential(msGraphConfig.ClientSecret), null, new TokenCache());
+                AuthenticationResult authResult = await daemonClient.AcquireTokenForClientAsync(new string[] { msGraphConfig.Scope });
 
-            ConfidentialClientApplication daemonClient = new ConfidentialClientApplication(msGraphConfig.ClientId, String.Format(msGraphConfig.AuthorityFormat, msGraphConfig.TenantId), msGraphConfig.RedirectUri, new ClientCredential(msGraphConfig.ClientSecret), null, new TokenCache());
-            AuthenticationResult authResult = await daemonClient.AcquireTokenForClientAsync(new string[] { msGraphConfig.Scope });
+                var startTime = start.ToUniversalTime().ToString("u").Replace(" ", "T");
+                var endTime = end.ToUniversalTime().ToString("u").Replace(" ", "T");
+                var path = $"https://graph.microsoft.com/v1.0/users/{userEmailAddress}/calendarview?startdatetime={startTime}&enddatetime={endTime}";
 
-            //var path = $"https://graph.microsoft.com/v1.0/users/{userEmailAddress}/calendar/events/";
-            var path = $"https://graph.microsoft.com/v1.0/users/{userEmailAddress}/calendar/events?startdatetime=2019-04-17T14:17:21.238Z&enddatetime=2019-04-26T14:17:21.238Z";
-            httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", authResult.AccessToken);
-            var response = await httpClient.GetAsync(path);
-            
-            var responseBody = await new StringContent(JsonConvert.SerializeObject(response.Content.ReadAsStringAsync()), Encoding.UTF8, "application/json").ReadAsStringAsync(); //await response.Content.ReadAsStringAsync();
-            
-            OutlookCalendarResult events = await response.Content.ReadAsAsync<OutlookCalendarResult>();
+                httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", authResult.AccessToken);
+                var response = await httpClient.GetAsync(path);
 
-            return events.OutlookCalendarEventValue;
+                var responseBody = await new StringContent(JsonConvert.SerializeObject(response.Content.ReadAsStringAsync()), Encoding.UTF8, "application/json").ReadAsStringAsync(); //await response.Content.ReadAsStringAsync();
+
+                OutlookCalendarResult events = await response.Content.ReadAsAsync<OutlookCalendarResult>();
+
+                return events.OutlookCalendarEventValue;
+            }
         }
     }
 }

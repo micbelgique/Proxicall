@@ -19,10 +19,13 @@ namespace ProxiCall.Web.Controllers.Api
             _msGraphClient = msGraphClient;
         }
 
-        [HttpGet("events")]
-        public async Task<IActionResult> GetEvents()
+        [HttpGet("events/{userEmailAddress}")]
+        public async Task<IActionResult> GetEventsOfTheDay(string userEmailAddress)
         {
-            var result = await _msGraphClient.GetEventsOfUser("melissa.fontesse@mic-belgique.be");
+            var startTime = DateTime.Now.Date + new TimeSpan(0, 0, 0);
+            var endTime = DateTime.Now.Date + new TimeSpan(23, 59, 59);
+
+            var result = await _msGraphClient.GetEventsOfUser(userEmailAddress, startTime, endTime);
             return Ok(result);
         }
     }
