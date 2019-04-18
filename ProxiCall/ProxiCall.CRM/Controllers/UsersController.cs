@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
+using ProxiCall.CRM.Areas.Identity.Data;
 using ProxiCall.CRM.Models;
 
 namespace ProxiCall.CRM.Controllers
@@ -14,17 +15,25 @@ namespace ProxiCall.CRM.Controllers
     [Authorize(Roles ="Admin")]
     public class UsersController : Controller
     {
+        private readonly ProxicallCRMContext _context;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IEmailSender _emailSender;
 
-        public UsersController(UserManager<ApplicationUser> userManager, IEmailSender emailSender)
+        public UsersController(ProxicallCRMContext context, UserManager<ApplicationUser> userManager, IEmailSender emailSender)
         {
+            _context = context;
             _userManager = userManager;
             _emailSender = emailSender;
         }
 
         public IActionResult Index()
         {
+            return View(_context.Set<ApplicationUser>());
+        }
+
+        public IActionResult Call(string id)
+        {
+            var user = _context.Set<ApplicationUser>().FirstOrDefault();
             return View();
         }
 
