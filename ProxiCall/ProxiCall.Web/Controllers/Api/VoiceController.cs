@@ -64,6 +64,19 @@ namespace ProxiCall.Web.Controllers.Api
             _hints = sb.ToString();
         }
 
+        [HttpGet("outbound")]
+        public IActionResult OutboundCall()
+        {
+            var from = "+32493044068";
+            var to = "+3278077844";
+            CallResource.Create(
+                url: new Uri($"{Environment.GetEnvironmentVariable("Host")}/api/voice/receive"),
+                to: new Twilio.Types.PhoneNumber("+32493044068"),
+                from: new Twilio.Types.PhoneNumber("+3278077844")
+            );
+            return Ok();
+        }
+
         [HttpGet("receive")]
         public async Task<IActionResult> ReceiveCall([FromQuery] string CallSid, [FromQuery] string From)
         {
