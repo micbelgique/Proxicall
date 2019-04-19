@@ -34,6 +34,7 @@ namespace ProxiCall.CRM.Controllers
         public IActionResult Call(string id)
         {
             var user = _context.Set<ApplicationUser>().FirstOrDefault();
+            //TODO call proxicall.web api to initiate a call
             return View();
         }
 
@@ -138,6 +139,35 @@ namespace ProxiCall.CRM.Controllers
             }
 
             return new string(chars.ToArray());
+        }
+        
+        // GET: Users/Delete/5
+        public IActionResult Delete(string id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var user = _context.Set<ApplicationUser>()
+                .FirstOrDefault(m => m.Id == id);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            return View(user);
+        }
+
+        // POST: Leads/Delete/5
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteConfirmed(string id)
+        {
+            var user = await _context.Set<ApplicationUser>().FindAsync(id);
+            _context.Set<ApplicationUser>().Remove(user);
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Index));
         }
     }
 }
