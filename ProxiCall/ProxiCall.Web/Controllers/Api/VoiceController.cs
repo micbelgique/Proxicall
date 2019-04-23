@@ -64,6 +64,17 @@ namespace ProxiCall.Web.Controllers.Api
             _hints = sb.ToString();
         }
 
+        [HttpGet("outbound/{to}")]
+        public IActionResult OutboundCall(string to)
+        {
+            CallResource.Create(
+                url: new Uri($"{Environment.GetEnvironmentVariable("Host")}/api/voice/receive"),
+                to: new Twilio.Types.PhoneNumber(to),
+                from: new Twilio.Types.PhoneNumber(Environment.GetEnvironmentVariable("TwilioPhoneNumber"))
+            );
+            return Ok();
+        }
+
         [HttpGet("receive")]
         public async Task<IActionResult> ReceiveCall([FromQuery] string CallSid, [FromQuery] string From)
         {
