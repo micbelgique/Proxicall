@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 using System.Text.Encodings.Web;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
@@ -30,11 +31,16 @@ namespace ProxiCall.CRM.Controllers
         {
             return View(_context.Set<ApplicationUser>());
         }
-
-        public IActionResult Call(string id)
+        
+        public async Task<IActionResult> Call(string id)
         {
-            var user = _context.Set<ApplicationUser>().FirstOrDefault();
-            //TODO call proxicall.web api to initiate a call
+            var user = _context.Set<ApplicationUser>().FirstOrDefault(accountUser => accountUser.Id == id);
+            using (var httpClient = new HttpClient())
+            {
+                //Todo manage potential error (number not found, no response,...)
+                var path = $"http://proxicall.azurewebsites.net/api/voice/outbound/{user.PhoneNumber}";
+                var response = await httpClient.GetAsync(path);
+            }
             return View();
         }
 
