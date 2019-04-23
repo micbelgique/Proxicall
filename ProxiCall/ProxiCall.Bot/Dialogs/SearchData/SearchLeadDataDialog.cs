@@ -31,7 +31,8 @@ namespace ProxiCall.Bot.Dialogs.SearchData
         private const string _retryFetchingMinimumDataFromUserPrompt = "retryFetchingMinimumDataFromUserPrompt";
         private const string _confirmForwardingPrompt = "confirmForwardingPrompt";
 
-        public SearchLeadDataDialog(StateAccessors accessors, ILoggerFactory loggerFactory, BotServices botServices, IServiceProvider serviceProvider) : base(nameof(SearchLeadDataDialog))
+        public SearchLeadDataDialog(StateAccessors accessors, ILoggerFactory loggerFactory,
+            BotServices botServices, IServiceProvider serviceProvider) : base(nameof(SearchLeadDataDialog))
         {
             _accessors = accessors;
             _loggerFactory = loggerFactory;

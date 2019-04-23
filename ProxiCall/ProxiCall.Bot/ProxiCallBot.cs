@@ -12,6 +12,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
 using ProxiCall.Bot.Dialogs.CreateData;
+using ProxiCall.Bot.Dialogs.ProactiveIntent;
 using ProxiCall.Bot.Dialogs.SearchData;
 using ProxiCall.Bot.Dialogs.Shared;
 using ProxiCall.Bot.Models;
@@ -68,6 +69,7 @@ namespace ProxiCall.Bot
             Dialogs.Add(ActivatorUtilities.CreateInstance<SearchLeadDataDialog>(_serviceProvider));
             Dialogs.Add(ActivatorUtilities.CreateInstance<SearchCompanyDataDialog>(_serviceProvider));
             Dialogs.Add(ActivatorUtilities.CreateInstance<CreateOpportunityDialog>(_serviceProvider));
+            Dialogs.Add(ActivatorUtilities.CreateInstance<CheckToRecordOpportunityDialog>(_serviceProvider));
         }
         
         /// <summary>
@@ -102,7 +104,8 @@ namespace ProxiCall.Bot
 
             if (activity.Type == ActivityTypes.Message)
             {
-                var isFirstMessage = false;
+                var isFirstMessageInboundCall = false;
+                var isFirstMessageOutboundCall = false;
                 var phonenumber = string.Empty;
 
                 if (activity.ChannelId == "directline")
@@ -111,21 +114,23 @@ namespace ProxiCall.Bot
                     {
                         foreach (var entity in activity.Entities)
                         {
-                            isFirstMessage = entity.Properties.TryGetValue("firstmessage", out var jtoken);
-                            phonenumber = isFirstMessage ? jtoken.ToString() : string.Empty;
-                            if(isFirstMessage)
-                                break;
+                            isFirstMessageInboundCall = entity.Properties.TryGetValue("firstmessage", out var phoneNumberJToken);
+                            isFirstMessageOutboundCall = entity.Properties.TryGetValue("firstmessageoutboundcall", out phoneNumberJToken);
+                            phonenumber = isFirstMessageInboundCall ? phoneNumberJToken.ToString() : string.Empty;
+                            //if(isFirstMessage)
+                            //    break;
                         }
                     }
                 }
                 else if (userState.LoggedUser.Token == null && isDevelopmentEnvironment)
                 {
                     // Admin login for development purposes
-                    isFirstMessage = true;
+                    isFirstMessageInboundCall = true;
+                    isFirstMessageOutboundCall = true;
                     phonenumber = "1234567890";
                 }
 
-                if(isFirstMessage)
+                if(isFirstMessageInboundCall || isFirstMessageOutboundCall)
                 {
                     // This is the first message sent by the bot on production
                     try
@@ -137,10 +142,21 @@ namespace ProxiCall.Bot
 
                         if (!isDevelopmentEnvironment && !string.IsNullOrEmpty(userState.LoggedUser.Token))
                         {
-                            //TODO add message to resx
-                            var welcomingMessage = $"Bonjour {userState.LoggedUser.Alias}. {CulturedBot.AskForRequest}";
-                            var reply = MessageFactory.Text(welcomingMessage, welcomingMessage, InputHints.AcceptingInput);
-                            await turnContext.SendActivityAsync(reply, cancellationToken);
+                            if(isFirstMessageInboundCall)
+                            {
+                                //TODO add message to resx
+                                var welcomingMessage = $"Bonjour {userState.LoggedUser.Alias}. {CulturedBot.AskForRequest}";
+                                var reply = MessageFactory.Text(welcomingMessage, welcomingMessage, InputHints.AcceptingInput);
+                                await turnContext.SendActivityAsync(reply, cancellationToken);
+                            }
+                            else if (isFirstMessageOutboundCall)
+                            {
+                                var welcomingMessage = $"Bonjour {userState.LoggedUser.Alias}. J'espère que la réunion s'est bien passée";
+                                var reply = MessageFactory.Text(welcomingMessage, welcomingMessage, InputHints.IgnoringInput);
+                                await turnContext.SendActivityAsync(reply, cancellationToken);
+                                await dialogContext.BeginDialogAsync(nameof(CheckToRecordOpportunityDialog), cancellationToken: cancellationToken);
+
+                            }
                         }
                     }
                     catch (Exception ex)
@@ -155,7 +171,7 @@ namespace ProxiCall.Bot
                     }
                 }
                 
-                if(!isFirstMessage || isDevelopmentEnvironment)
+                if(!(isFirstMessageInboundCall || isFirstMessageOutboundCall) || isDevelopmentEnvironment)
                 {
                     // Perform a call to LUIS to retrieve results for the current activity message.
                     var luisResults = await _services.LuisServices[BotServices.LUIS_APP_NAME].RecognizeAsync(dialogContext.Context, cancellationToken);
@@ -172,46 +188,50 @@ namespace ProxiCall.Bot
                     // If no one has responded,
                     if (!dialogContext.Context.Responded)
                     {
-                        // Examine results from active dialog
-                        switch (dialogResult.Status)
+                        if(!userState.WantsToEndCall)
                         {
-                            case DialogTurnStatus.Empty:
-                                switch (topIntent)
-                                {
-                                    case ProxiCallIntents.CreateOpportunity:
-                                        await UpdateDialogStatesAsync(luisResults, topIntent, dialogContext.Context);
-                                        await dialogContext.BeginDialogAsync(nameof(CreateOpportunityDialog), cancellationToken: cancellationToken);
-                                        break;
-                                    case ProxiCallIntents.SearchCompanyData:
-                                        await UpdateDialogStatesAsync(luisResults, topIntent, dialogContext.Context);
-                                        await dialogContext.BeginDialogAsync(nameof(SearchCompanyDataDialog), cancellationToken: cancellationToken);
-                                        break;
-                                    case ProxiCallIntents.SearchLeadData:
-                                    case ProxiCallIntents.MakeACall:
-                                        await UpdateDialogStatesAsync(luisResults, topIntent, dialogContext.Context);
-                                        await dialogContext.BeginDialogAsync(nameof(SearchLeadDataDialog), cancellationToken: cancellationToken);
-                                        break;
+                            // Examine results from active dialog
+                            switch (dialogResult.Status)
+                            {
+                                case DialogTurnStatus.Empty:
+                                    switch (topIntent)
+                                    {
+                                        case ProxiCallIntents.CreateOpportunity:
+                                            await UpdateDialogStatesAsync(luisResults, topIntent, dialogContext.Context);
+                                            await dialogContext.BeginDialogAsync(nameof(CreateOpportunityDialog), cancellationToken: cancellationToken);
+                                            break;
+                                        case ProxiCallIntents.SearchCompanyData:
+                                            await UpdateDialogStatesAsync(luisResults, topIntent, dialogContext.Context);
+                                            await dialogContext.BeginDialogAsync(nameof(SearchCompanyDataDialog), cancellationToken: cancellationToken);
+                                            break;
+                                        case ProxiCallIntents.SearchLeadData:
+                                        case ProxiCallIntents.MakeACall:
+                                            await UpdateDialogStatesAsync(luisResults, topIntent, dialogContext.Context);
+                                            await dialogContext.BeginDialogAsync(nameof(SearchLeadDataDialog), cancellationToken: cancellationToken);
+                                            break;
 
-                                    case ProxiCallIntents.None:
-                                    default:
-                                        await dialogContext.Context.SendActivityAsync(CulturedBot.NoIntentFound, cancellationToken: cancellationToken);
-                                        break;
-                                }
+                                        case ProxiCallIntents.None:
+                                        default:
+                                            await dialogContext.Context.SendActivityAsync(CulturedBot.NoIntentFound, cancellationToken: cancellationToken);
+                                            break;
+                                    }
 
-                                break;
+                                    break;
 
-                            case DialogTurnStatus.Waiting:
-                                // The active dialog is waiting for a response from the user, so do nothing.
-                                break;
+                                case DialogTurnStatus.Waiting:
+                                    // The active dialog is waiting for a response from the user, so do nothing.
+                                    break;
 
-                            case DialogTurnStatus.Complete:
-                                await dialogContext.EndDialogAsync(cancellationToken: cancellationToken);
-                                break;
+                                case DialogTurnStatus.Complete:
+                                    await dialogContext.EndDialogAsync(cancellationToken: cancellationToken);
+                                    break;
 
-                            default:
-                                await dialogContext.CancelAllDialogsAsync(cancellationToken);
-                                break;
+                                default:
+                                    await dialogContext.CancelAllDialogsAsync(cancellationToken);
+                                    break;
+                            }
                         }
+                        
                     }
                 }
             }
@@ -220,6 +240,12 @@ namespace ProxiCall.Bot
                 var message = $"{CulturedBot.Greet}. {CulturedBot.AskForRequest}";
                 var reply = MessageFactory.Text(message, message, InputHints.AcceptingInput);
                 await turnContext.SendActivityAsync(reply, cancellationToken);
+
+                //Testing Outbound Call
+                //var welcomingMessage = $"Bonjour. J'espère que la réunion s'est bien passée";
+                //var reply = MessageFactory.Text(welcomingMessage, welcomingMessage, InputHints.IgnoringInput);
+                //await turnContext.SendActivityAsync(reply, cancellationToken);
+                //await dialogContext.BeginDialogAsync(nameof(CheckToRecordOpportunityDialog), cancellationToken: cancellationToken);
             }
 
             await _accessors.UserState.SaveChangesAsync(turnContext, false, cancellationToken);
