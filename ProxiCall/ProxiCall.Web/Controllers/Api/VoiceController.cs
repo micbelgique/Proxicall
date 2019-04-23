@@ -64,15 +64,13 @@ namespace ProxiCall.Web.Controllers.Api
             _hints = sb.ToString();
         }
 
-        [HttpGet("outbound")]
-        public IActionResult OutboundCall()
+        [HttpGet("outbound/{to}")]
+        public IActionResult OutboundCall(string to)
         {
-            var from = "+3278250201";
-            var to = "+32491180031";
             CallResource.Create(
                 url: new Uri($"{Environment.GetEnvironmentVariable("Host")}/api/voice/receive"),
                 to: new Twilio.Types.PhoneNumber(to),
-                from: new Twilio.Types.PhoneNumber(from)
+                from: new Twilio.Types.PhoneNumber(Environment.GetEnvironmentVariable("TwilioPhoneNumber"))
             );
             return Ok();
         }
