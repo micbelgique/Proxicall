@@ -67,12 +67,12 @@ namespace ProxiCall.Web.Controllers.Api
         [HttpGet("outbound")]
         public IActionResult OutboundCall()
         {
-            var from = "+32493044068";
-            var to = "+3278077844";
+            var from = "+3278250201";
+            var to = "+32491180031";
             CallResource.Create(
                 url: new Uri($"{Environment.GetEnvironmentVariable("Host")}/api/voice/receive"),
-                to: new Twilio.Types.PhoneNumber("+32493044068"),
-                from: new Twilio.Types.PhoneNumber("+3278077844")
+                to: new Twilio.Types.PhoneNumber(to),
+                from: new Twilio.Types.PhoneNumber(from)
             );
             return Ok();
         }
