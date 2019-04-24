@@ -18,6 +18,12 @@
         <li class="nav-item">
             <a id="opportunity" class="nav-link text-dark" asp-area="" asp-controller="Opportunities" asp-action="Index">Opportunities</a>
         </li>
+        if (User.IsInRole("Admin"))
+        {
+            <li class="nav-item">
+                <a id="createUser" class="nav-link text-dark" asp-area="" asp-controller="Users" asp-action="Index">Users</a>
+            </li>
+        }
     }
     else
     {
