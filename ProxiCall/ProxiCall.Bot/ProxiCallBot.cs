@@ -122,7 +122,7 @@ namespace ProxiCall.Bot
                 {
                     // Admin login for development purposes
                     isFirstMessage = true;
-                    phonenumber = "1234567890";
+                    phonenumber = "+32493044068";
                 }
 
                 if(isFirstMessage)
