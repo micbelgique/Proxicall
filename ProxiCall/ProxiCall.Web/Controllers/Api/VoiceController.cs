@@ -63,9 +63,27 @@ namespace ProxiCall.Web.Controllers.Api
             sb.Remove(sb.Length - 1, 1);
             _hints = sb.ToString();
         }
+        
+        //-------------------
+        //---OUTBOUND CALL---
+        //-------------------
+        [HttpGet("outbound/{to}")]
+        public IActionResult OutboundCall(string to)
+        {
+            CallResource.Create(
+                method: HttpMethod.Get,
+                url: new Uri($"{Environment.GetEnvironmentVariable("Host")}/api/voice/receive"),
+                to: new Twilio.Types.PhoneNumber(to),
+                from: new Twilio.Types.PhoneNumber(Environment.GetEnvironmentVariable("TwilioPhoneNumber"))
+            );
+            return Ok();
+        }
 
+        //------------
+        //---SHARED---
+        //------------
         [HttpGet("receive")]
-        public async Task<IActionResult> ReceiveCall([FromQuery] string CallSid, [FromQuery] string From)
+        public async Task<IActionResult> ReceiveCall([FromQuery] string CallSid, [FromQuery] string From, [FromQuery] string To)
         {
             var audioToDelete = Directory.GetFiles(_hostingEnvironment.WebRootPath + "/audio");
             foreach (var file in audioToDelete)
@@ -89,12 +107,25 @@ namespace ProxiCall.Web.Controllers.Api
                 Text = string.Empty,
                 Entities = new List<Entity>()
             };
+
+            var phoneNumber = string.Empty;
+            if (From != Environment.GetEnvironmentVariable("TwilioPhoneNumber"))
+            {
+                //User Phone Number during Inbound Call
+                phoneNumber = From.Substring(1);
+            }
+            else
+            {
+                //User Phone Number during Outbound Call
+                phoneNumber = To.Substring(1);
+            }
+
             var entity = new Entity
             {
                 Properties = new JObject
                 {
                     {
-                        "firstmessage", JToken.Parse(From.Substring(1))
+                        "firstmessage", JToken.Parse(phoneNumber)
                     }
                 }
             };
@@ -167,10 +198,6 @@ namespace ProxiCall.Web.Controllers.Api
                     speechTimeout: "auto",
                     hints: _hints
                 );
-                //var uriAction = new Uri($"{Environment.GetEnvironmentVariable("Host")}/api/voice/record");
-                //voiceResponse.Record(action: uriAction, method: HttpMethod.Get, timeout: 2, transcribe: false, playBeep: true);
-                ////Any TwiML verbs occurring after a <Record> are unreachable
-                //voiceResponse.Say("Enregistrement non-effectué par Twilio", voice: "alice", language: Say.LanguageEnum.FrFr);
             }
 
             var xmlFileName = Guid.NewGuid();

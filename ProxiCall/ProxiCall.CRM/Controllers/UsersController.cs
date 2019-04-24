@@ -1,12 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 using System.Text.Encodings.Web;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
+using ProxiCall.CRM.Areas.Identity.Data;
 using ProxiCall.CRM.Models;
 
 namespace ProxiCall.CRM.Controllers
@@ -14,17 +16,31 @@ namespace ProxiCall.CRM.Controllers
     [Authorize(Roles ="Admin")]
     public class UsersController : Controller
     {
+        private readonly ProxicallCRMContext _context;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IEmailSender _emailSender;
 
-        public UsersController(UserManager<ApplicationUser> userManager, IEmailSender emailSender)
+        public UsersController(ProxicallCRMContext context, UserManager<ApplicationUser> userManager, IEmailSender emailSender)
         {
+            _context = context;
             _userManager = userManager;
             _emailSender = emailSender;
         }
 
         public IActionResult Index()
         {
+            return View(_context.Set<ApplicationUser>());
+        }
+        
+        public async Task<IActionResult> Call(string id)
+        {
+            var user = _context.Set<ApplicationUser>().FirstOrDefault(accountUser => accountUser.Id == id);
+            using (var httpClient = new HttpClient())
+            {
+                //Todo manage potential error (number not found, no response,...)
+                var path = $"http://proxicall.azurewebsites.net/api/voice/outbound/{user.PhoneNumber}";
+                var response = await httpClient.GetAsync(path);
+            }
             return View();
         }
 
@@ -129,6 +145,35 @@ namespace ProxiCall.CRM.Controllers
             }
 
             return new string(chars.ToArray());
+        }
+        
+        // GET: Users/Delete/5
+        public IActionResult Delete(string id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var user = _context.Set<ApplicationUser>()
+                .FirstOrDefault(m => m.Id == id);
+            if (user == null)
+            {
+                return NotFound();
+            }
+
+            return View(user);
+        }
+
+        // POST: Leads/Delete/5
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteConfirmed(string id)
+        {
+            var user = await _context.Set<ApplicationUser>().FindAsync(id);
+            _context.Set<ApplicationUser>().Remove(user);
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Index));
         }
     }
 }

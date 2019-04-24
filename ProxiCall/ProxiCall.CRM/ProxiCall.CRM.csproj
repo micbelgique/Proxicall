@@ -20,4 +20,10 @@
     <ProjectReference Include="..\ProxiCall.Library\ProxiCall.Library.csproj" />
   </ItemGroup>
 
+
+  <ItemGroup>
+    <_ContentIncludedByDefault Remove="Views\Users\Create.cshtml" />
+    <_ContentIncludedByDefault Remove="Views\Users\Index.cshtml" />
+  </ItemGroup>
+
 </Project>
