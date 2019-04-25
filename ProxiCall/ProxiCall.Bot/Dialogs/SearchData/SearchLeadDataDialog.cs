@@ -364,8 +364,13 @@ namespace ProxiCall.Bot.Dialogs.SearchData
                 }
             }
 
-            var hasNoResults = !(hasCompany || hasAddress || hasPhone || hasEmail || hasOppornunities);
-            if (hasNoResults)
+            var hasNoWantedResults =
+                !(
+                    (hasCompany && wantCompany) || (hasAddress && wantAddress) ||
+                    (hasPhone && wantPhone) || (hasEmail && wantEmail) || (hasOppornunities && wantOppornunities)
+                );
+
+            if (hasNoWantedResults)
             {
                 var hasMoreThanOneWantedInfos = luisState.Entities.Count > 1;
                 if(!wantAnyInfoAboutOpportunities || !onlyWantAnyInfoAboutOpportunities)
