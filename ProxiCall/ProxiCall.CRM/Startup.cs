@@ -45,6 +45,28 @@ namespace ProxiCall.CRM
             services.AddIdentity<ApplicationUser, IdentityRole>()
                 .AddEntityFrameworkStores<ProxicallCRMContext>()
                 .AddDefaultTokenProviders();
+            
+            // ===== Add Jwt Authentication and Microsoft Account Authentication ========
+            JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear(); // => remove default claims
+            services
+                .AddAuthentication()
+                .AddMicrosoftAccount(microsoftOptions =>
+                {
+                    microsoftOptions.ClientId = Configuration.GetSection("MicrosoftAccount")["ApplicationId"];
+                    microsoftOptions.ClientSecret = Configuration.GetSection("MicrosoftAccount")["Password"];
+                })
+                .AddJwtBearer(cfg =>
+                {
+                    cfg.RequireHttpsMetadata = false;
+                    cfg.SaveToken = true;
+                    cfg.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        ValidIssuer = Configuration.GetSection("AppSettings")["JwtIssuer"],
+                        ValidAudience = Configuration.GetSection("AppSettings")["JwtIssuer"],
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration.GetSection("AppSettings")["JwtKey"])),
+                        ClockSkew = TimeSpan.Zero // remove delay of token when expire
+                    };
+                });
 
             services.AddScoped<IRolesInitializer, RolesInitializer>();
 
@@ -71,26 +93,6 @@ namespace ProxiCall.CRM
             services.AddTransient<LeadDAO>();
             services.AddTransient<ProductDAO>();
             services.AddTransient<CompanyDAO>();
-
-            // ===== Add Jwt Authentication ========
-            JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear(); // => remove default claims
-            services
-                .AddAuthentication(options =>
-                {
-
-                })
-                .AddJwtBearer(cfg =>
-                {
-                    cfg.RequireHttpsMetadata = false;
-                    cfg.SaveToken = true;
-                    cfg.TokenValidationParameters = new TokenValidationParameters
-                    {
-                        ValidIssuer = Configuration.GetSection("AppSettings")["JwtIssuer"],
-                        ValidAudience = Configuration.GetSection("AppSettings")["JwtIssuer"],
-                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration.GetSection("AppSettings")["JwtKey"])),
-                        ClockSkew = TimeSpan.Zero // remove delay of token when expire
-                    };
-                });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
