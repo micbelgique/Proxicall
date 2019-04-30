@@ -76,18 +76,20 @@ namespace ProxiCall.Bot.Dialogs.CreateData
                 EndSearchDialogStepAsync
 
             };
+            
+            var culture = CulturedBot.Culture?.Name;
             AddDialog(new WaterfallDialog(_createOpportunityDataWaterfall, waterfallSteps));
             //Searching for lead
             AddDialog(new TextPrompt(_leadFullNamePrompt));
-            AddDialog(new ConfirmPrompt(_retryFetchingLeadFromUserPrompt, defaultLocale: "fr-fr"));
+            AddDialog(new ConfirmPrompt(_retryFetchingLeadFromUserPrompt, defaultLocale: culture));
             //Searching for product
             AddDialog(new TextPrompt(_productNamePrompt));
-            AddDialog(new ConfirmPrompt(_retryFetchingProductFromUserPrompt, defaultLocale: "fr-fr"));
+            AddDialog(new ConfirmPrompt(_retryFetchingProductFromUserPrompt, defaultLocale: culture));
             //Checking the closing date
             AddDialog(new TextPrompt(_closingDatePrompt));
-            AddDialog(new ConfirmPrompt(_retryFetchingClosingDateFromUserPrompt, defaultLocale: "fr-fr"));
+            AddDialog(new ConfirmPrompt(_retryFetchingClosingDateFromUserPrompt, defaultLocale: culture));
             //Checking for comment
-            AddDialog(new ConfirmPrompt(_commentPrompt, defaultLocale: "fr-fr"));
+            AddDialog(new ConfirmPrompt(_commentPrompt, defaultLocale: culture));
             AddDialog(new TextPrompt(_fetchingCommentFromUserPrompt));
         }
 

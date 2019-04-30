@@ -2,6 +2,8 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -68,6 +70,10 @@ namespace ProxiCall.Bot
             Dialogs.Add(ActivatorUtilities.CreateInstance<SearchLeadDataDialog>(_serviceProvider));
             Dialogs.Add(ActivatorUtilities.CreateInstance<SearchCompanyDataDialog>(_serviceProvider));
             Dialogs.Add(ActivatorUtilities.CreateInstance<CreateOpportunityDialog>(_serviceProvider));
+
+            //TODO : change culture after user identification
+            CulturedBot.Culture = new CultureInfo("fr");
+            //CulturedBot.Culture = new CultureInfo("en");
         }
         
         /// <summary>
@@ -122,7 +128,7 @@ namespace ProxiCall.Bot
                 {
                     // Admin login for development purposes
                     isFirstMessage = true;
-                    phonenumber = "+32493044068";
+                    phonenumber = Environment.GetEnvironmentVariable("AdminPhoneNumber");
                 }
 
                 if(isFirstMessage)

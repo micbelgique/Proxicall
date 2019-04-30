@@ -47,11 +47,12 @@ namespace ProxiCall.Bot.Dialogs.SearchData
                 ResultHandlerStepAsync,
                 EndSearchDialogStepAsync
             };
-
+            
+            var culture = CulturedBot.Culture?.Name;
             AddDialog(new WaterfallDialog(_searchCompanyDataWaterfall, waterfallSteps));
             AddDialog(new TextPrompt(_companyNamePrompt));
-            AddDialog(new ConfirmPrompt(_retryFetchingMinimumDataFromUserPrompt, defaultLocale: "fr-fr"));
-            AddDialog(new ConfirmPrompt(_confirmForwardingPrompt, defaultLocale: "fr-fr"));
+            AddDialog(new ConfirmPrompt(_retryFetchingMinimumDataFromUserPrompt, defaultLocale: culture));
+            AddDialog(new ConfirmPrompt(_confirmForwardingPrompt, defaultLocale: culture));
         }
 
         private async Task<DialogTurnResult> InitializeStateStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)

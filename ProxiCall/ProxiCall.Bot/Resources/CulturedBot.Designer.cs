@@ -196,7 +196,7 @@ namespace ProxiCall.Bot.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Son adresse email est {0}..
+        ///   Looks up a localized string similar to {0} adresse email est {1}..
         /// </summary>
         public static string GiveEmailAddress {
             get {
@@ -205,7 +205,7 @@ namespace ProxiCall.Bot.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Il/Elle habite au {0}..
+        ///   Looks up a localized string similar to {0} habite au {1}..
         /// </summary>
         public static string GiveHomeAddress {
             get {
@@ -232,7 +232,7 @@ namespace ProxiCall.Bot.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Son numéro de téléphone est le {0}.
+        ///   Looks up a localized string similar to {0} numéro de téléphone est le {1}.
         /// </summary>
         public static string GivePhoneNumber {
             get {
@@ -340,11 +340,29 @@ namespace ProxiCall.Bot.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Il.
+        /// </summary>
+        public static string SayHe {
+            get {
+                return ResourceManager.GetString("SayHe", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to elle.
         /// </summary>
         public static string SayHer {
             get {
                 return ResourceManager.GetString("SayHer", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Son.
+        /// </summary>
+        public static string SayHerPossesive {
+            get {
+                return ResourceManager.GetString("SayHerPossesive", resourceCulture);
             }
         }
         
@@ -358,11 +376,29 @@ namespace ProxiCall.Bot.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Son.
+        /// </summary>
+        public static string SayHisPossesive {
+            get {
+                return ResourceManager.GetString("SayHisPossesive", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Très bien, l&apos;opportunité a bien été créée..
         /// </summary>
         public static string SayOpportunityWasCreated {
             get {
                 return ResourceManager.GetString("SayOpportunityWasCreated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Elle.
+        /// </summary>
+        public static string SayShe {
+            get {
+                return ResourceManager.GetString("SayShe", resourceCulture);
             }
         }
         
