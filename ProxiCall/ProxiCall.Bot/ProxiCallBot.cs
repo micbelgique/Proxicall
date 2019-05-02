@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Bot.Builder;
@@ -103,26 +104,16 @@ namespace ProxiCall.Bot
             // Create a dialog context
             var dialogContext = await Dialogs.CreateContextAsync(turnContext, cancellationToken);
             
-            //todo move teams channel check
             // Check if development environment
-            var isDevelopmentEnvironment = activity.ChannelId == "webchat" || activity.ChannelId == "emulator" || activity.ChannelId == "msteams";
+            var isDevelopmentEnvironment = activity.ChannelId == "webchat" || activity.ChannelId == "emulator";
 
             var userState = await _accessors.LoggedUserAccessor.GetAsync(dialogContext.Context, () => new LoggedUserState(), cancellationToken);
             
-                    
-            //todo remove
-            //Testing retrieving Teams user infos
-            if (activity.ChannelId == "msteams")
-            {
-                var teamsContext = turnContext.TurnState.Get<ITeamsContext>();
-                var teamsChannelAccount = teamsContext.AsTeamsChannelAccount(activity.From);
-                Console.WriteLine("debug");
-            }
-
             if (activity.Type == ActivityTypes.Message)
             {
                 var isFirstMessage = false;
-                var phonenumber = string.Empty;
+                var credential = string.Empty;
+                var loginMethod = "phone";
 
                 if (activity.ChannelId == "directline")
                 {
@@ -131,17 +122,31 @@ namespace ProxiCall.Bot
                         foreach (var entity in activity.Entities)
                         {
                             isFirstMessage = entity.Properties.TryGetValue("firstmessage", out var jtoken);
-                            phonenumber = isFirstMessage ? jtoken.ToString() : string.Empty;
+                            credential = isFirstMessage ? jtoken.ToString() : string.Empty;
                             if(isFirstMessage)
                                 break;
                         }
+                    }
+                }
+                else if (activity.ChannelId == "msteams")
+                {
+                    if (activity.Text == "restart")
+                    {
+                        userState = new LoggedUserState();
+                        isFirstMessage = true;
+                    }
+                    if (userState.LoggedUser.Token == null)
+                    {
+                        loginMethod = "aad";
+                        credential = activity.From.AadObjectId;
+                        isFirstMessage = true;
                     }
                 }
                 else if (userState.LoggedUser.Token == null && isDevelopmentEnvironment)
                 {
                     // Admin login for development purposes
                     isFirstMessage = true;
-                    phonenumber = Environment.GetEnvironmentVariable("AdminPhoneNumber");
+                    credential = Environment.GetEnvironmentVariable("AdminPhoneNumber");
                 }
 
                 if(isFirstMessage)
@@ -149,7 +154,7 @@ namespace ProxiCall.Bot
                     // This is the first message sent by the bot on production
                     try
                     {
-                        var loggedUser = await _accountService.Authenticate(phonenumber);
+                        var loggedUser = await _accountService.Authenticate(credential, loginMethod);
                         userState.LoggedUser = loggedUser;
                         await _accessors.LoggedUserAccessor.SetAsync(dialogContext.Context, userState,
                             cancellationToken);

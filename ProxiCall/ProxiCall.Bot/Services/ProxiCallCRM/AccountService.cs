@@ -16,9 +16,9 @@ namespace ProxiCall.Bot.Services.ProxiCallCRM
             _httpClient.BaseAddress = new Uri(Environment.GetEnvironmentVariable("ApiHost"));   
         }
 
-        public async Task<User> Authenticate(string phonenumber) 
+        public async Task<User> Authenticate(string credential, string loginMethod = "phone") 
         {
-            var path = $"api/account/login?phoneNumber={phonenumber}";
+            var path = $"api/account/login?credential={credential}&loginMethod={loginMethod}";
             var response = await _httpClient.GetAsync(path);
 
             if (response.IsSuccessStatusCode)
