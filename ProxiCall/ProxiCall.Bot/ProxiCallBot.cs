@@ -9,6 +9,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Bot.Builder;
 using Microsoft.Bot.Builder.Dialogs;
+using Microsoft.Bot.Builder.Teams;
 using Microsoft.Bot.Schema;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -102,8 +103,9 @@ namespace ProxiCall.Bot
             // Create a dialog context
             var dialogContext = await Dialogs.CreateContextAsync(turnContext, cancellationToken);
             
+            //todo move teams channel check
             // Check if development environment
-            var isDevelopmentEnvironment = activity.ChannelId == "webchat" || activity.ChannelId == "emulator";
+            var isDevelopmentEnvironment = activity.ChannelId == "webchat" || activity.ChannelId == "emulator" || activity.ChannelId == "msteams";
 
             var userState = await _accessors.LoggedUserAccessor.GetAsync(dialogContext.Context, () => new LoggedUserState(), cancellationToken);
 

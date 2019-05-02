@@ -9,8 +9,10 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.Bot.Builder;
+using Microsoft.Bot.Builder.BotFramework;
 using Microsoft.Bot.Builder.Dialogs;
 using Microsoft.Bot.Builder.Integration.AspNet.Core;
+using Microsoft.Bot.Builder.Teams.Middlewares;
 using Microsoft.Bot.Configuration;
 using Microsoft.Bot.Connector.Authentication;
 using Microsoft.Extensions.Configuration;
@@ -154,6 +156,13 @@ namespace ProxiCall.Bot
                     logger.LogError($"Exception caught : {exception}");
                     await context.SendActivityAsync(errorMessage);
                 };
+                
+                //Adding Teams middleware
+                options.Middleware.Add(
+                    new TeamsMiddleware(
+                        new ConfigurationCredentialProvider(this.Configuration)
+                    )
+                );
             });
             
             services.AddHttpClient<AccountService>();
