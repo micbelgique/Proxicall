@@ -20,13 +20,13 @@ namespace ProxiCall.Bot.Models
         public void ChangeConfidenceBasedOnName(string confidenceName)
         {
             var dict = OpportunityConfidence.AllConfidenceDisplay;
-            var key = dict.FirstOrDefault(x => x.Value == confidenceName);
+            var key = dict.FirstOrDefault(x => x.Value.ToLower() == confidenceName.ToLower());
             Confidence = key.Key;
         }
         public void ChangeStatusBasedOnName(string statusName)
         {
             var dict = OpportunityStatus.AllStatusDisplay;
-            var key = dict.FirstOrDefault(x => x.Value == statusName);
+            var key = dict.FirstOrDefault(x => x.Value.ToLower() == statusName.ToLower());
             Status = key.Key;
         }
 
