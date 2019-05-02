@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Collections;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -7,7 +8,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using ProxiCall.CRM.Areas.Identity.Data;
 using ProxiCall.CRM.Models;
-using ProxiCall.CRM.Models.Enumeration.Opportunity;
+using ProxiCall.Library.Enumeration.Opportunity;
 
 namespace ProxiCall.CRM.Controllers
 {
@@ -56,8 +57,8 @@ namespace ProxiCall.CRM.Controllers
         {
             ViewData["LeadId"] = new SelectList(_context.Leads, "Id", "FullName");
             ViewData["ProductId"] = new SelectList(_context.Products, "Id", "Title");
-            ViewData["Confidence"] = new SelectList(Confidence.AllConfidenceDisplay);
-            ViewData["Status"] = new SelectList(Status.AllStatusDisplay);
+            ViewData["Confidence"] = new SelectList((IEnumerable)OpportunityConfidence.AllConfidenceDisplay, "Key", "Value");
+            ViewData["Status"] = new SelectList((IEnumerable)OpportunityStatus.AllStatusDisplay, "Key", "Value");
             return View();
         }
 
@@ -76,8 +77,8 @@ namespace ProxiCall.CRM.Controllers
             }
             ViewData["LeadId"] = new SelectList(_context.Leads, "Id", "FullName", opportunity.LeadId);
             ViewData["ProductId"] = new SelectList(_context.Products, "Id", "Title", opportunity.ProductId);
-            ViewData["Confidence"] = new SelectList(Confidence.AllConfidenceDisplay, opportunity.Confidence);
-            ViewData["Status"] = new SelectList(Status.AllStatusDisplay, opportunity.Status);
+            ViewData["Confidence"] = new SelectList((IEnumerable)OpportunityConfidence.AllConfidenceDisplay, "Key", "Value", opportunity.Confidence);
+            ViewData["Status"] = new SelectList((IEnumerable)OpportunityStatus.AllStatusDisplay, "Key", "Value", opportunity.Status);
             return View(opportunity);
         }
 
@@ -97,8 +98,8 @@ namespace ProxiCall.CRM.Controllers
             ViewData["LeadId"] = new SelectList(_context.Leads, "Id", "FullName", opportunity.LeadId);
             ViewData["OwnerId"] = new SelectList(_context.Users, "Id", "UserName", opportunity.OwnerId);
             ViewData["ProductId"] = new SelectList(_context.Products, "Id", "Title", opportunity.ProductId);
-            ViewData["Confidence"] = new SelectList(Confidence.AllConfidenceDisplay, opportunity.Confidence);
-            ViewData["Status"] = new SelectList(Status.AllStatusDisplay, opportunity.Status);
+            ViewData["Confidence"] = new SelectList(OpportunityConfidence.AllConfidenceDisplay, "Key", "Value", opportunity.Confidence);
+            ViewData["Status"] = new SelectList(OpportunityStatus.AllStatusDisplay, "Key", "Value", opportunity.Status);
             return View(opportunity);
         }
 
@@ -137,8 +138,8 @@ namespace ProxiCall.CRM.Controllers
             ViewData["LeadId"] = new SelectList(_context.Leads, "Id", "FullName", opportunity.LeadId);
             ViewData["OwnerId"] = new SelectList(_context.Users, "Id", "UserName", opportunity.OwnerId);
             ViewData["ProductId"] = new SelectList(_context.Products, "Id", "Title", opportunity.ProductId);
-            ViewData["Confidence"] = new SelectList(Confidence.AllConfidenceDisplay, opportunity.Confidence);
-            ViewData["Status"] = new SelectList(Status.AllStatusDisplay, opportunity.Status);
+            ViewData["Confidence"] = new SelectList(OpportunityConfidence.AllConfidenceDisplay, "Key", "Value", opportunity.Confidence);
+            ViewData["Status"] = new SelectList(OpportunityStatus.AllStatusDisplay, "Key", "Value", opportunity.Status);
             return View(opportunity);
         }
 

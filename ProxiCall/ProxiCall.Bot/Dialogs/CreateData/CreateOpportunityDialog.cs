@@ -493,7 +493,7 @@ namespace ProxiCall.Bot.Dialogs.CreateData
             var userState = await _accessors.LoggedUserAccessor.GetAsync(stepContext.Context, () => new LoggedUserState(), cancellationToken);
 
             //Finalizing the created opportunity
-            crmState.Opportunity.Status = OpportunityStatus.Open.Name;
+            crmState.Opportunity.ChangeStatusBasedOnName(OpportunityStatus.Open.Name);
             crmState.Opportunity.OwnerId = userState.LoggedUser.Id;
 
             var message = string.Empty;

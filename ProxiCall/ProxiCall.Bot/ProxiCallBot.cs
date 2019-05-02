@@ -305,11 +305,11 @@ namespace ProxiCall.Bot
                     if (entities[luisExpectedConfidenceOpportunity] != null)
                     {
                         var confidenceOpportunity = (string)entities[luisExpectedConfidenceOpportunity][0].First;
-                        crmState.Opportunity.Confidence = confidenceOpportunity;
+                        crmState.Opportunity.ChangeConfidenceBasedOnName(confidenceOpportunity);
                     }
                     else
                     {
-                        crmState.Opportunity.Confidence = OpportunityConfidence.Average.Name;
+                        crmState.Opportunity.ChangeConfidenceBasedOnName(OpportunityConfidence.Average.Name);
                     }
                 }
 
