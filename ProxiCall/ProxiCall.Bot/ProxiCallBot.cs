@@ -248,7 +248,7 @@ namespace ProxiCall.Bot
                 string[] luisExpectedLeadName =
                 {
                     "leadfullname",
-                    "personName"
+                    "personNameP"
                 };
                 string luisExpectedCompanyName = "companyName";
                 string luisExpectedDateTime = "datetime";
