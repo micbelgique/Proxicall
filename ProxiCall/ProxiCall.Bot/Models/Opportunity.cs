@@ -27,7 +27,7 @@ namespace ProxiCall.Bot.Models
         {
             var dict = OpportunityStatus.AllStatusDisplay;
             var key = dict.FirstOrDefault(x => x.Value == statusName);
-            Confidence = key.Key;
+            Status = key.Key;
         }
 
 
