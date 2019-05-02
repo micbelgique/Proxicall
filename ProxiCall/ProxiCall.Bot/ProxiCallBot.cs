@@ -73,7 +73,8 @@ namespace ProxiCall.Bot
 
             //TODO : change culture after user identification
             CulturedBot.Culture = new CultureInfo("fr");
-            //CulturedBot.Culture = new CultureInfo("en");
+            OpportunityConfidenceValue.Culture = new CultureInfo("fr");
+            OpportunityStatusValue.Culture = new CultureInfo("fr");
         }
         
         /// <summary>

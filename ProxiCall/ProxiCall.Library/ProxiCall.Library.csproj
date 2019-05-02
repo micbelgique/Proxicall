@@ -27,9 +27,21 @@
       <Generator>PublicResXFileCodeGenerator</Generator>
       <LastGenOutput>GenderName.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+    <EmbeddedResource Update="Enumeration\Opportunity\OpportunityConfidenceValue.en.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Enumeration\Opportunity\OpportunityConfidenceValue.fr.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+    </EmbeddedResource>
     <EmbeddedResource Update="Enumeration\Opportunity\OpportunityConfidenceValue.resx">
       <Generator>PublicResXFileCodeGenerator</Generator>
       <LastGenOutput>OpportunityConfidenceValue.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Enumeration\Opportunity\OpportunityStatusValue.en.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Enumeration\Opportunity\OpportunityStatusValue.fr.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
     </EmbeddedResource>
     <EmbeddedResource Update="Enumeration\Opportunity\OpportunityStatusValue.resx">
       <Generator>PublicResXFileCodeGenerator</Generator>

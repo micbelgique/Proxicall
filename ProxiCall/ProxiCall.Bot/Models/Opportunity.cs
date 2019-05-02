@@ -1,6 +1,9 @@
-﻿using ProxiCall.Library.Enumeration.Opportunity;
+﻿using ProxiCall.Bot.Resources;
+using ProxiCall.Library.Enumeration.Opportunity;
 using ProxiCall.Library.ProxiCallLuis;
 using System;
+using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 
 namespace ProxiCall.Bot.Models
@@ -19,14 +22,26 @@ namespace ProxiCall.Bot.Models
 
         public void ChangeConfidenceBasedOnName(string confidenceName)
         {
-            var dict = OpportunityConfidence.AllConfidenceDisplay;
-            var key = dict.FirstOrDefault(x => x.Value.ToLower() == confidenceName.ToLower());
+            // TODO : to be improved
+            var allConfidenceDisplay = new Dictionary<int, string>
+            {
+                { 0, OpportunityConfidenceValue.High },
+                { 1, OpportunityConfidenceValue.Average },
+                { 2, OpportunityConfidenceValue.Low }
+            };
+            var key = allConfidenceDisplay.FirstOrDefault(x => x.Value.ToLower() == confidenceName.ToLower());
             Confidence = key.Key;
         }
         public void ChangeStatusBasedOnName(string statusName)
         {
-            var dict = OpportunityStatus.AllStatusDisplay;
-            var key = dict.FirstOrDefault(x => x.Value.ToLower() == statusName.ToLower());
+            // TODO : to be improved
+            var allStatusDisplay = new Dictionary<int, string>
+                {
+                    { 0, OpportunityStatusValue.Open },
+                    { 1, OpportunityStatusValue.Closed },
+                    { 2, OpportunityStatusValue.Canceled }
+                };
+            var key = allStatusDisplay.FirstOrDefault(x => x.Value.ToLower() == statusName.ToLower());
             Status = key.Key;
         }
 

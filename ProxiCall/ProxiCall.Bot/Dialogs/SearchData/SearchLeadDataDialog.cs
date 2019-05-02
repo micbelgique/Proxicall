@@ -280,9 +280,10 @@ namespace ProxiCall.Bot.Dialogs.SearchData
             var chosenSubjectPronoun = string.Empty;
             var chosenObjectPronoun = string.Empty;
             var chosenPossessivePronoun = string.Empty;
-            LeadGender.AllGender.TryGetValue(crmState.Lead.Gender, out string genderName);
-            var isMale = genderName == LeadGender.MALE;
-            var isFemale = genderName == LeadGender.FEMALE;
+
+            // TODO : to be improved
+            var isMale = crmState.Lead.Gender == 1;
+            var isFemale = crmState.Lead.Gender == 2;
             if (isMale)
             {
                 chosenSubjectPronoun = $"{CulturedBot.SayHe}";

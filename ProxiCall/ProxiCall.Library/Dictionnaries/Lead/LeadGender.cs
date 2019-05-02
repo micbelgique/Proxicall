@@ -8,9 +8,14 @@ namespace ProxiCall.Library.Dictionnaries.Lead
         public static readonly string MALE = GenderName.Male;
         public static readonly string FEMALE = GenderName.Female;
 
-        private static Dictionary<int,string> allGender;
+        public LeadGender()
+        {
 
-        public static Dictionary<int,string> AllGender
+        }
+
+        private Dictionary<int,string> allGender;
+
+        public Dictionary<int,string> AllGender
         {
             get
             {

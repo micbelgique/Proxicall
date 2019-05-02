@@ -1,5 +1,6 @@
 ﻿using ProxiCall.Library.Enumeration.Opportunity;
 using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -45,25 +46,33 @@ namespace ProxiCall.CRM.Models
         {
             get
             {
-                OpportunityStatus.AllStatusDisplay.TryGetValue(Status, out string statusName);
+                // TODO : to be improved
+                var allStatusDisplay = new Dictionary<int, string>
+                {
+                    { 0, OpportunityStatusValue.Open },
+                    { 1, OpportunityStatusValue.Closed },
+                    { 2, OpportunityStatusValue.Canceled }
+                };
+                allStatusDisplay.TryGetValue(Status, out string statusName);
                 return statusName;
             }
         }
 
         public int Confidence { get; set; }
-
-        public string NameOfConfidence()
-        {
-            OpportunityConfidence.AllConfidenceDisplay.TryGetValue(Confidence, out string confidenceName);
-            return confidenceName;
-        }
-
+        
         [NotMapped]
         public string ConfidenceName
         {
             get
             {
-                OpportunityConfidence.AllConfidenceDisplay.TryGetValue(Confidence, out string confidenceName);
+                // TODO : to be improved
+                var allConfidenceDisplay = new Dictionary<int, string>
+                {
+                    { 0, OpportunityConfidenceValue.High },
+                    { 1, OpportunityConfidenceValue.Average },
+                    { 2, OpportunityConfidenceValue.Low }
+                };
+                allConfidenceDisplay.TryGetValue(Confidence, out string confidenceName);
                 return confidenceName;
             }
         }

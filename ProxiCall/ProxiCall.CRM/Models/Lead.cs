@@ -35,12 +35,14 @@ namespace ProxiCall.CRM.Models
         {
             get
             {
-                LeadGender.AllGender.TryGetValue(Gender, out string genderName);
+                var leadGender = new LeadGender();
+                leadGender.AllGender.TryGetValue(Gender, out string genderName);
                 return genderName;
             }
             set
             {
-                if (LeadGender.AllGender.ContainsValue(value))
+                var leadGender = new LeadGender();
+                if (leadGender.AllGender.ContainsValue(value))
                 {
                     genderName = value;
                 }
@@ -64,7 +66,8 @@ namespace ProxiCall.CRM.Models
 
         public Lead()
         {
-            Gender = LeadGender.AllGender.Keys.Where(k => LeadGender.AllGender[k] == LeadGender.UNDETERMINED).First();
+            var leadGender = new LeadGender();
+            Gender = leadGender.AllGender.Keys.Where(k => leadGender.AllGender[k] == LeadGender.UNDETERMINED).First();
         }
 
         public override string ToString()
