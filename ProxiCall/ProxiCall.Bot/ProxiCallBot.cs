@@ -108,6 +108,16 @@ namespace ProxiCall.Bot
             var isDevelopmentEnvironment = activity.ChannelId == "webchat" || activity.ChannelId == "emulator" || activity.ChannelId == "msteams";
 
             var userState = await _accessors.LoggedUserAccessor.GetAsync(dialogContext.Context, () => new LoggedUserState(), cancellationToken);
+            
+                    
+            //todo remove
+            //Testing retrieving Teams user infos
+            if (activity.ChannelId == "msteams")
+            {
+                var teamsContext = turnContext.TurnState.Get<ITeamsContext>();
+                var teamsChannelAccount = teamsContext.AsTeamsChannelAccount(activity.From);
+                Console.WriteLine("debug");
+            }
 
             if (activity.Type == ActivityTypes.Message)
             {
