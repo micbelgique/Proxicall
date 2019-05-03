@@ -234,4 +234,10 @@
   <data name="ThisDataNotFoundInDB" xml:space="preserve">
     <value>Cette information n'est malheureusement pas référencée.</value>
   </data>
+  <data name="LuisAppName" xml:space="preserve">
+    <value>proxicall-luis</value>
+  </data>
+  <data name="AskForComment" xml:space="preserve">
+    <value>Avez-vous un commentaire a ajouté?</value>
+  </data>
 </root>

@@ -19,7 +19,6 @@ namespace ProxiCall.Bot
     //  See https://www.luis.ai/home" for more information regarding language understanding using LUIS
     public class BotServices
     {
-        public static readonly string LUIS_APP_NAME = "proxicall-luis";
         /// <summary>
         /// Initializes a new instance of the <see cref="BotServices"/> class.
         /// <param name="botConfiguration">A dictionary of named <see cref="BotConfiguration"/> instances for usage within the bot.</param>

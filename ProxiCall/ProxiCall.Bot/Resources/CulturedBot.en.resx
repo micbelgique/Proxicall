@@ -234,4 +234,10 @@
   <data name="ThisDataNotFoundInDB" xml:space="preserve">
     <value>This information couldn't be found.</value>
   </data>
+  <data name="LuisAppName" xml:space="preserve">
+    <value>proxicall-luis-en</value>
+  </data>
+  <data name="AskForComment" xml:space="preserve">
+    <value>Do you want to add a comment?</value>
+  </data>
 </root>
