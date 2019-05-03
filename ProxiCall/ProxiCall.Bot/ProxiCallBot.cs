@@ -69,7 +69,7 @@ namespace ProxiCall.Bot
             Dialogs.Add(ActivatorUtilities.CreateInstance<CreateOpportunityDialog>(_serviceProvider));
 
             //TODO : change culture after user identification
-            SwitchCulture("en");
+            SwitchCulture("fr-fr");
         }
         
         /// <summary>
@@ -408,10 +408,13 @@ namespace ProxiCall.Bot
             var acceptedCultureNames = new string[]
             {
                 "en",
-                "fr"
+                "fr",
+                "fr-fr",
+                "en-us",
+                "en-uk"
             };
 
-            if(!acceptedCultureNames.Contains(cultureName))
+            if(!acceptedCultureNames.Contains(cultureName.ToLower()))
             {
                 cultureName = "en";
             }
