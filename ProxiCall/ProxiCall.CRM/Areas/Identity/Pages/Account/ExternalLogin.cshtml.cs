@@ -1,4 +1,6 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
+using System.Net.Mime;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
@@ -42,6 +44,13 @@ namespace ProxiCall.CRM.Areas.Identity.Pages.Account
             [Required]
             [EmailAddress]
             public string Email { get; set; }
+            
+            [Required]
+            [Phone]
+            [DisplayName("Phone number")]
+            public string PhoneNumber { get; set; }
+            
+            public string Alias { get; set; }
         }
 
         public IActionResult OnGetAsync()
@@ -112,13 +121,17 @@ namespace ProxiCall.CRM.Areas.Identity.Pages.Account
 
             if (ModelState.IsValid)
             {
-                var user = new ApplicationUser { UserName = Input.Email, Email = Input.Email };
+                var user = new ApplicationUser { UserName = Input.Email, Email = Input.Email, Alias = Input.Alias, PhoneNumber = Input.PhoneNumber};
                 var result = await _userManager.CreateAsync(user);
                 if (result.Succeeded)
                 {
                     result = await _userManager.AddLoginAsync(user, info);
                     if (result.Succeeded)
                     {
+                        //TODO check tenant id
+                        //Add default role to user
+                        await _userManager.AddToRoleAsync(user, "user");
+                         
                         await _signInManager.SignInAsync(user, isPersistent: false);
                         _logger.LogInformation("User created an account using {Name} provider.", info.LoginProvider);
                         return LocalRedirect(returnUrl);
