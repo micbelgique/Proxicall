@@ -16,5 +16,8 @@ namespace ProxiCall.CRM.Models
         [Required]
         [Display(Name = "Administrator")]
         public bool IsAdmin { get; set; } = false;
+
+        [Display(Name = "Language Of Choice")]
+        public string Language { get; set; }
     }
 }

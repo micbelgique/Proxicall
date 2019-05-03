@@ -13,5 +13,28 @@ namespace ProxiCall.CRM.Models
 
         [Required]
         public override string PhoneNumber { get; set; }
+
+        private string language;
+
+
+        [Display(Name = "Language Of Choice")]
+        public string Language
+        {
+            get
+            {
+                if(string.IsNullOrEmpty(language))
+                {
+                    language = "en";
+                }
+                return language;
+            }
+            set { language = value; }
+        }
+
+
+        public ApplicationUser()
+        {
+            Language = "en";
+        }
     }
 }

@@ -22,6 +22,9 @@
             <th>
                 @Html.DisplayNameFor(model => model.PhoneNumber)
             </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Language)
+            </th>
             <th></th>
             <th></th>
         </tr>
@@ -37,6 +40,9 @@
             </td>
             <td>
                 @Html.DisplayFor(modelItem => item.PhoneNumber)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Language)
             </td>
             <td>
                 <a asp-action="Call" asp-route-id="@item.Id">Call</a>

@@ -8,8 +8,10 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using ProxiCall.CRM.Areas.Identity.Data;
 using ProxiCall.CRM.Models;
+using ProxiCall.Library.Dictionnaries;
 
 namespace ProxiCall.CRM.Controllers
 {
@@ -46,11 +48,13 @@ namespace ProxiCall.CRM.Controllers
 
         public IActionResult Create()
         {
+            var languageOfChoice = new LanguageOfChoice();
+            ViewData["Language"] = new SelectList(languageOfChoice.DisplayedLanguageOfChoice, "Key", "Value");
             return View();
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create([Bind("UserName,Email,Password,ConfirmPassword")] NewUser userForm)
+        public async Task<IActionResult> Create([Bind("UserName,Email,Password,ConfirmPassword,Language")] NewUser userForm)
         {
             if(ModelState.IsValid)
             {
@@ -161,7 +165,6 @@ namespace ProxiCall.CRM.Controllers
             {
                 return NotFound();
             }
-
             return View(user);
         }
 
