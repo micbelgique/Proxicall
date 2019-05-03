@@ -88,6 +88,15 @@ namespace ProxiCall.Bot.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Avez-vous un commentaire a ajouté?.
+        /// </summary>
+        public static string AskForComment {
+            get {
+                return ResourceManager.GetString("AskForComment", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Que puis-je faire pour vous?.
         /// </summary>
         public static string AskForRequest {
@@ -282,6 +291,15 @@ namespace ProxiCall.Bot.Resources {
         public static string ListOpportunitiesOfCompany {
             get {
                 return ResourceManager.GetString("ListOpportunitiesOfCompany", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to proxicall-luis.
+        /// </summary>
+        public static string LuisAppName {
+            get {
+                return ResourceManager.GetString("LuisAppName", resourceCulture);
             }
         }
         

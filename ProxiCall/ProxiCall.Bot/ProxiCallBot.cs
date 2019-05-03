@@ -62,21 +62,14 @@ namespace ProxiCall.Bot
             _services = services ?? throw new ArgumentNullException(nameof(services));
 
             _accountService = (AccountService) _serviceProvider.GetService(typeof(AccountService));
-
-            if (!_services.LuisServices.ContainsKey(BotServices.LUIS_APP_NAME))
-            {
-                throw new System.ArgumentException($"The bot configuration does not contain a service type of `luis` with the id `{BotServices.LUIS_APP_NAME}`.");
-            }
-
+            
             Dialogs = new DialogSet(_accessors.DialogStateAccessor);
             Dialogs.Add(ActivatorUtilities.CreateInstance<SearchLeadDataDialog>(_serviceProvider));
             Dialogs.Add(ActivatorUtilities.CreateInstance<SearchCompanyDataDialog>(_serviceProvider));
             Dialogs.Add(ActivatorUtilities.CreateInstance<CreateOpportunityDialog>(_serviceProvider));
 
             //TODO : change culture after user identification
-            CulturedBot.Culture = new CultureInfo("fr");
-            OpportunityConfidenceValue.Culture = new CultureInfo("fr");
-            OpportunityStatusValue.Culture = new CultureInfo("fr");
+            SwitchCulture("fr-fr");
         }
         
         /// <summary>
@@ -182,7 +175,7 @@ namespace ProxiCall.Bot
                 if(!isFirstMessage || isDevelopmentEnvironment)
                 {
                     // Perform a call to LUIS to retrieve results for the current activity message.
-                    var luisResults = await _services.LuisServices[BotServices.LUIS_APP_NAME].RecognizeAsync(dialogContext.Context, cancellationToken);
+                    var luisResults = await _services.LuisServices[CulturedBot.LuisAppName].RecognizeAsync(dialogContext.Context, cancellationToken);
 
                     // If any entities were updated, treat as interruption.
                     // For example, "no my name is tony" will manifest as an update of the name to be "tony".
@@ -407,6 +400,31 @@ namespace ProxiCall.Bot
                 luisState.IntentName = intentName;
                 await _accessors.CRMStateAccessor.SetAsync(turnContext, crmState);
                 await _accessors.LuisStateAccessor.SetAsync(turnContext, luisState);
+            }
+        }
+
+        private void SwitchCulture(string cultureName)
+        {
+            var acceptedCultureNames = new string[]
+            {
+                "en",
+                "fr",
+                "fr-fr",
+                "en-us",
+                "en-uk"
+            };
+
+            if(!acceptedCultureNames.Contains(cultureName.ToLower()))
+            {
+                cultureName = "en";
+            }
+            CulturedBot.Culture = new CultureInfo(cultureName);
+            OpportunityConfidenceValue.Culture = new CultureInfo(cultureName);
+            OpportunityStatusValue.Culture = new CultureInfo(cultureName);
+
+            if (!_services.LuisServices.ContainsKey(CulturedBot.LuisAppName))
+            {
+                throw new System.ArgumentException($"The bot configuration does not contain a service type of `luis` with the id `{CulturedBot.LuisAppName}`.");
             }
         }
     }
