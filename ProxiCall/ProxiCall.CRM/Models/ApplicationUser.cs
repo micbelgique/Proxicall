@@ -16,7 +16,6 @@ namespace ProxiCall.CRM.Models
 
         private string language;
 
-
         [Display(Name = "Language Of Choice")]
         public string Language
         {

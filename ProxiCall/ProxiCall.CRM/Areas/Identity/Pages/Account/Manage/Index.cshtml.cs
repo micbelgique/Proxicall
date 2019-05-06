@@ -6,7 +6,10 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using ProxiCall.CRM.Areas.Identity.Data;
 using ProxiCall.CRM.Models;
+using ProxiCall.Library.Dictionnaries;
 
 namespace ProxiCall.CRM.Areas.Identity.Pages.Account.Manage
 {
@@ -45,11 +48,20 @@ namespace ProxiCall.CRM.Areas.Identity.Pages.Account.Manage
             [Phone]
             [Display(Name = "Phone number")]
             public string PhoneNumber { get; set; }
-
-
+            
             [Display(Name = "Language Of Choice")]
+            [DataType(DataType.Text)]
             public string Language { get; set; }
+            
+            [DataType(DataType.Text)]
+            public string Alias { get; set; }
         }
+
+        public SelectList Options { get; set; }
+
+        [BindProperty(SupportsGet = true)]
+        public string SelectedValue { get; set; }
+
 
         public async Task<IActionResult> OnGetAsync()
         {
@@ -63,6 +75,7 @@ namespace ProxiCall.CRM.Areas.Identity.Pages.Account.Manage
             var email = await _userManager.GetEmailAsync(user);
             var phoneNumber = await _userManager.GetPhoneNumberAsync(user);
             var language = user.Language;
+            var alias = user.Alias;
 
             Username = userName;
 
@@ -70,10 +83,16 @@ namespace ProxiCall.CRM.Areas.Identity.Pages.Account.Manage
             {
                 Email = email,
                 PhoneNumber = phoneNumber,
-                Language = language
+                Language = language,
+                Alias = alias
             };
 
             IsEmailConfirmed = await _userManager.IsEmailConfirmedAsync(user);
+
+            var languageOfChoice = new LanguageOfChoice();
+            SelectedValue = Input.Language;
+            Options = new SelectList(languageOfChoice.DisplayedLanguageOfChoice, "Key", "Value", Input.Language);
+            var test = Options;
 
             return Page();
         }
@@ -113,10 +132,18 @@ namespace ProxiCall.CRM.Areas.Identity.Pages.Account.Manage
                 }
             }
 
-            var language = user.Language;
-            if (Input.Language != language)
+            var language = Input.Language;
+            if (language != user.Language)
             {
                 user.Language = language;
+                await _userManager.UpdateAsync(user);
+            }
+
+            var alias = Input.Alias;
+            if (alias != user.Alias)
+            {
+                user.Alias = alias;
+                await _userManager.UpdateAsync(user);
             }
 
             await _signInManager.RefreshSignInAsync(user);
