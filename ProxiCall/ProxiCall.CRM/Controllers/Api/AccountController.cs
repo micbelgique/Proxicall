@@ -72,9 +72,11 @@ namespace ProxiCall.CRM.Controllers.Api
                 Alias = user.Alias,
                 UserName = user.UserName,
                 PhoneNumber = user.PhoneNumber,
+                Language = user.Language,
                 Roles = await _userManager.GetRolesAsync(user),
                 Token = await GenerateJwtToken(credential, user)
             };
+
 
             return response;
         }

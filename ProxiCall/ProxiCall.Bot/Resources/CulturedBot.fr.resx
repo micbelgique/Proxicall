@@ -178,7 +178,7 @@
     <value>{0} numéro de téléphone est le {1}</value>
   </data>
   <data name="Greet" xml:space="preserve">
-    <value>Bienvenue sur ProxiCall.</value>
+    <value>Bienvenue sur ProxiCall {0}.</value>
   </data>
   <data name="InformAboutForwardingCall" xml:space="preserve">
     <value>Nous transférons votre appel.</value>
@@ -239,5 +239,8 @@
   </data>
   <data name="AskForComment" xml:space="preserve">
     <value>Avez-vous un commentaire a ajouté?</value>
+  </data>
+  <data name="NoAccessException" xml:space="preserve">
+    <value>Désolé, vous n'avez pas les droits d'accès requis.</value>
   </data>
 </root>

@@ -2,15 +2,12 @@
 // Licensed under the MIT License.
 
 using System;
-using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Bot.Builder;
 using Microsoft.Bot.Builder.Dialogs;
-using Microsoft.Bot.Builder.Teams;
 using Microsoft.Bot.Schema;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -67,9 +64,6 @@ namespace ProxiCall.Bot
             Dialogs.Add(ActivatorUtilities.CreateInstance<SearchLeadDataDialog>(_serviceProvider));
             Dialogs.Add(ActivatorUtilities.CreateInstance<SearchCompanyDataDialog>(_serviceProvider));
             Dialogs.Add(ActivatorUtilities.CreateInstance<CreateOpportunityDialog>(_serviceProvider));
-
-            //TODO : change culture after user identification
-            SwitchCulture("fr-fr");
         }
         
         /// <summary>
@@ -101,13 +95,13 @@ namespace ProxiCall.Bot
             var isDevelopmentEnvironment = activity.ChannelId == "webchat" || activity.ChannelId == "emulator";
 
             var userState = await _accessors.LoggedUserAccessor.GetAsync(dialogContext.Context, () => new LoggedUserState(), cancellationToken);
-            
+
+            var loginMethod = "phone";
+            var isFirstMessage = false;
+            var credential = string.Empty;
+
             if (activity.Type == ActivityTypes.Message)
             {
-                var isFirstMessage = false;
-                var credential = string.Empty;
-                var loginMethod = "phone";
-
                 if (activity.ChannelId == "directline")
                 {
                     if (activity.Entities != null)
@@ -152,18 +146,18 @@ namespace ProxiCall.Bot
                         await _accessors.LoggedUserAccessor.SetAsync(dialogContext.Context, userState,
                             cancellationToken);
 
+                        SwitchCulture(loggedUser.Language);
+
                         if (!isDevelopmentEnvironment && !string.IsNullOrEmpty(userState.LoggedUser.Token))
                         {
-                            //TODO add message to resx
-                            var welcomingMessage = $"Bonjour {userState.LoggedUser.Alias}. {CulturedBot.AskForRequest}";
+                            var welcomingMessage = $"{string.Format(CulturedBot.Greet,loggedUser.Alias)}. {CulturedBot.AskForRequest}";
                             var reply = MessageFactory.Text(welcomingMessage, welcomingMessage, InputHints.AcceptingInput);
                             await turnContext.SendActivityAsync(reply, cancellationToken);
                         }
                     }
                     catch (Exception ex)
                     {
-                        //TODO add message to resx
-                        var errorMessage = "Désolé, vous n'avez pas accès.";
+                        var errorMessage = $"{CulturedBot.NoAccessException}";
                         var reply = MessageFactory.Text(errorMessage, errorMessage, InputHints.AcceptingInput);
                         var entity = new Entity();
                         entity.Properties.Add("error", JToken.Parse("{\"hangup\":\"" + ex.Message + "\"}"));
@@ -234,9 +228,19 @@ namespace ProxiCall.Bot
             }
             else if (isDevelopmentEnvironment && activity.Type == ActivityTypes.ConversationUpdate && activity.MembersAdded.FirstOrDefault()?.Id == activity.Recipient.Id)
             {
-                var message = $"{CulturedBot.Greet}. {CulturedBot.AskForRequest}";
+                credential = Environment.GetEnvironmentVariable("AdminPhoneNumber");
+                var loggedUser = await _accountService.Authenticate(credential, loginMethod);
+                userState.LoggedUser = loggedUser;
+                await _accessors.LoggedUserAccessor.SetAsync(turnContext, userState,
+                    cancellationToken);
+
+                SwitchCulture(loggedUser.Language);
+
+                var message = $"{string.Format(CulturedBot.Greet, loggedUser.Alias)} {CulturedBot.AskForRequest}";
                 var reply = MessageFactory.Text(message, message, InputHints.AcceptingInput);
                 await turnContext.SendActivityAsync(reply, cancellationToken);
+
+                isFirstMessage = false;
             }
 
             await _accessors.UserState.SaveChangesAsync(turnContext, false, cancellationToken);
@@ -410,6 +414,7 @@ namespace ProxiCall.Bot
                 "en",
                 "fr",
                 "fr-fr",
+                "fr-ca",
                 "en-us",
                 "en-uk"
             };

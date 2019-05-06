@@ -250,7 +250,7 @@ namespace ProxiCall.Bot.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Bienvenue sur ProxiCall..
+        ///   Looks up a localized string similar to Bienvenue sur ProxiCall {0}..
         /// </summary>
         public static string Greet {
             get {
@@ -318,6 +318,15 @@ namespace ProxiCall.Bot.Resources {
         public static string NamedObjectNotFound {
             get {
                 return ResourceManager.GetString("NamedObjectNotFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to solé, vous n&apos;avez pas les droits d&apos;accès requis..
+        /// </summary>
+        public static string NoAccessException {
+            get {
+                return ResourceManager.GetString("NoAccessException", resourceCulture);
             }
         }
         
