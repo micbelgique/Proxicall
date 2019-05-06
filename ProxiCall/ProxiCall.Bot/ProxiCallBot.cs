@@ -131,6 +131,7 @@ namespace ProxiCall.Bot
                 }
                 else if (userState.LoggedUser.Token == null && isDevelopmentEnvironment)
                 {
+                    //TODO : when do we land here?
                     // Admin login for development purposes
                     isFirstMessage = true;
                     credential = Environment.GetEnvironmentVariable("AdminPhoneNumber");
@@ -151,8 +152,11 @@ namespace ProxiCall.Bot
                         if (!isDevelopmentEnvironment && !string.IsNullOrEmpty(userState.LoggedUser.Token))
                         {
                             var welcomingMessage = $"{string.Format(CulturedBot.Greet,loggedUser.Alias)}. {CulturedBot.AskForRequest}";
-                            var reply = MessageFactory.Text(welcomingMessage, welcomingMessage, InputHints.AcceptingInput);
-                            await turnContext.SendActivityAsync(reply, cancellationToken);
+                            var replyActivity = MessageFactory.Text(welcomingMessage, welcomingMessage, InputHints.AcceptingInput);
+                            var entity = new Entity();
+                            entity.Properties.Add("lang", JToken.Parse(CulturedBot.Culture?.Name));
+                            replyActivity.Entities.Add(entity);
+                            await turnContext.SendActivityAsync(replyActivity, cancellationToken);
                         }
                     }
                     catch (Exception ex)
@@ -237,8 +241,11 @@ namespace ProxiCall.Bot
                 SwitchCulture(loggedUser.Language);
 
                 var message = $"{string.Format(CulturedBot.Greet, loggedUser.Alias)} {CulturedBot.AskForRequest}";
-                var reply = MessageFactory.Text(message, message, InputHints.AcceptingInput);
-                await turnContext.SendActivityAsync(reply, cancellationToken);
+                var replyActivity = MessageFactory.Text(message, message, InputHints.AcceptingInput);
+                var entity = new Entity();
+                entity.Properties.Add("lang", JToken.Parse(CulturedBot.Culture?.Name));
+                replyActivity.Entities.Add(entity);
+                await turnContext.SendActivityAsync(replyActivity, cancellationToken);
 
                 isFirstMessage = false;
             }
