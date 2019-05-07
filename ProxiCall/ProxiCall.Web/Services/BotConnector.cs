@@ -3,6 +3,7 @@ using Microsoft.Bot.Connector.DirectLine;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Net.WebSockets;
 using System.Text;
 using System.Threading;
