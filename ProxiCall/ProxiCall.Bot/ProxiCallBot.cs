@@ -153,9 +153,7 @@ namespace ProxiCall.Bot
                         {
                             var welcomingMessage = $"{string.Format(CulturedBot.Greet,loggedUser.Alias)}. {CulturedBot.AskForRequest}";
                             var replyActivity = MessageFactory.Text(welcomingMessage, welcomingMessage, InputHints.AcceptingInput);
-                            var entity = new Entity();
-                            entity.Properties.Add("lang", JToken.Parse(CulturedBot.Culture?.Name));
-                            replyActivity.Entities.Add(entity);
+                            replyActivity.Locale = CulturedBot.Culture?.Name;
                             await turnContext.SendActivityAsync(replyActivity, cancellationToken);
                         }
                     }
@@ -242,9 +240,7 @@ namespace ProxiCall.Bot
 
                 var message = $"{string.Format(CulturedBot.Greet, loggedUser.Alias)} {CulturedBot.AskForRequest}";
                 var replyActivity = MessageFactory.Text(message, message, InputHints.AcceptingInput);
-                var entity = new Entity();
-                entity.Properties.Add("lang", JToken.Parse(CulturedBot.Culture?.Name));
-                replyActivity.Entities.Add(entity);
+                replyActivity.Locale = CulturedBot.Culture?.Name;
                 await turnContext.SendActivityAsync(replyActivity, cancellationToken);
 
                 isFirstMessage = false;
