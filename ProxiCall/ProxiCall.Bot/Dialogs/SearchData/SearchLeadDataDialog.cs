@@ -192,10 +192,9 @@ namespace ProxiCall.Bot.Dialogs.SearchData
                 {
                     //Ending Dialog if user decides not to retry
                     var message = CulturedBot.AskForRequest;
-                    await stepContext.Context.SendActivityAsync(MessageFactory
-                        .Text(message, message, InputHints.AcceptingInput)
-                        , cancellationToken
-                    );
+                    var activity = MessageFactory.Text(message, message, InputHints.AcceptingInput);
+                    activity.Locale = CulturedBot.Culture?.Name;
+                    await stepContext.Context.SendActivityAsync(activity, cancellationToken);
                     
                     crmState.ResetLead();
                     luisState.ResetAll();
@@ -232,11 +231,9 @@ namespace ProxiCall.Bot.Dialogs.SearchData
                 var textMessage = await FormatMessageWithWantedData(stepContext);
 
                 //Sending response
-                await stepContext.Context
-                    .SendActivityAsync(MessageFactory
-                        .Text(textMessage, textMessage, InputHints.IgnoringInput)
-                        , cancellationToken
-                );
+                var activity = MessageFactory.Text(textMessage, textMessage, InputHints.AcceptingInput);
+                activity.Locale = CulturedBot.Culture?.Name;
+                await stepContext.Context.SendActivityAsync(activity, cancellationToken);
 
                 //Asking if user wants to forward the call
                 if (userState.IsEligibleForPotentialForwarding)
@@ -429,10 +426,9 @@ namespace ProxiCall.Bot.Dialogs.SearchData
                 {
                     //Ending Dialog
                     var message = CulturedBot.AskForRequest;
-                    await stepContext.Context.SendActivityAsync(MessageFactory
-                        .Text(message, message, InputHints.AcceptingInput)
-                        , cancellationToken
-                    );
+                    var activity = MessageFactory.Text(message, message, InputHints.AcceptingInput);
+                    activity.Locale = CulturedBot.Culture?.Name;
+                    await stepContext.Context.SendActivityAsync(activity, cancellationToken);
 
                     userState.IsEligibleForPotentialForwarding = false;
                     crmState.ResetLead();
@@ -454,6 +450,7 @@ namespace ProxiCall.Bot.Dialogs.SearchData
                 var entity = new Entity();
                 entity.Properties.Add("forward", JToken.Parse(crmState.Lead.PhoneNumber));
                 activity.Entities.Add(entity);
+                activity.Locale = CulturedBot.Culture?.Name;
 
                 await stepContext.Context.SendActivityAsync(activity, cancellationToken);
 
