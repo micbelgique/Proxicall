@@ -226,6 +226,7 @@ namespace ProxiCall.Bot
             }
             else if (isDevelopmentEnvironment && activity.Type == ActivityTypes.ConversationUpdate && activity.MembersAdded.FirstOrDefault()?.Id == activity.Recipient.Id)
             {
+                //TODO : change current phone number to MIC phone number
                 credential = Environment.GetEnvironmentVariable("AdminPhoneNumber");
                 var loggedUser = await _accountService.Authenticate(credential, loginMethod);
                 userState.LoggedUser = loggedUser;
