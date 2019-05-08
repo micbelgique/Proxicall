@@ -153,11 +153,17 @@ namespace ProxiCall.Web.Controllers.Api
 
             foreach (var activity in botReplies)
             {
-                CultureInfo.CurrentCulture = new CultureInfo(activity.Locale);
-
-                var test = CultureInfo.CurrentCulture;
-                var test2 = activity.Locale;
-
+                var locale = activity.Locale;
+                if (locale == "fr")
+                {
+                    locale = "fr-FR";
+                }
+                else if (locale == "en")
+                {
+                    locale = "en-US";
+                }
+                CultureInfo.CurrentCulture = new CultureInfo(locale);
+                
                 var tts = new TextToSpeech();
                 //Using TTS to repond to the caller
                 var ttsResponse = await System.Threading.Tasks.Task.Run(() =>
