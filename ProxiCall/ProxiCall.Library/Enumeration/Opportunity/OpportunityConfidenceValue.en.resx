@@ -117,130 +117,13 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="AdmitNotUnderstanding" xml:space="preserve">
-    <value>Je n'ai pas compris.</value>
+  <data name="Average" xml:space="preserve">
+    <value>Potential</value>
   </data>
-  <data name="AskCompanyName" xml:space="preserve">
-    <value>Quelle est le nom de la compagnie concernée pour cette demande?</value>
+  <data name="High" xml:space="preserve">
+    <value>Certain</value>
   </data>
-  <data name="AskEstimatedClosingDateOfOpportunity" xml:space="preserve">
-    <value>A quelle date estimez-vous pouvoir conclure cette opportunité?</value>
-  </data>
-  <data name="AskForRequest" xml:space="preserve">
-    <value>Que puis-je faire pour vous?</value>
-  </data>
-  <data name="AskForRequestAgain" xml:space="preserve">
-    <value>Que puis-je faire pour vous à présent?</value>
-  </data>
-  <data name="AskForWhichLeadToCreateOpportunity" xml:space="preserve">
-    <value>Pour quel client désirez-vous créer cette opportunité?</value>
-  </data>
-  <data name="AskForWhichProduct" xml:space="preserve">
-    <value>Pour quel produit?</value>
-  </data>
-  <data name="AskIfWantForwardCall" xml:space="preserve">
-    <value>Souhaitez vous être mis en contact ?</value>
-  </data>
-  <data name="AskIfWantRetry" xml:space="preserve">
-    <value>Souhaitez-vous réessayer?</value>
-  </data>
-  <data name="AskIfWantToSkip" xml:space="preserve">
-    <value>Voulez-vous passer cette étape?</value>
-  </data>
-  <data name="AskSearchedPersonFullName" xml:space="preserve">
-    <value>Quelle est la personne que vous recherchez ?</value>
-  </data>
-  <data name="AskYesOrNo" xml:space="preserve">
-    <value>Veuillez répondre par 'Oui' ou  'Non' pour confirmer.</value>
-  </data>
-  <data name="FullNameIncomplete" xml:space="preserve">
-    <value>{0} n'est pas un nom complet.</value>
-  </data>
-  <data name="GiveCompanyName" xml:space="preserve">
-    <value>{0} travaille pour {1}.</value>
-  </data>
-  <data name="GiveContactName" xml:space="preserve">
-    <value>Votre contact chez {0} est {1}.</value>
-  </data>
-  <data name="GiveEmailAddress" xml:space="preserve">
-    <value>{0} adresse email est {1}.</value>
-  </data>
-  <data name="GiveHomeAddress" xml:space="preserve">
-    <value>{0} habite au {1}.</value>
-  </data>
-  <data name="GivenNumberOfOpportunities" xml:space="preserve">
-    <value>Vous avez en ce moment {0} opportunités avec {1}.</value>
-  </data>
-  <data name="GivenNumberOfOpportunitiesByCompany" xml:space="preserve">
-    <value>Vous avez en ce moment {0} opportunités avec cette compagnie.</value>
-  </data>
-  <data name="GivePhoneNumber" xml:space="preserve">
-    <value>{0} numéro de téléphone est le {1}</value>
-  </data>
-  <data name="Greet" xml:space="preserve">
-    <value>Bienvenue sur ProxiCall {0}.</value>
-  </data>
-  <data name="InformAboutForwardingCall" xml:space="preserve">
-    <value>Nous transférons votre appel.</value>
-  </data>
-  <data name="LinkWithAnd" xml:space="preserve">
-    <value>et</value>
-  </data>
-  <data name="ListOpportunities" xml:space="preserve">
-    <value>pour le produit {0}, créée le {1}</value>
-  </data>
-  <data name="ListOpportunitiesOfCompany" xml:space="preserve">
-    <value>avec {0} pour le produit {1}, créée le {2}</value>
-  </data>
-  <data name="MissingDataForThisLead" xml:space="preserve">
-    <value>Les données suivantes sont absentes de la base de données : {0}.</value>
-  </data>
-  <data name="NamedObjectNotFound" xml:space="preserve">
-    <value>{0} n'a pas été trouvé.</value>
-  </data>
-  <data name="NoDataFoundInDB" xml:space="preserve">
-    <value>Ces informations ne sont malheureusement pas référencées.</value>
-  </data>
-  <data name="NoIntentFound" xml:space="preserve">
-    <value>Je n'ai pas compris ce que vous venez de dire.</value>
-  </data>
-  <data name="PhoneNumberNotFound" xml:space="preserve">
-    <value>Le numéro de téléphone de {0} n'a pas été trouvé.</value>
-  </data>
-  <data name="SayGoAhead" xml:space="preserve">
-    <value>Allez-y!</value>
-  </data>
-  <data name="SayHe" xml:space="preserve">
-    <value>Il</value>
-  </data>
-  <data name="SayHer" xml:space="preserve">
-    <value>elle</value>
-  </data>
-  <data name="SayHerPossesive" xml:space="preserve">
-    <value>Son</value>
-  </data>
-  <data name="SayHim" xml:space="preserve">
-    <value>lui</value>
-  </data>
-  <data name="SayHisPossesive" xml:space="preserve">
-    <value>Son</value>
-  </data>
-  <data name="SayOpportunityWasCreated" xml:space="preserve">
-    <value>Très bien, l'opportunité a bien été créée.</value>
-  </data>
-  <data name="SayShe" xml:space="preserve">
-    <value>Elle</value>
-  </data>
-  <data name="ThisDataNotFoundInDB" xml:space="preserve">
-    <value>Cette information n'est malheureusement pas référencée.</value>
-  </data>
-  <data name="LuisAppName" xml:space="preserve">
-    <value>proxicall-luis</value>
-  </data>
-  <data name="AskForComment" xml:space="preserve">
-    <value>Avez-vous un commentaire a ajouté?</value>
-  </data>
-  <data name="NoAccessException" xml:space="preserve">
-    <value>solé, vous n'avez pas les droits d'accès requis.</value>
+  <data name="Low" xml:space="preserve">
+    <value>Uncertain</value>
   </data>
 </root>

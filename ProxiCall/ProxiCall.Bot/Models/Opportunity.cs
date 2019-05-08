@@ -1,6 +1,10 @@
-﻿using ProxiCall.Library.Enumeration.Opportunity;
+﻿using ProxiCall.Bot.Resources;
+using ProxiCall.Library.Enumeration.Opportunity;
 using ProxiCall.Library.ProxiCallLuis;
 using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
 
 namespace ProxiCall.Bot.Models
 {
@@ -11,29 +15,34 @@ namespace ProxiCall.Bot.Models
         public string ProductId { get; set; }
         public DateTime? EstimatedCloseDate { get; set; }
         public string Comments { get; set; }
-        public string Status { get; set; }
 
-        private string confidence;
-        public string Confidence
+        public int Status { get; set; }
+
+        public int Confidence { get; set; }
+
+        public void ChangeConfidenceBasedOnName(string confidenceName)
         {
-            get { return confidence; }
-            set
+            // TODO : to be improved
+            var allConfidenceDisplay = new Dictionary<int, string>
             {
-                switch(value)
+                { 0, OpportunityConfidenceValue.High },
+                { 1, OpportunityConfidenceValue.Average },
+                { 2, OpportunityConfidenceValue.Low }
+            };
+            var key = allConfidenceDisplay.FirstOrDefault(x => x.Value.ToLower() == confidenceName.ToLower());
+            Confidence = key.Key;
+        }
+        public void ChangeStatusBasedOnName(string statusName)
+        {
+            // TODO : to be improved
+            var allStatusDisplay = new Dictionary<int, string>
                 {
-                    //TODO : remove hardcoded part
-                    case "incertaine":
-                        confidence = OpportunityConfidence.Low.Name;
-                        break;
-                    case "certaine":
-                        confidence = OpportunityConfidence.High.Name;
-                        break;
-                    case "potentiel":
-                    default:
-                        confidence = OpportunityConfidence.Average.Name;
-                        break;
-                }
-            }
+                    { 0, OpportunityStatusValue.Open },
+                    { 1, OpportunityStatusValue.Closed },
+                    { 2, OpportunityStatusValue.Canceled }
+                };
+            var key = allStatusDisplay.FirstOrDefault(x => x.Value.ToLower() == statusName.ToLower());
+            Status = key.Key;
         }
 
 

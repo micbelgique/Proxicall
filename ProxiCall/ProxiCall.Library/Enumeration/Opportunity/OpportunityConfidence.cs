@@ -8,11 +8,11 @@ namespace ProxiCall.Library.Enumeration.Opportunity
         public static OpportunityConfidence Average = new AverageConfidence();
         public static OpportunityConfidence Low = new LowConfidence();
 
-        public static IList<string> AllConfidenceDisplay = new List<string>
+        public static Dictionary<int,string> AllConfidenceDisplay = new Dictionary<int,string>
         {
-            High.Name,
-            Average.Name,
-            Low.Name
+            { High.Id, High.Name },
+            { Average.Id, Average.Name },
+            { Low.Id, Low.Name }
         };
 
         protected OpportunityConfidence(int id, string name)
@@ -21,19 +21,19 @@ namespace ProxiCall.Library.Enumeration.Opportunity
 
         private class HighConfidence : OpportunityConfidence
         {
-            public HighConfidence() : base(1, OpportunityConfidenceValue.High)
+            public HighConfidence() : base(0, OpportunityConfidenceValue.High)
             { }
         }
 
         private class AverageConfidence : OpportunityConfidence
         {
-            public AverageConfidence() : base(2, OpportunityConfidenceValue.Average)
+            public AverageConfidence() : base(1, OpportunityConfidenceValue.Average)
             { }
         }
 
         private class LowConfidence : OpportunityConfidence
         {
-            public LowConfidence() : base(3, OpportunityConfidenceValue.Low)
+            public LowConfidence() : base(2, OpportunityConfidenceValue.Low)
             { }
         }
     }

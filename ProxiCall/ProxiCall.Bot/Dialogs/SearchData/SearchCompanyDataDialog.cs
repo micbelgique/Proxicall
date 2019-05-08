@@ -47,11 +47,12 @@ namespace ProxiCall.Bot.Dialogs.SearchData
                 ResultHandlerStepAsync,
                 EndSearchDialogStepAsync
             };
-
+            
+            var culture = CulturedBot.Culture?.Name;
             AddDialog(new WaterfallDialog(_searchCompanyDataWaterfall, waterfallSteps));
             AddDialog(new TextPrompt(_companyNamePrompt));
-            AddDialog(new ConfirmPrompt(_retryFetchingMinimumDataFromUserPrompt, defaultLocale: "fr-fr"));
-            AddDialog(new ConfirmPrompt(_confirmForwardingPrompt, defaultLocale: "fr-fr"));
+            AddDialog(new ConfirmPrompt(_retryFetchingMinimumDataFromUserPrompt, defaultLocale: culture));
+            AddDialog(new ConfirmPrompt(_confirmForwardingPrompt, defaultLocale: culture));
         }
 
         private async Task<DialogTurnResult> InitializeStateStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
@@ -256,7 +257,7 @@ namespace ProxiCall.Bot.Dialogs.SearchData
                 for (int i = 0; i < crmState.Opportunities.Count; i++)
                 {
                     wantedData.Append(string.Format(CulturedBot.ListOpportunitiesOfCompany,
-                        crmState.Opportunities[i].Lead.FullName, crmState.Opportunities[i].Product.Title, crmState.Opportunities[i].CreationDate?.ToString("dd MMMM")));
+                        crmState.Opportunities[i].Lead.FullName, crmState.Opportunities[i].Product.Title, crmState.Opportunities[i].CreationDate?.ToString("dd MMMM", CulturedBot.Culture)));
                     if (i == (numberOfOpportunities - 2))
                     {
                         wantedData.Append($" {CulturedBot.LinkWithAnd} ");

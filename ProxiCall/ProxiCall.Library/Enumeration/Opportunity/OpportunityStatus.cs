@@ -8,11 +8,11 @@ namespace ProxiCall.Library.Enumeration.Opportunity
         public static OpportunityStatus Closed = new ClosedStatus();
         public static OpportunityStatus Canceled = new CanceledStatus();
 
-        public static IList<string> AllStatusDisplay = new List<string>
+        public static Dictionary<int, string> AllStatusDisplay = new Dictionary<int, string>
         {
-            Open.Name,
-            Closed.Name,
-            Canceled.Name
+            { Open.Id, Open.Name },
+            { Closed.Id, Closed.Name },
+            { Canceled.Id, Canceled.Name }
         };
 
         protected OpportunityStatus(int id, string name)
@@ -21,19 +21,19 @@ namespace ProxiCall.Library.Enumeration.Opportunity
 
         private class OpenStatus : OpportunityStatus
         {
-            public OpenStatus() : base(1, OpportunityStatusValue.Open)
+            public OpenStatus() : base(0, OpportunityStatusValue.Open)
             { }
         }
 
         private class ClosedStatus : OpportunityStatus
         {
-            public ClosedStatus() : base(2, OpportunityStatusValue.Closed)
+            public ClosedStatus() : base(1, OpportunityStatusValue.Closed)
             { }
         }
 
         private class CanceledStatus : OpportunityStatus
         {
-            public CanceledStatus() : base(3, OpportunityStatusValue.Canceled)
+            public CanceledStatus() : base(2, OpportunityStatusValue.Canceled)
             { }
         }
     }

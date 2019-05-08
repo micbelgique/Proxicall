@@ -13,6 +13,7 @@
       "launchBrowser": true,
       "environmentVariables": {
         "ApiHost": "https://proxicall-crm.azurewebsites.net",
+        "AdminPhoneNumber": "+32493044068",
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
     },

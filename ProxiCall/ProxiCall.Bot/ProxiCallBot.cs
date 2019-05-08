@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Globalization;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -58,12 +59,7 @@ namespace ProxiCall.Bot
             _services = services ?? throw new ArgumentNullException(nameof(services));
 
             _accountService = (AccountService) _serviceProvider.GetService(typeof(AccountService));
-
-            if (!_services.LuisServices.ContainsKey(BotServices.LUIS_APP_NAME))
-            {
-                throw new System.ArgumentException($"The bot configuration does not contain a service type of `luis` with the id `{BotServices.LUIS_APP_NAME}`.");
-            }
-
+            
             Dialogs = new DialogSet(_accessors.DialogStateAccessor);
             Dialogs.Add(ActivatorUtilities.CreateInstance<SearchLeadDataDialog>(_serviceProvider));
             Dialogs.Add(ActivatorUtilities.CreateInstance<SearchCompanyDataDialog>(_serviceProvider));
@@ -100,11 +96,12 @@ namespace ProxiCall.Bot
 
             var userState = await _accessors.LoggedUserAccessor.GetAsync(dialogContext.Context, () => new LoggedUserState(), cancellationToken);
 
+            var loginMethod = "phone";
+            var isFirstMessage = false;
+            var credential = string.Empty;
+
             if (activity.Type == ActivityTypes.Message)
             {
-                var isFirstMessage = false;
-                var phonenumber = string.Empty;
-
                 if (activity.ChannelId == "directline")
                 {
                     if (activity.Entities != null)
@@ -112,17 +109,32 @@ namespace ProxiCall.Bot
                         foreach (var entity in activity.Entities)
                         {
                             isFirstMessage = entity.Properties.TryGetValue("firstmessage", out var jtoken);
-                            phonenumber = isFirstMessage ? jtoken.ToString() : string.Empty;
+                            credential = isFirstMessage ? jtoken.ToString() : string.Empty;
                             if(isFirstMessage)
                                 break;
                         }
                     }
                 }
+                else if (activity.ChannelId == "msteams")
+                {
+                    if (activity.Text == "restart")
+                    {
+                        userState = new LoggedUserState();
+                        isFirstMessage = true;
+                    }
+                    if (userState.LoggedUser.Token == null)
+                    {
+                        loginMethod = "aad";
+                        credential = activity.From.AadObjectId;
+                        isFirstMessage = true;
+                    }
+                }
                 else if (userState.LoggedUser.Token == null && isDevelopmentEnvironment)
                 {
+                    //TODO : when do we land here?
                     // Admin login for development purposes
                     isFirstMessage = true;
-                    phonenumber = "+32493044068";
+                    credential = Environment.GetEnvironmentVariable("AdminPhoneNumber");
                 }
 
                 if(isFirstMessage)
@@ -130,23 +142,24 @@ namespace ProxiCall.Bot
                     // This is the first message sent by the bot on production
                     try
                     {
-                        var loggedUser = await _accountService.Authenticate(phonenumber);
+                        var loggedUser = await _accountService.Authenticate(credential, loginMethod);
                         userState.LoggedUser = loggedUser;
                         await _accessors.LoggedUserAccessor.SetAsync(dialogContext.Context, userState,
                             cancellationToken);
 
+                        SwitchCulture(loggedUser.Language);
+
                         if (!isDevelopmentEnvironment && !string.IsNullOrEmpty(userState.LoggedUser.Token))
                         {
-                            //TODO add message to resx
-                            var welcomingMessage = $"Bonjour {userState.LoggedUser.Alias}. {CulturedBot.AskForRequest}";
-                            var reply = MessageFactory.Text(welcomingMessage, welcomingMessage, InputHints.AcceptingInput);
-                            await turnContext.SendActivityAsync(reply, cancellationToken);
+                            var welcomingMessage = $"{string.Format(CulturedBot.Greet,loggedUser.Alias)}. {CulturedBot.AskForRequest}";
+                            var replyActivity = MessageFactory.Text(welcomingMessage, welcomingMessage, InputHints.AcceptingInput);
+                            replyActivity.Locale = CulturedBot.Culture?.Name;
+                            await turnContext.SendActivityAsync(replyActivity, cancellationToken);
                         }
                     }
                     catch (Exception ex)
                     {
-                        //TODO add message to resx
-                        var errorMessage = "Désolé, vous n'avez pas accès.";
+                        var errorMessage = $"{CulturedBot.NoAccessException}";
                         var reply = MessageFactory.Text(errorMessage, errorMessage, InputHints.AcceptingInput);
                         var entity = new Entity();
                         entity.Properties.Add("error", JToken.Parse("{\"hangup\":\"" + ex.Message + "\"}"));
@@ -158,7 +171,7 @@ namespace ProxiCall.Bot
                 if(!isFirstMessage || isDevelopmentEnvironment)
                 {
                     // Perform a call to LUIS to retrieve results for the current activity message.
-                    var luisResults = await _services.LuisServices[BotServices.LUIS_APP_NAME].RecognizeAsync(dialogContext.Context, cancellationToken);
+                    var luisResults = await _services.LuisServices[CulturedBot.LuisAppName].RecognizeAsync(dialogContext.Context, cancellationToken);
 
                     // If any entities were updated, treat as interruption.
                     // For example, "no my name is tony" will manifest as an update of the name to be "tony".
@@ -217,9 +230,20 @@ namespace ProxiCall.Bot
             }
             else if (isDevelopmentEnvironment && activity.Type == ActivityTypes.ConversationUpdate && activity.MembersAdded.FirstOrDefault()?.Id == activity.Recipient.Id)
             {
-                var message = $"{CulturedBot.Greet}. {CulturedBot.AskForRequest}";
-                var reply = MessageFactory.Text(message, message, InputHints.AcceptingInput);
-                await turnContext.SendActivityAsync(reply, cancellationToken);
+                credential = Environment.GetEnvironmentVariable("AdminPhoneNumber");
+                var loggedUser = await _accountService.Authenticate(credential, loginMethod);
+                userState.LoggedUser = loggedUser;
+                await _accessors.LoggedUserAccessor.SetAsync(turnContext, userState,
+                    cancellationToken);
+
+                SwitchCulture(loggedUser.Language);
+
+                var message = $"{string.Format(CulturedBot.Greet, loggedUser.Alias)} {CulturedBot.AskForRequest}";
+                var replyActivity = MessageFactory.Text(message, message, InputHints.AcceptingInput);
+                replyActivity.Locale = CulturedBot.Culture?.Name;
+                await turnContext.SendActivityAsync(replyActivity, cancellationToken);
+
+                isFirstMessage = false;
             }
 
             await _accessors.UserState.SaveChangesAsync(turnContext, false, cancellationToken);
@@ -242,7 +266,7 @@ namespace ProxiCall.Bot
                 string[] luisExpectedLeadName =
                 {
                     "leadfullname",
-                    "personName"
+                    "personNameP"
                 };
                 string luisExpectedCompanyName = "companyName";
                 string luisExpectedDateTime = "datetime";
@@ -299,11 +323,11 @@ namespace ProxiCall.Bot
                     if (entities[luisExpectedConfidenceOpportunity] != null)
                     {
                         var confidenceOpportunity = (string)entities[luisExpectedConfidenceOpportunity][0].First;
-                        crmState.Opportunity.Confidence = confidenceOpportunity;
+                        crmState.Opportunity.ChangeConfidenceBasedOnName(confidenceOpportunity);
                     }
                     else
                     {
-                        crmState.Opportunity.Confidence = OpportunityConfidence.Average.Name;
+                        crmState.Opportunity.ChangeConfidenceBasedOnName(OpportunityConfidence.Average.Name);
                     }
                 }
 
@@ -383,6 +407,32 @@ namespace ProxiCall.Bot
                 luisState.IntentName = intentName;
                 await _accessors.CRMStateAccessor.SetAsync(turnContext, crmState);
                 await _accessors.LuisStateAccessor.SetAsync(turnContext, luisState);
+            }
+        }
+
+        private void SwitchCulture(string cultureName)
+        {
+            var acceptedCultureNames = new string[]
+            {
+                "en",
+                "fr",
+                "fr-fr",
+                "fr-ca",
+                "en-us",
+                "en-uk"
+            };
+
+            if(!acceptedCultureNames.Contains(cultureName.ToLower()))
+            {
+                cultureName = "en";
+            }
+            CulturedBot.Culture = new CultureInfo(cultureName);
+            OpportunityConfidenceValue.Culture = new CultureInfo(cultureName);
+            OpportunityStatusValue.Culture = new CultureInfo(cultureName);
+
+            if (!_services.LuisServices.ContainsKey(CulturedBot.LuisAppName))
+            {
+                throw new System.ArgumentException($"The bot configuration does not contain a service type of `luis` with the id `{CulturedBot.LuisAppName}`.");
             }
         }
     }

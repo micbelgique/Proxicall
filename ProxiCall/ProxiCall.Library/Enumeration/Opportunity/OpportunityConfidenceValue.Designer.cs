@@ -61,7 +61,7 @@ namespace ProxiCall.Library.Enumeration.Opportunity {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Moyenne.
+        ///   Looks up a localized string similar to Potentielle.
         /// </summary>
         public static string Average {
             get {
@@ -70,7 +70,7 @@ namespace ProxiCall.Library.Enumeration.Opportunity {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Haute.
+        ///   Looks up a localized string similar to Certaine.
         /// </summary>
         public static string High {
             get {
@@ -79,7 +79,7 @@ namespace ProxiCall.Library.Enumeration.Opportunity {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Low.
+        ///   Looks up a localized string similar to Incertaine.
         /// </summary>
         public static string Low {
             get {

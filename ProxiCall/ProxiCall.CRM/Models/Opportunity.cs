@@ -1,7 +1,8 @@
-﻿using System;
+﻿using ProxiCall.Library.Enumeration.Opportunity;
+using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using Microsoft.AspNetCore.Identity;
 
 namespace ProxiCall.CRM.Models
 {
@@ -38,14 +39,49 @@ namespace ProxiCall.CRM.Models
 
         public string Comments { get; set; }
         
-        public string Status { get; set; }
+        public int Status { get; set; }
 
-        public string Confidence { get; set; }
+        [NotMapped]
+        public string StatusName
+        {
+            get
+            {
+                // TODO : to be improved
+                var allStatusDisplay = new Dictionary<int, string>
+                {
+                    { 0, OpportunityStatusValue.Open },
+                    { 1, OpportunityStatusValue.Closed },
+                    { 2, OpportunityStatusValue.Canceled }
+                };
+                allStatusDisplay.TryGetValue(Status, out string statusName);
+                return statusName;
+            }
+        }
+
+        public int Confidence { get; set; }
+        
+        [NotMapped]
+        public string ConfidenceName
+        {
+            get
+            {
+                // TODO : to be improved
+                var allConfidenceDisplay = new Dictionary<int, string>
+                {
+                    { 0, OpportunityConfidenceValue.High },
+                    { 1, OpportunityConfidenceValue.Average },
+                    { 2, OpportunityConfidenceValue.Low }
+                };
+                allConfidenceDisplay.TryGetValue(Confidence, out string confidenceName);
+                return confidenceName;
+            }
+        }
+
 
         public Opportunity()
         {
             CreationDate = DateTime.Now.Date;
-            Status = Enumeration.Opportunity.Status.Open.Name;
+            Status = OpportunityStatus.Open.Id;
         }
     }
 }

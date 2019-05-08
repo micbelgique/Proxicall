@@ -48,11 +48,12 @@ namespace ProxiCall.Bot.Dialogs.SearchData
                 ResultHandlerStepAsync,
                 EndSearchDialogStepAsync
             };
-
+            
+            var culture = CulturedBot.Culture?.Name;
             AddDialog(new WaterfallDialog(_searchLeadDataWaterfall, waterfallSteps));
             AddDialog(new TextPrompt(_leadFullNamePrompt));
-            AddDialog(new ConfirmPrompt(_retryFetchingMinimumDataFromUserPrompt, defaultLocale: "fr-fr"));
-            AddDialog(new ConfirmPrompt(_confirmForwardingPrompt, defaultLocale: "fr-fr"));
+            AddDialog(new ConfirmPrompt(_retryFetchingMinimumDataFromUserPrompt, defaultLocale: culture));
+            AddDialog(new ConfirmPrompt(_confirmForwardingPrompt, defaultLocale: culture));
         }
 
         private async Task<DialogTurnResult> InitializeStateStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
@@ -276,6 +277,32 @@ namespace ProxiCall.Bot.Dialogs.SearchData
             var hasEmail = !string.IsNullOrEmpty(crmState.Lead.Email);
             var hasOppornunities = false;
 
+            var chosenSubjectPronoun = string.Empty;
+            var chosenObjectPronoun = string.Empty;
+            var chosenPossessivePronoun = string.Empty;
+
+            // TODO : to be improved
+            var isMale = crmState.Lead.Gender == 1;
+            var isFemale = crmState.Lead.Gender == 2;
+            if (isMale)
+            {
+                chosenSubjectPronoun = $"{CulturedBot.SayHe}";
+                chosenObjectPronoun = $"{CulturedBot.SayHim}";
+                chosenPossessivePronoun = $"{CulturedBot.SayHisPossesive}";
+            }
+            else if (isFemale)
+            {
+                chosenSubjectPronoun = $"{CulturedBot.SayShe}";
+                chosenObjectPronoun = $"{CulturedBot.SayHer}";
+                chosenPossessivePronoun = $"{CulturedBot.SayHerPossesive}";
+            }
+            else
+            {
+                chosenSubjectPronoun = $"{CulturedBot.SayHe}";
+                chosenObjectPronoun = $"{CulturedBot.SayHisPossesive}";
+                chosenPossessivePronoun = $"{CulturedBot.SayHisPossesive}";
+            }
+
             if (wantOppornunities || wantNumberOppornunities)
             {
                 //Searching opportunities with this lead
@@ -302,19 +329,19 @@ namespace ProxiCall.Bot.Dialogs.SearchData
             //Address
             if (wantAddress && hasAddress)
             {
-                wantedData.AppendLine($"{string.Format(CulturedBot.GiveHomeAddress, crmState.Lead.Address)}");
+                wantedData.AppendLine($"{string.Format(CulturedBot.GiveHomeAddress, chosenSubjectPronoun, crmState.Lead.Address)}");
             }
 
             //Phone Number
             if (wantPhone && hasPhone)
             {
-                wantedData.AppendLine($"{string.Format(CulturedBot.GivePhoneNumber, crmState.Lead.PhoneNumber)}");
+                wantedData.AppendLine($"{string.Format(CulturedBot.GivePhoneNumber, chosenPossessivePronoun, crmState.Lead.PhoneNumber)}");
             }
 
             //Email
             if (wantEmail && hasEmail)
             {
-                wantedData.AppendLine($"{string.Format(CulturedBot.GiveEmailAddress, crmState.Lead.Email)}");
+                wantedData.AppendLine($"{string.Format(CulturedBot.GiveEmailAddress, chosenPossessivePronoun, crmState.Lead.Email)}");
             }
 
             //Number of Opportunities
@@ -324,24 +351,7 @@ namespace ProxiCall.Bot.Dialogs.SearchData
 
                 if(numberOfOpportunities>0 || onlyWantAnyInfoAboutOpportunities)
                 {
-                    var chosenPronoun = string.Empty;
-                    LeadGender.AllGender.TryGetValue(crmState.Lead.Gender, out string genderName);
-                    var isMale = genderName == LeadGender.MALE;
-                    var isFemale = genderName == LeadGender.FEMALE;
-
-                    if (isMale)
-                    {
-                        chosenPronoun = $"{CulturedBot.SayHim}";
-                    }
-                    else if (isFemale)
-                    {
-                        chosenPronoun = $"{CulturedBot.SayHer}";
-                    }
-                    else
-                    {
-                        chosenPronoun = $"{CulturedBot.SayHim} {CulturedBot.SayHer}";
-                    }
-                    wantedData.AppendLine($"{string.Format(CulturedBot.GivenNumberOfOpportunities, numberOfOpportunities, chosenPronoun)}");
+                    wantedData.AppendLine($"{string.Format(CulturedBot.GivenNumberOfOpportunities, numberOfOpportunities, chosenObjectPronoun)}");
                 }
             }
 
@@ -352,7 +362,7 @@ namespace ProxiCall.Bot.Dialogs.SearchData
                 for (int i = 0; i < crmState.Opportunities.Count; i++)
                 {
                     wantedData.Append(string.Format(CulturedBot.ListOpportunities,
-                        crmState.Opportunities[i].Product.Title, crmState.Opportunities[i].CreationDate?.ToString("dd MMMM")));
+                        crmState.Opportunities[i].Product.Title, crmState.Opportunities[i].CreationDate?.ToString("dd MMMM", CulturedBot.Culture)));
                     if (i == (numberOfOpportunities - 2))
                     {
                         wantedData.Append($" {CulturedBot.LinkWithAnd} ");

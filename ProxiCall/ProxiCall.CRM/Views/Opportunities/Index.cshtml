@@ -62,10 +62,10 @@
                 @Html.DisplayFor(modelItem => item.Comments)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.Status)
+                @Html.DisplayFor(modelItem => item.StatusName)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.Confidence)
+                @Html.DisplayFor(modelItem => item.ConfidenceName)
             </td>
             <td>
                 <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |

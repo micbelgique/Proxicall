@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Net.Http;
 using System.Text;
 using System.Threading;
@@ -10,29 +12,23 @@ namespace ProxiCall.Web.Services.Speech
 {
     class TextToSpeech
     {
-        public static async Task<byte[]> TransformTextToSpeechAsync
+        public async Task<byte[]> TransformTextToSpeechAsync
             (string texttotransform, string locale, string region = "westeurope")
         {
             string accessToken;
             // If your resource isn't in WEST EUROPE, change the endpoint (ex: "westus")
             AuthentificationApi auth = new AuthentificationApi(Environment.GetEnvironmentVariable("SpeechApiKey"), region);
             accessToken = auth.GetAccessToken();
-            
-            var voiceName = String.Empty;
-            switch (locale)
-            {
-                case "en-US":
-                    voiceName = "JessaNeural";
-                    break;
-                case "fr-FR":
-                    voiceName = "Julie, Apollo";
-                    break;
-                default:
-                    locale = "fr-FR";
-                    voiceName = "Julie, Apollo";
-                    break;
-            }
 
+            var voiceName = ChoseProperVoice();
+            if(locale == "fr")
+            {
+                locale = "fr-fr";
+            }
+            else if (locale == "en")
+            {
+                locale = "en-us";
+            }
             // Set request body
             string body = @"<speak version='1.0' xmlns='http://www.w3.org/2001/10/synthesis' xml:lang='" + locale + "'>" +
                                 "<voice name='Microsoft Server Speech Text to Speech Voice (" + locale + ", " + voiceName + ")'>" +
@@ -72,6 +68,34 @@ namespace ProxiCall.Web.Services.Speech
                         return audioResponse;
                     }
                 }
+            }
+        }
+
+        private string ChoseProperVoice()
+        {
+            var acceptedCultureNames = new string[]
+            {
+                "en",
+                "fr",
+                "fr-fr",
+                "fr-ca",
+                "en-us",
+                "en-uk"
+            };
+
+            if (!acceptedCultureNames.Contains(CultureInfo.CurrentCulture.Name))
+            {
+                CultureInfo.CurrentCulture = new CultureInfo("en");
+            }
+
+            string cultureName = CultureInfo.CurrentCulture.Name;
+            if (cultureName.Substring(0, 2) == "fr")
+            {
+                return "Julie, Apollo";
+            }
+            else
+            {
+                return "JessaNeural";
             }
         }
     }

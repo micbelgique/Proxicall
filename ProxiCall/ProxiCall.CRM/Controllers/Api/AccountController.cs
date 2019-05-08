@@ -36,16 +36,27 @@ namespace ProxiCall.CRM.Controllers.Api
 
         [AllowAnonymous]
         [HttpGet("login")]
-        public async Task<ActionResult<LoginDTO>> Login(string phonenumber)
+        public async Task<ActionResult<LoginDTO>> Login(string credential, string loginMethod)
         {
-            if(string.IsNullOrEmpty(phonenumber))
+            if(string.IsNullOrEmpty(credential))
             {
                 return BadRequest();
             }
 
-            phonenumber = phonenumber.Trim();
-
-            var user = _context.Set<ApplicationUser>().FirstOrDefault(u => u.PhoneNumber == phonenumber);
+            ApplicationUser user;
+            switch (loginMethod)
+            {
+                case "phone" :
+                    var phonenumber = credential.Trim();
+                    user = _context.Set<ApplicationUser>().FirstOrDefault(u => u.PhoneNumber == phonenumber);
+                    break;
+                case "aad" :
+                    user = await _userManager.FindByLoginAsync("Microsoft", credential);
+                    break;
+                default:
+                    user = null;
+                    break;
+            }
                        
             if (user == null)
             {
@@ -61,19 +72,21 @@ namespace ProxiCall.CRM.Controllers.Api
                 Alias = user.Alias,
                 UserName = user.UserName,
                 PhoneNumber = user.PhoneNumber,
+                Language = user.Language,
                 Roles = await _userManager.GetRolesAsync(user),
-                Token = await GenerateJwtToken(phonenumber, user)
+                Token = await GenerateJwtToken(credential, user)
             };
+
 
             return response;
         }
 
-        private async Task<string> GenerateJwtToken(string phonenumber, ApplicationUser user)
+        private async Task<string> GenerateJwtToken(string credential, ApplicationUser user)
         {
             var roles = await _userManager.GetRolesAsync(user);
             var claims = new List<Claim>
             {
-                new Claim(JwtRegisteredClaimNames.Sub, phonenumber),
+                new Claim(JwtRegisteredClaimNames.Sub, credential),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
                 new Claim(ClaimTypes.NameIdentifier, user.Id),
                 new Claim(ClaimTypes.Role, roles[0])

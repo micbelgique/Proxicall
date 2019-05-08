@@ -51,7 +51,8 @@ namespace ProxiCall.CRM.Controllers
         public IActionResult Create()
         {
             ViewData["CompanyId"] = new SelectList(_context.Companies, "Id", "Name");
-            ViewData["GenderName"] = new SelectList((IEnumerable)LeadGender.AllGender, "Key", "Value");
+            var leadGender = new LeadGender();
+            ViewData["GenderName"] = new SelectList((IEnumerable)leadGender.AllGender, "Key", "Value");
             return View();
         }
 
@@ -69,7 +70,8 @@ namespace ProxiCall.CRM.Controllers
                 return RedirectToAction(nameof(Index));
             }
             ViewData["CompanyId"] = new SelectList(_context.Companies, "Id", "Name", lead.CompanyId);
-            ViewData["GenderName"] = new SelectList((IEnumerable)LeadGender.AllGender, "Key", "Value");
+            var leadGender = new LeadGender();
+            ViewData["GenderName"] = new SelectList((IEnumerable)leadGender.AllGender, "Key", "Value");
             return View(lead);
         }
 
@@ -87,7 +89,8 @@ namespace ProxiCall.CRM.Controllers
                 return NotFound();
             }
             ViewData["CompanyId"] = new SelectList(_context.Companies, "Id", "Name", lead.CompanyId);
-            ViewData["GenderName"] = new SelectList((IEnumerable)LeadGender.AllGender, "Key", "Value");
+            var leadGender = new LeadGender();
+            ViewData["GenderName"] = new SelectList((IEnumerable)leadGender.AllGender, "Key", "Value");
             return View(lead);
         }
 
@@ -124,7 +127,8 @@ namespace ProxiCall.CRM.Controllers
                 return RedirectToAction(nameof(Index));
             }
             ViewData["CompanyId"] = new SelectList(_context.Companies, "Id", "Name", lead.CompanyId);
-            ViewData["GenderName"] = new SelectList((IEnumerable)LeadGender.AllGender, "Key", "Value");
+            var leadGender = new LeadGender();
+            ViewData["GenderName"] = new SelectList((IEnumerable)leadGender.AllGender, "Key", "Value");
             return View(lead);
         }
 

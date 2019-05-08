@@ -76,18 +76,20 @@ namespace ProxiCall.Bot.Dialogs.CreateData
                 EndSearchDialogStepAsync
 
             };
+            
+            var culture = CulturedBot.Culture?.Name;
             AddDialog(new WaterfallDialog(_createOpportunityDataWaterfall, waterfallSteps));
             //Searching for lead
             AddDialog(new TextPrompt(_leadFullNamePrompt));
-            AddDialog(new ConfirmPrompt(_retryFetchingLeadFromUserPrompt, defaultLocale: "fr-fr"));
+            AddDialog(new ConfirmPrompt(_retryFetchingLeadFromUserPrompt, defaultLocale: culture));
             //Searching for product
             AddDialog(new TextPrompt(_productNamePrompt));
-            AddDialog(new ConfirmPrompt(_retryFetchingProductFromUserPrompt, defaultLocale: "fr-fr"));
+            AddDialog(new ConfirmPrompt(_retryFetchingProductFromUserPrompt, defaultLocale: culture));
             //Checking the closing date
             AddDialog(new TextPrompt(_closingDatePrompt));
-            AddDialog(new ConfirmPrompt(_retryFetchingClosingDateFromUserPrompt, defaultLocale: "fr-fr"));
+            AddDialog(new ConfirmPrompt(_retryFetchingClosingDateFromUserPrompt, defaultLocale: culture));
             //Checking for comment
-            AddDialog(new ConfirmPrompt(_commentPrompt, defaultLocale: "fr-fr"));
+            AddDialog(new ConfirmPrompt(_commentPrompt, defaultLocale: culture));
             AddDialog(new TextPrompt(_fetchingCommentFromUserPrompt));
         }
 
@@ -366,7 +368,7 @@ namespace ProxiCall.Bot.Dialogs.CreateData
             //Gathering the date if not already given
             if (crmState.Opportunity.EstimatedCloseDate == null || crmState.Opportunity.EstimatedCloseDate == DateTime.MinValue)
             {
-                var luisResult = await _botServices.LuisServices[BotServices.LUIS_APP_NAME].RecognizeAsync(stepContext.Context, cancellationToken);
+                var luisResult = await _botServices.LuisServices[CulturedBot.LuisAppName].RecognizeAsync(stepContext.Context, cancellationToken);
 
                 var entities = luisResult.Entities;
                 string timex = (string)entities["datetime"]?[0]?["timex"]?.First;
@@ -446,7 +448,7 @@ namespace ProxiCall.Bot.Dialogs.CreateData
             
             var promptOptions = new PromptOptions
             {
-                Prompt = MessageFactory.Text("Avez-vous un commentaire a ajouté?"),
+                Prompt = MessageFactory.Text(CulturedBot.AskForComment),
                 RetryPrompt = MessageFactory.Text(CulturedBot.AskYesOrNo),
             };
             return await stepContext.PromptAsync(_commentPrompt, promptOptions, cancellationToken);
@@ -491,7 +493,7 @@ namespace ProxiCall.Bot.Dialogs.CreateData
             var userState = await _accessors.LoggedUserAccessor.GetAsync(stepContext.Context, () => new LoggedUserState(), cancellationToken);
 
             //Finalizing the created opportunity
-            crmState.Opportunity.Status = OpportunityStatus.Open.Name;
+            crmState.Opportunity.ChangeStatusBasedOnName(OpportunityStatus.Open.Name);
             crmState.Opportunity.OwnerId = userState.LoggedUser.Id;
 
             var message = string.Empty;

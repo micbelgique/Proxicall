@@ -241,6 +241,6 @@
     <value>Avez-vous un commentaire a ajouté?</value>
   </data>
   <data name="NoAccessException" xml:space="preserve">
-    <value>solé, vous n'avez pas les droits d'accès requis.</value>
+    <value>Désolé, vous n'avez pas les droits d'accès requis.</value>
   </data>
 </root>

@@ -5,8 +5,8 @@ using Microsoft.EntityFrameworkCore;
 using NinjaNye.SearchExtensions.Levenshtein;
 using ProxiCall.CRM.Areas.Identity.Data;
 using ProxiCall.CRM.Models;
-using ProxiCall.CRM.Models.Dictionnaries;
-using ProxiCall.CRM.Models.Enumeration.Levenshtein;
+using ProxiCall.Library.Dictionnaries;
+using ProxiCall.Library.Enumeration.Levenshtein;
 
 namespace ProxiCall.CRM.DAO
 {

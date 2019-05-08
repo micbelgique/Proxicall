@@ -16,7 +16,8 @@ using Twilio.Rest.Api.V2010.Account;
 using ProxiCall.Web.Services.Speech;
 using Twilio.Http;
 using Newtonsoft.Json.Linq;
-using ProxiCall.Web.Services.MsGraph;
+using System.Globalization;
+using System.Linq;
 
 namespace ProxiCall.Web.Controllers.Api
 {
@@ -152,9 +153,15 @@ namespace ProxiCall.Web.Controllers.Api
 
             foreach (var activity in botReplies)
             {
+                CultureInfo.CurrentCulture = new CultureInfo(activity.Locale);
+
+                var test = CultureInfo.CurrentCulture;
+                var test2 = activity.Locale;
+
+                var tts = new TextToSpeech();
                 //Using TTS to repond to the caller
                 var ttsResponse = await System.Threading.Tasks.Task.Run(() =>
-                TextToSpeech.TransformTextToSpeechAsync(activity.Text, "fr-FR"));
+                tts.TransformTextToSpeechAsync(activity.Text, CultureInfo.CurrentCulture.Name));
 
                 var wavGuid = Guid.NewGuid();
                 var pathToAudioDirectory = _hostingEnvironment.WebRootPath + "/audio";
@@ -192,7 +199,7 @@ namespace ProxiCall.Web.Controllers.Api
             {
                 voiceResponse.Gather(
                     input: new List<Gather.InputEnum> { Gather.InputEnum.Speech },
-                    language: Gather.LanguageEnum.FrFr,
+                    language: CultureInfo.CurrentCulture.Name,
                     action: new Uri($"{Environment.GetEnvironmentVariable("Host")}/api/voice/send"),
                     method: Twilio.Http.HttpMethod.Get,
                     speechTimeout: "auto",
