@@ -413,15 +413,15 @@ namespace ProxiCall.Bot
             {
                 "en",
                 "fr",
-                "fr-fr",
-                "fr-ca",
-                "en-us",
-                "en-uk"
+                "fr-FR",
+                "fr-CA",
+                "en-US",
+                "en-UK"
             };
 
             if(!acceptedCultureNames.Contains(cultureName.ToLower()))
             {
-                cultureName = "en";
+                cultureName = "en-US";
             }
             CulturedBot.Culture = new CultureInfo(cultureName);
             OpportunityConfidenceValue.Culture = new CultureInfo(cultureName);
