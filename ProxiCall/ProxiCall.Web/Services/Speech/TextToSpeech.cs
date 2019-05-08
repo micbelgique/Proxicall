@@ -69,10 +69,10 @@ namespace ProxiCall.Web.Services.Speech
             {
                 "en",
                 "fr",
-                "fr-fr",
-                "fr-ca",
-                "en-us",
-                "en-uk"
+                "fr-FR",
+                "fr-CA",
+                "en-US",
+                "en-UK"
             };
 
             if (!acceptedCultureNames.Contains(CultureInfo.CurrentCulture.Name))
