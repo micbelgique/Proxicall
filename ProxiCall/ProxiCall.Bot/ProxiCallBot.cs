@@ -129,13 +129,6 @@ namespace ProxiCall.Bot
                         isFirstMessage = true;
                     }
                 }
-                else if (userState.LoggedUser.Token == null && isDevelopmentEnvironment)
-                {
-                    //TODO : when do we land here?
-                    // Admin login for development purposes
-                    isFirstMessage = true;
-                    credential = Environment.GetEnvironmentVariable("AdminPhoneNumber");
-                }
 
                 if(isFirstMessage)
                 {
@@ -151,7 +144,7 @@ namespace ProxiCall.Bot
 
                         if (!isDevelopmentEnvironment && !string.IsNullOrEmpty(userState.LoggedUser.Token))
                         {
-                            var welcomingMessage = $"{string.Format(CulturedBot.Greet,loggedUser.Alias)}. {CulturedBot.AskForRequest}";
+                            var welcomingMessage = $"{string.Format(CulturedBot.Greet,loggedUser.Alias)} {CulturedBot.AskForRequest}";
                             var replyActivity = MessageFactory.Text(welcomingMessage, welcomingMessage, InputHints.AcceptingInput);
                             replyActivity.Locale = CulturedBot.Culture?.Name;
                             await turnContext.SendActivityAsync(replyActivity, cancellationToken);
