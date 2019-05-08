@@ -231,7 +231,7 @@ namespace ProxiCall.Bot.Dialogs.SearchData
                 var textMessage = await FormatMessageWithWantedData(stepContext);
 
                 //Sending response
-                var activity = MessageFactory.Text(textMessage, textMessage, InputHints.AcceptingInput);
+                var activity = MessageFactory.Text(textMessage, textMessage, InputHints.IgnoringInput);
                 activity.Locale = CulturedBot.Culture?.Name;
                 await stepContext.Context.SendActivityAsync(activity, cancellationToken);
 

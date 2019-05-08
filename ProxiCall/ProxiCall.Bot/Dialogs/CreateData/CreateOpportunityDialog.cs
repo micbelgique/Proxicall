@@ -223,10 +223,9 @@ namespace ProxiCall.Bot.Dialogs.CreateData
                 {
                     //Ending Dialog if user decides not to retry
                     var message = CulturedBot.AskForRequest;
-                    await stepContext.Context.SendActivityAsync(MessageFactory
-                        .Text(message, message, InputHints.AcceptingInput)
-                        , cancellationToken
-                    );
+                    var activity = MessageFactory.Text(message, message, InputHints.AcceptingInput);
+                    activity.Locale = CulturedBot.Culture?.Name;
+                    await stepContext.Context.SendActivityAsync(activity, cancellationToken);
 
                     crmState.ResetOpportunity();
                     luisState.ResetAll();
@@ -326,10 +325,9 @@ namespace ProxiCall.Bot.Dialogs.CreateData
                 {
                     //Ending Dialog if user decides not to retry
                     var message = CulturedBot.AskForRequest;
-                    await stepContext.Context.SendActivityAsync(MessageFactory
-                        .Text(message, message, InputHints.AcceptingInput)
-                        , cancellationToken
-                    );
+                    var activity = MessageFactory.Text(message, message, InputHints.AcceptingInput);
+                    activity.Locale = CulturedBot.Culture?.Name;
+                    await stepContext.Context.SendActivityAsync(activity, cancellationToken);
 
                     crmState.ResetOpportunity();
                     luisState.ResetAll();
@@ -420,10 +418,9 @@ namespace ProxiCall.Bot.Dialogs.CreateData
                 {
                     //Ending Dialog if user decides not to retry
                     var message = CulturedBot.AskForRequest;
-                    await stepContext.Context.SendActivityAsync(MessageFactory
-                        .Text(message, message, InputHints.AcceptingInput)
-                        , cancellationToken
-                    );
+                    var activity = MessageFactory.Text(message, message, InputHints.AcceptingInput);
+                    activity.Locale = CulturedBot.Culture?.Name;
+                    await stepContext.Context.SendActivityAsync(activity, cancellationToken);
 
                     userState.IsEligibleForPotentialSkippingStep = false;
                     crmState.ResetOpportunity();
@@ -510,10 +507,9 @@ namespace ProxiCall.Bot.Dialogs.CreateData
                 message = "La création de l'opportunité a échoué";
             }
 
-            await stepContext.Context.SendActivityAsync(MessageFactory
-                .Text(message, message, InputHints.AcceptingInput)
-                , cancellationToken
-            );
+            var activity = MessageFactory.Text(message, message, InputHints.AcceptingInput);
+            activity.Locale = CulturedBot.Culture?.Name;
+            await stepContext.Context.SendActivityAsync(activity, cancellationToken);
 
             crmState.ResetOpportunity();
             luisState.ResetAll();

@@ -15,11 +15,13 @@ using Microsoft.Bot.Builder.Integration.AspNet.Core;
 using Microsoft.Bot.Builder.Teams.Middlewares;
 using Microsoft.Bot.Configuration;
 using Microsoft.Bot.Connector.Authentication;
+using Microsoft.Bot.Schema;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using ProxiCall.Bot.Dialogs.Shared;
 using ProxiCall.Bot.Exceptions.ProxiCallCRM;
+using ProxiCall.Bot.Resources;
 using ProxiCall.Bot.Services.ProxiCallCRM;
 
 namespace ProxiCall.Bot
@@ -152,9 +154,11 @@ namespace ProxiCall.Bot
                 options.OnTurnError = async (context, exception) =>
                 {
                     var errorMessage = ExceptionHandler(exception);
-                    
                     logger.LogError($"Exception caught : {exception}");
-                    await context.SendActivityAsync(errorMessage);
+
+                    var activity = MessageFactory.Text(errorMessage, errorMessage, InputHints.AcceptingInput);
+                    activity.Locale = CulturedBot.Culture?.Name;
+                    await context.SendActivityAsync(activity);
                 };
                 
                 //Adding Teams middleware

@@ -157,6 +157,7 @@ namespace ProxiCall.Bot
                         var entity = new Entity();
                         entity.Properties.Add("error", JToken.Parse("{\"hangup\":\"" + ex.Message + "\"}"));
                         reply.Entities.Add(entity);
+                        reply.Locale = CulturedBot.Culture?.Name;
                         await turnContext.SendActivityAsync(reply, cancellationToken);
                     }
                 }
@@ -200,6 +201,8 @@ namespace ProxiCall.Bot
 
                                     case ProxiCallIntents.None:
                                     default:
+                                        var replyNoIntent = MessageFactory.Text(CulturedBot.NoIntentFound, CulturedBot.NoIntentFound, InputHints.AcceptingInput);
+                                        replyNoIntent.Locale = CulturedBot.Culture?.Name;
                                         await dialogContext.Context.SendActivityAsync(CulturedBot.NoIntentFound, cancellationToken: cancellationToken);
                                         break;
                                 }

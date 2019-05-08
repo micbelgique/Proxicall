@@ -175,10 +175,9 @@ namespace ProxiCall.Bot.Dialogs.SearchData
                 {
                     //Ending Dialog if user decides not to retry
                     var message = CulturedBot.AskForRequest;
-                    await stepContext.Context.SendActivityAsync(MessageFactory
-                        .Text(message, message, InputHints.AcceptingInput)
-                        , cancellationToken
-                    );
+                    var activity = MessageFactory.Text(message, message, InputHints.AcceptingInput);
+                    activity.Locale = CulturedBot.Culture?.Name;
+                    await stepContext.Context.SendActivityAsync(activity, cancellationToken);
 
                     crmState.ResetCompany();
                     luisState.ResetAll();
@@ -211,11 +210,10 @@ namespace ProxiCall.Bot.Dialogs.SearchData
                 var textMessage = await FormatMessageWithOpportunities(stepContext);
 
                 //Sending response
-                await stepContext.Context
-                    .SendActivityAsync(MessageFactory
-                        .Text(textMessage, textMessage, InputHints.IgnoringInput)
-                        , cancellationToken
-                );
+                var activity = MessageFactory.Text(textMessage, textMessage, InputHints.IgnoringInput);
+                activity.Locale = CulturedBot.Culture?.Name;
+                await stepContext.Context.SendActivityAsync(activity, cancellationToken);
+                
             }
 
             return await stepContext.NextAsync(cancellationToken: cancellationToken);
@@ -286,10 +284,9 @@ namespace ProxiCall.Bot.Dialogs.SearchData
             var luisState = await _accessors.LuisStateAccessor.GetAsync(stepContext.Context, () => new LuisState(), cancellationToken);
 
             var message = CulturedBot.AskForRequest;
-            await stepContext.Context.SendActivityAsync(MessageFactory
-                .Text(message, message, InputHints.AcceptingInput)
-                , cancellationToken
-            );
+            var activity = MessageFactory.Text(message, message, InputHints.AcceptingInput);
+            activity.Locale = CulturedBot.Culture?.Name;
+            await stepContext.Context.SendActivityAsync(activity, cancellationToken);
 
             crmState.ResetCompany();
             luisState.ResetAll();
