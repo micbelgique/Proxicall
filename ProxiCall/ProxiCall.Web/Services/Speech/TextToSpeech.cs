@@ -77,7 +77,7 @@ namespace ProxiCall.Web.Services.Speech
 
             if (!acceptedCultureNames.Contains(CultureInfo.CurrentCulture.Name))
             {
-                CultureInfo.CurrentCulture = new CultureInfo("en");
+                CultureInfo.CurrentCulture = new CultureInfo("en-US");
             }
 
             string cultureName = CultureInfo.CurrentCulture.Name;
