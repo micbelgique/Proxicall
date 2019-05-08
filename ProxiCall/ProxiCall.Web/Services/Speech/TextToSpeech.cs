@@ -21,14 +21,6 @@ namespace ProxiCall.Web.Services.Speech
             accessToken = auth.GetAccessToken();
 
             var voiceName = ChoseProperVoice();
-            if(locale == "fr")
-            {
-                locale = "fr-fr";
-            }
-            else if (locale == "en")
-            {
-                locale = "en-us";
-            }
             // Set request body
             string body = @"<speak version='1.0' xmlns='http://www.w3.org/2001/10/synthesis' xml:lang='" + locale + "'>" +
                                 "<voice name='Microsoft Server Speech Text to Speech Voice (" + locale + ", " + voiceName + ")'>" +
