@@ -13,9 +13,9 @@
     },
     {
       "type": "endpoint",
-      "appId": "",
-      "appPassword": "",
-      "endpoint": "http://localhost:3978/api/messages",
+      "appId": "055b7097-5147-4c0f-8340-9b075b90d113",
+      "appPassword": "rmojJDL57?|vfsMNTM595[-",
+      "endpoint": "http://locahost:3978/api/messages",
       "id": "3",
       "name": "development"
     },
