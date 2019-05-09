@@ -14,10 +14,14 @@ namespace ProxiCall.CRM.Models
         public string Alias { get; set; }
 
         [Required]
+        [Display(Name = "Phone number")]
+        public string PhoneNumber { get; set; }
+
+        [Required]
         [Display(Name = "Administrator")]
         public bool IsAdmin { get; set; } = false;
 
-        [Display(Name = "Language Of Choice")]
+        [Display(Name = "Language of choice")]
         public string Language { get; set; }
     }
 }

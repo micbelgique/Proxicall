@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
 using ProxiCall.CRM.Areas.Identity.Data;
 using ProxiCall.CRM.Models;
 using ProxiCall.Library.Dictionnaries;
@@ -29,9 +30,9 @@ namespace ProxiCall.CRM.Controllers
             _emailSender = emailSender;
         }
 
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            return View(_context.Set<ApplicationUser>());
+            return View(await _context.Set<ApplicationUser>().ToListAsync());
         }
         
         public async Task<IActionResult> Call(string id)
@@ -54,7 +55,7 @@ namespace ProxiCall.CRM.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create([Bind("UserName,Email,Password,ConfirmPassword,Language")] NewUser userForm)
+        public async Task<IActionResult> Create([Bind("UserName,PhoneNumber,Alias,Email,Password,ConfirmPassword,Language")] NewUser userForm)
         {
             if(ModelState.IsValid)
             {
@@ -62,7 +63,9 @@ namespace ProxiCall.CRM.Controllers
                 {
                     UserName = userForm.Email,
                     Email = userForm.Email, 
-                    Alias = userForm.Alias
+                    Alias = userForm.Alias,
+                    PhoneNumber = userForm.PhoneNumber,
+                    Language = userForm.Language
                 };
                 var password = GenerateRandomPassword(_userManager.Options.Password);
                 var result = await _userManager.CreateAsync(user, password.ToString());
@@ -72,13 +75,15 @@ namespace ProxiCall.CRM.Controllers
                     await _userManager.AddToRoleAsync(user, role);
                     await SendEmailConfirmation(user);
                     //TODO add view for new user details -> username, email, role, isConfirmed
-                    return View("Index");
+                    return View("Index", await _context.Set<ApplicationUser>().ToListAsync());
                 }
                 foreach (var error in result.Errors)
                 {
                     ModelState.AddModelError(string.Empty, error.Description);
                 }
             }
+            var languageOfChoice = new LanguageOfChoice();
+            ViewData["Language"] = new SelectList(languageOfChoice.DisplayedLanguageOfChoice, "Key", "Value");
             return View();
         }
 
