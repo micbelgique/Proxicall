@@ -18,6 +18,7 @@ using Twilio.Http;
 using Newtonsoft.Json.Linq;
 using System.Globalization;
 using System.Linq;
+using ProxiCall.Library.Dictionnaries;
 
 namespace ProxiCall.Web.Controllers.Api
 {
@@ -153,16 +154,7 @@ namespace ProxiCall.Web.Controllers.Api
 
             foreach (var activity in botReplies)
             {
-                var locale = activity.Locale;
-                if (locale == "fr")
-                {
-                    locale = "fr-FR";
-                }
-                else if (locale == "en")
-                {
-                    locale = "en-US";
-                }
-                CultureInfo.CurrentCulture = new CultureInfo(locale);
+                CheckAndSelectAppropriateCulture(activity.Locale);
                 
                 var tts = new TextToSpeech();
                 //Using TTS to repond to the caller
@@ -207,7 +199,7 @@ namespace ProxiCall.Web.Controllers.Api
                     input: new List<Gather.InputEnum> { Gather.InputEnum.Speech },
                     language: CultureInfo.CurrentCulture.Name,
                     action: new Uri($"{Environment.GetEnvironmentVariable("Host")}/api/voice/send"),
-                    method: Twilio.Http.HttpMethod.Get,
+                    method: HttpMethod.Get,
                     speechTimeout: "auto",
                     hints: _hints
                 );
@@ -218,10 +210,27 @@ namespace ProxiCall.Web.Controllers.Api
             System.IO.File.WriteAllText($"{pathToXMLDirectory}/{xmlFileName}.xml", voiceResponse.ToString());
 
             CallResource.Update(
-                method: Twilio.Http.HttpMethod.Get,
+                method: HttpMethod.Get,
                 url: new Uri($"{Environment.GetEnvironmentVariable("Host")}/xml/{xmlFileName}.xml"),
                 pathSid: callSid
             );
+        }
+
+        private void CheckAndSelectAppropriateCulture(string activityLocale)
+        {
+            var locale = activityLocale;
+            var languageOfChoice = new LanguageOfChoice();
+            var acceptedLanguages = languageOfChoice.AllowedLanguageOfChoice;
+            var isAnAcceptedLanguage = acceptedLanguages.TryGetValue(locale, out var localeFullName);
+
+            if (isAnAcceptedLanguage)
+            {
+                CultureInfo.CurrentCulture = new CultureInfo(locale);
+            }
+            else
+            {
+                CultureInfo.CurrentCulture = new CultureInfo(LanguageOfChoice.DEFAULT);
+            }
         }
 
         [HttpGet("send")]
@@ -241,7 +250,7 @@ namespace ProxiCall.Web.Controllers.Api
             response.Pause(15);
 
             //DEBUG
-            response.Say("Aucune réponse de ProxiCall", voice: "alice", language: Say.LanguageEnum.FrFr);
+            response.Say("ProxiCall's got disconnect", voice: "alice", language: Say.LanguageEnum.EnUs);
 
             return TwiML(response);
         }
