@@ -17,8 +17,7 @@ using ProxiCall.Web.Services.Speech;
 using Twilio.Http;
 using Newtonsoft.Json.Linq;
 using System.Globalization;
-using System.Linq;
-using ProxiCall.Library.Dictionnaries;
+using ProxiCall.Library;
 
 namespace ProxiCall.Web.Controllers.Api
 {
@@ -154,7 +153,9 @@ namespace ProxiCall.Web.Controllers.Api
 
             foreach (var activity in botReplies)
             {
-                CheckAndSelectAppropriateCulture(activity.Locale);
+                var languagesManager = new LanguagesManager();
+                var localeCulture = languagesManager.CheckAndReturnAppropriateCulture(activity.Locale);
+                CultureInfo.CurrentCulture = new CultureInfo(localeCulture);
                 
                 var tts = new TextToSpeech();
                 //Using TTS to repond to the caller
@@ -214,23 +215,6 @@ namespace ProxiCall.Web.Controllers.Api
                 url: new Uri($"{Environment.GetEnvironmentVariable("Host")}/xml/{xmlFileName}.xml"),
                 pathSid: callSid
             );
-        }
-
-        private void CheckAndSelectAppropriateCulture(string activityLocale)
-        {
-            var locale = activityLocale;
-            var languageOfChoice = new LanguageOfChoice();
-            var acceptedLanguages = languageOfChoice.AllowedLanguageOfChoice;
-            var isAnAcceptedLanguage = acceptedLanguages.TryGetValue(locale, out var localeFullName);
-
-            if (isAnAcceptedLanguage)
-            {
-                CultureInfo.CurrentCulture = new CultureInfo(locale);
-            }
-            else
-            {
-                CultureInfo.CurrentCulture = new CultureInfo(LanguageOfChoice.DEFAULT);
-            }
         }
 
         [HttpGet("send")]

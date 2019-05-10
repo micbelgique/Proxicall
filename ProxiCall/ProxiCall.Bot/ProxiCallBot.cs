@@ -18,6 +18,7 @@ using ProxiCall.Bot.Dialogs.Shared;
 using ProxiCall.Bot.Models;
 using ProxiCall.Bot.Resources;
 using ProxiCall.Bot.Services.ProxiCallCRM;
+using ProxiCall.Library;
 using ProxiCall.Library.Enumeration.Opportunity;
 using ProxiCall.Library.ProxiCallLuis;
 using ProxiCall.Library.Services;
@@ -412,20 +413,8 @@ namespace ProxiCall.Bot
 
         private void SwitchCulture(string cultureName)
         {
-            var acceptedCultureNames = new string[]
-            {
-                "en",
-                "fr",
-                "fr-FR",
-                "fr-CA",
-                "en-US",
-                "en-UK"
-            };
-
-            if(!acceptedCultureNames.Contains(cultureName.ToLower()))
-            {
-                cultureName = "en-US";
-            }
+            var languagesManager = new LanguagesManager();
+            cultureName = languagesManager.CheckAndReturnAppropriateCulture(cultureName);
             CulturedBot.Culture = new CultureInfo(cultureName);
             OpportunityConfidenceValue.Culture = new CultureInfo(cultureName);
             OpportunityStatusValue.Culture = new CultureInfo(cultureName);
