@@ -164,6 +164,9 @@ namespace ProxiCall.Bot
                 
                 if(!isFirstMessage || isDevelopmentEnvironment)
                 {
+                    // TODO : check if works without this before removing
+                    // SwitchCulture(userState.LoggedUser.Language);
+
                     // Perform a call to LUIS to retrieve results for the current activity message.
                     var luisResults = await _services.LuisServices[CulturedBot.LuisAppName].RecognizeAsync(dialogContext.Context, cancellationToken);
 

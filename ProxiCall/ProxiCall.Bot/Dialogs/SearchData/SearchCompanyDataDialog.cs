@@ -109,9 +109,12 @@ namespace ProxiCall.Bot.Dialogs.SearchData
             //Asking for the name of the company if not already given
             if (string.IsNullOrEmpty(crmState.Company.Name))
             {
+                var activityPrompt = MessageFactory.Text(CulturedBot.AskCompanyName);
+                activityPrompt.Locale = CulturedBot.Culture?.Name;
+
                 return await stepContext.PromptAsync(_companyNamePrompt, new PromptOptions
                 {
-                    Prompt = MessageFactory.Text(CulturedBot.AskCompanyName)
+                    Prompt = activityPrompt
                 }, cancellationToken);
             }
             return await stepContext.NextAsync(cancellationToken: cancellationToken);
@@ -137,10 +140,17 @@ namespace ProxiCall.Bot.Dialogs.SearchData
             {
                 await _accessors.CRMStateAccessor.SetAsync(stepContext.Context, crmState, cancellationToken);
                 var promptMessage = $"{string.Format(CulturedBot.NamedObjectNotFound, companyNameGivenByUser)} {CulturedBot.AskIfWantRetry}";
+                
+                var activityPrompt = MessageFactory.Text(promptMessage);
+                activityPrompt.Locale = CulturedBot.Culture?.Name;
+
+                var activityRetryPrompt = MessageFactory.Text(CulturedBot.AskYesOrNo);
+                activityRetryPrompt.Locale = CulturedBot.Culture?.Name;
+
                 var promptOptions = new PromptOptions
                 {
-                    Prompt = MessageFactory.Text(promptMessage),
-                    RetryPrompt = MessageFactory.Text(CulturedBot.AskYesOrNo),
+                    Prompt = activityPrompt,
+                    RetryPrompt = activityRetryPrompt,
                 };
                 return await stepContext.PromptAsync(_retryFetchingMinimumDataFromUserPrompt, promptOptions, cancellationToken);
             }

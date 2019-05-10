@@ -110,8 +110,12 @@ namespace ProxiCall.Bot.Dialogs.SearchData
             //Asking for the name of the lead if not already given
             if (string.IsNullOrEmpty(crmState.Lead.FullName))
             {
+                var activityPrompt = MessageFactory.Text(CulturedBot.AskSearchedPersonFullName);
+                activityPrompt.Locale = CulturedBot.Culture?.Name;
+
                 return await stepContext.PromptAsync(_leadFullNamePrompt, new PromptOptions {
-                    Prompt = MessageFactory.Text(CulturedBot.AskSearchedPersonFullName) }, cancellationToken);
+                    Prompt =  activityPrompt
+                }, cancellationToken);
             }
             return await stepContext.NextAsync();
         }
@@ -151,10 +155,17 @@ namespace ProxiCall.Bot.Dialogs.SearchData
             {
                 await _accessors.LoggedUserAccessor.SetAsync(stepContext.Context, userState);
                 await _accessors.CRMStateAccessor.SetAsync(stepContext.Context, crmState);
+
+                var activityPrompt = MessageFactory.Text(promptMessage);
+                activityPrompt.Locale = CulturedBot.Culture?.Name;
+
+                var activityRetryPrompt = MessageFactory.Text(CulturedBot.AskYesOrNo);
+                activityRetryPrompt.Locale = CulturedBot.Culture?.Name;
+
                 var promptOptions = new PromptOptions
                 {
-                    Prompt = MessageFactory.Text(promptMessage),
-                    RetryPrompt = MessageFactory.Text(CulturedBot.AskYesOrNo),
+                    Prompt = activityPrompt,
+                    RetryPrompt = activityRetryPrompt,
                 };
                 return await stepContext.PromptAsync(_retryFetchingMinimumDataFromUserPrompt, promptOptions, cancellationToken);
             }
@@ -238,10 +249,16 @@ namespace ProxiCall.Bot.Dialogs.SearchData
                 //Asking if user wants to forward the call
                 if (userState.IsEligibleForPotentialForwarding)
                 {
+                    var activityPrompt = MessageFactory.Text(CulturedBot.AskIfWantForwardCall);
+                    activityPrompt.Locale = CulturedBot.Culture?.Name;
+
+                    var activityRetryPrompt = MessageFactory.Text(CulturedBot.AskYesOrNo);
+                    activityRetryPrompt.Locale = CulturedBot.Culture?.Name;
+
                     var forwardPromptOptions = new PromptOptions
                     {
-                        Prompt = MessageFactory.Text(CulturedBot.AskIfWantForwardCall),
-                        RetryPrompt = MessageFactory.Text(CulturedBot.AskYesOrNo),
+                        Prompt = activityPrompt,
+                        RetryPrompt = activityRetryPrompt,
                     };
                     return await stepContext.PromptAsync(_confirmForwardingPrompt, forwardPromptOptions, cancellationToken);
                 }

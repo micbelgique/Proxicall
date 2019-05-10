@@ -158,10 +158,12 @@ namespace ProxiCall.Bot.Dialogs.CreateData
             //Asking for the name of the lead if not already given
             if (string.IsNullOrEmpty(crmState.Opportunity.Lead.FullName))
             {
-                return await stepContext.PromptAsync(_leadFullNamePrompt, new PromptOptions
+                var activity = MessageFactory.Text(CulturedBot.AskForWhichLeadToCreateOpportunity);
+                activity.Locale = CulturedBot.Culture?.Name;
+            return await stepContext.PromptAsync(_leadFullNamePrompt, new PromptOptions
                 {
-                    Prompt = MessageFactory.Text(CulturedBot.AskForWhichLeadToCreateOpportunity)
-                }, cancellationToken);
+                    Prompt = activity
+            }, cancellationToken);
             }
             return await stepContext.NextAsync(cancellationToken: cancellationToken);
         }
@@ -184,10 +186,16 @@ namespace ProxiCall.Bot.Dialogs.CreateData
             //Asking for retry if necessary
             if (crmState.Opportunity.Lead == null)
             {
+                var activityPrompt = MessageFactory.Text($"{string.Format(CulturedBot.NamedObjectNotFound, fullNameGivenByUser)} {CulturedBot.AskIfWantRetry}");
+                activityPrompt.Locale = CulturedBot.Culture?.Name;
+
+                var activityRetryPrompt = MessageFactory.Text(CulturedBot.AskYesOrNo);
+                activityRetryPrompt.Locale = CulturedBot.Culture?.Name;
+
                 var promptOptions = new PromptOptions
                 {
-                    Prompt = MessageFactory.Text($"{string.Format(CulturedBot.NamedObjectNotFound, fullNameGivenByUser)} {CulturedBot.AskIfWantRetry}"),
-                    RetryPrompt = MessageFactory.Text(CulturedBot.AskYesOrNo),
+                    Prompt = activityPrompt,
+                    RetryPrompt = activityRetryPrompt,
                 };
                 return await stepContext.PromptAsync(_retryFetchingLeadFromUserPrompt, promptOptions, cancellationToken);
             }
@@ -248,9 +256,11 @@ namespace ProxiCall.Bot.Dialogs.CreateData
             //Asking for the name of the product if not already given
             if (string.IsNullOrEmpty(crmState.Product.Title))
             {
+                var activityPrompt = MessageFactory.Text(CulturedBot.AskForWhichProduct);
+                activityPrompt.Locale = CulturedBot.Culture?.Name;
                 return await stepContext.PromptAsync(_productNamePrompt, new PromptOptions
                 {
-                    Prompt = MessageFactory.Text(CulturedBot.AskForWhichProduct)
+                    Prompt = activityPrompt
                 }, cancellationToken);
             }
             else
@@ -285,10 +295,16 @@ namespace ProxiCall.Bot.Dialogs.CreateData
             if (needsRetry)
             {
                 await _accessors.CRMStateAccessor.SetAsync(stepContext.Context, crmState, cancellationToken);
+                var activityPrompt = MessageFactory.Text(promptMessage);
+                activityPrompt.Locale = CulturedBot.Culture?.Name;
+
+                var activityRetryPrompt = MessageFactory.Text(CulturedBot.AskYesOrNo);
+                activityRetryPrompt.Locale = CulturedBot.Culture?.Name;
+
                 var promptOptions = new PromptOptions
                 {
-                    Prompt = MessageFactory.Text(promptMessage),
-                    RetryPrompt = MessageFactory.Text(CulturedBot.AskYesOrNo),
+                    Prompt = activityPrompt,
+                    RetryPrompt = activityRetryPrompt,
                 };
                 return await stepContext.PromptAsync(_retryFetchingProductFromUserPrompt, promptOptions, cancellationToken);
             }
@@ -350,9 +366,11 @@ namespace ProxiCall.Bot.Dialogs.CreateData
             //Asking for date if not already given
             if (crmState.Opportunity.EstimatedCloseDate == null || crmState.Opportunity.EstimatedCloseDate == DateTime.MinValue)
             {
+                var activityPrompt = MessageFactory.Text(CulturedBot.AskEstimatedClosingDateOfOpportunity);
+                activityPrompt.Locale = CulturedBot.Culture?.Name;
                 return await stepContext.PromptAsync(_closingDatePrompt, new PromptOptions
                 {
-                    Prompt = MessageFactory.Text(CulturedBot.AskEstimatedClosingDateOfOpportunity)
+                    Prompt = activityPrompt
                 }, cancellationToken);
             }
             return await stepContext.NextAsync(cancellationToken: cancellationToken);
@@ -385,10 +403,17 @@ namespace ProxiCall.Bot.Dialogs.CreateData
             {
                 await _accessors.LoggedUserAccessor.SetAsync(stepContext.Context, userState, cancellationToken);
                 await _accessors.CRMStateAccessor.SetAsync(stepContext.Context, crmState, cancellationToken);
+
+                var activityPrompt = MessageFactory.Text(promptMessage);
+                activityPrompt.Locale = CulturedBot.Culture?.Name;
+
+                var activityRetryPrompt = MessageFactory.Text(CulturedBot.AskYesOrNo);
+                activityRetryPrompt.Locale = CulturedBot.Culture?.Name;
+
                 var promptOptions = new PromptOptions
                 {
-                    Prompt = MessageFactory.Text(promptMessage),
-                    RetryPrompt = MessageFactory.Text(CulturedBot.AskYesOrNo),
+                    Prompt = activityPrompt,
+                    RetryPrompt = activityRetryPrompt,
                 };
                 return await stepContext.PromptAsync(_retryFetchingClosingDateFromUserPrompt, promptOptions, cancellationToken);
             }
@@ -443,10 +468,16 @@ namespace ProxiCall.Bot.Dialogs.CreateData
             var luisState = await _accessors.LuisStateAccessor.GetAsync(stepContext.Context, () => new LuisState(), cancellationToken);
             var userState = await _accessors.LoggedUserAccessor.GetAsync(stepContext.Context, () => new LoggedUserState(), cancellationToken);
             
+            var activityPrompt = MessageFactory.Text(CulturedBot.AskForComment);
+            activityPrompt.Locale = CulturedBot.Culture?.Name;
+
+            var activityRetryPrompt = MessageFactory.Text(CulturedBot.AskYesOrNo);
+            activityRetryPrompt.Locale = CulturedBot.Culture?.Name;
+
             var promptOptions = new PromptOptions
             {
-                Prompt = MessageFactory.Text(CulturedBot.AskForComment),
-                RetryPrompt = MessageFactory.Text(CulturedBot.AskYesOrNo),
+                Prompt = activityPrompt,
+                RetryPrompt = activityRetryPrompt,
             };
             return await stepContext.PromptAsync(_commentPrompt, promptOptions, cancellationToken);
         }
@@ -460,9 +491,12 @@ namespace ProxiCall.Bot.Dialogs.CreateData
 
             if (userState.WantsToComment)
             {
+                var activityPrompt = MessageFactory.Text(CulturedBot.SayGoAhead);
+                activityPrompt.Locale = CulturedBot.Culture?.Name;
+                
                 return await stepContext.PromptAsync(_fetchingCommentFromUserPrompt, new PromptOptions
                 {
-                    Prompt = MessageFactory.Text(CulturedBot.SayGoAhead)
+                    Prompt = activityPrompt
                 }, cancellationToken);
             }
             return await stepContext.NextAsync(cancellationToken: cancellationToken);
