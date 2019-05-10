@@ -7,9 +7,8 @@ using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using ProxiCall.CRM.Areas.Identity.Data;
 using ProxiCall.CRM.Models;
-using ProxiCall.Library.Dictionnaries;
+using ProxiCall.Library;
 
 namespace ProxiCall.CRM.Areas.Identity.Pages.Account.Manage
 {
@@ -89,9 +88,9 @@ namespace ProxiCall.CRM.Areas.Identity.Pages.Account.Manage
 
             IsEmailConfirmed = await _userManager.IsEmailConfirmedAsync(user);
 
-            var languageOfChoice = new LanguageOfChoice();
+            var languagesManager = new LanguagesManager();
             SelectedValue = Input.Language;
-            Options = new SelectList(languageOfChoice.DisplayedLanguageOfChoice, "Key", "Value", Input.Language);
+            Options = new SelectList(languagesManager.AllowedLanguagesOfChoice, "Key", "Value", Input.Language);
             var test = Options;
 
             return Page();
@@ -171,7 +170,7 @@ namespace ProxiCall.CRM.Areas.Identity.Pages.Account.Manage
             var callbackUrl = Url.Page(
                 "/Account/ConfirmEmail",
                 pageHandler: null,
-                values: new { userId = userId, code = code },
+                values: new { userId, code },
                 protocol: Request.Scheme);
             await _emailSender.SendEmailAsync(
                 email,

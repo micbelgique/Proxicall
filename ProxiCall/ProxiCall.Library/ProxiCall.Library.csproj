@@ -27,20 +27,20 @@
       <Generator>PublicResXFileCodeGenerator</Generator>
       <LastGenOutput>GenderName.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-    <EmbeddedResource Update="Enumeration\Opportunity\OpportunityConfidenceValue.en.resx">
+    <EmbeddedResource Update="Enumeration\Opportunity\OpportunityConfidenceValue.en-US.resx">
       <Generator>PublicResXFileCodeGenerator</Generator>
     </EmbeddedResource>
-    <EmbeddedResource Update="Enumeration\Opportunity\OpportunityConfidenceValue.fr.resx">
+    <EmbeddedResource Update="Enumeration\Opportunity\OpportunityConfidenceValue.fr-FR.resx">
       <Generator>PublicResXFileCodeGenerator</Generator>
     </EmbeddedResource>
     <EmbeddedResource Update="Enumeration\Opportunity\OpportunityConfidenceValue.resx">
       <Generator>PublicResXFileCodeGenerator</Generator>
       <LastGenOutput>OpportunityConfidenceValue.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-    <EmbeddedResource Update="Enumeration\Opportunity\OpportunityStatusValue.en.resx">
+    <EmbeddedResource Update="Enumeration\Opportunity\OpportunityStatusValue.en-US.resx">
       <Generator>PublicResXFileCodeGenerator</Generator>
     </EmbeddedResource>
-    <EmbeddedResource Update="Enumeration\Opportunity\OpportunityStatusValue.fr.resx">
+    <EmbeddedResource Update="Enumeration\Opportunity\OpportunityStatusValue.fr-FR.resx">
       <Generator>PublicResXFileCodeGenerator</Generator>
     </EmbeddedResource>
     <EmbeddedResource Update="Enumeration\Opportunity\OpportunityStatusValue.resx">

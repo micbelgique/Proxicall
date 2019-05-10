@@ -27,4 +27,9 @@
     <Folder Include="wwwroot\xml\" />
   </ItemGroup>
 
+
+  <ItemGroup>
+    <ProjectReference Include="..\ProxiCall.Library\ProxiCall.Library.csproj" />
+  </ItemGroup>
+
 </Project>

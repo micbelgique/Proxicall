@@ -4,6 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
+using ProxiCall.Library;
 
 namespace ProxiCall.CRM.Models
 {
@@ -16,14 +17,14 @@ namespace ProxiCall.CRM.Models
 
         private string language;
 
-        [Display(Name = "Language Of Choice")]
+        [Display(Name = "Language of choice")]
         public string Language
         {
             get
             {
                 if(string.IsNullOrEmpty(language))
                 {
-                    language = "en";
+                    language = LanguagesManager.DEFAULT;
                 }
                 return language;
             }
@@ -33,7 +34,7 @@ namespace ProxiCall.CRM.Models
 
         public ApplicationUser()
         {
-            Language = "en";
+            Language = LanguagesManager.DEFAULT;
         }
     }
 }

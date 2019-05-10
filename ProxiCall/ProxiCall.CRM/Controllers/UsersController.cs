@@ -12,7 +12,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using ProxiCall.CRM.Areas.Identity.Data;
 using ProxiCall.CRM.Models;
-using ProxiCall.Library.Dictionnaries;
+using ProxiCall.Library;
 
 namespace ProxiCall.CRM.Controllers
 {
@@ -49,8 +49,8 @@ namespace ProxiCall.CRM.Controllers
 
         public IActionResult Create()
         {
-            var languageOfChoice = new LanguageOfChoice();
-            ViewData["Language"] = new SelectList(languageOfChoice.DisplayedLanguageOfChoice, "Key", "Value");
+            var languagesManager = new LanguagesManager();
+            ViewData["Language"] = new SelectList(languagesManager.AllowedLanguagesOfChoice, "Key", "Value");
             return View();
         }
 
@@ -82,8 +82,8 @@ namespace ProxiCall.CRM.Controllers
                     ModelState.AddModelError(string.Empty, error.Description);
                 }
             }
-            var languageOfChoice = new LanguageOfChoice();
-            ViewData["Language"] = new SelectList(languageOfChoice.DisplayedLanguageOfChoice, "Key", "Value");
+            var languagesManager = new LanguagesManager();
+            ViewData["Language"] = new SelectList(languagesManager.AllowedLanguagesOfChoice, "Key", "Value");
             return View();
         }
 
