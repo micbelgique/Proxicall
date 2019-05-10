@@ -1,55 +1,55 @@
 {
-  "name": "proxicallbot",
-  "description": "",
-  "services": [
-    {
-      "type": "abs",
-      "appId": "055b7097-5147-4c0f-8340-9b075b90d113",
-      "id": "2",
-      "resourceGroup": "proxicall",
-      "serviceName": "ProxiCallBot",
-      "subscriptionId": "eeae0393-3618-46f5-acb7-8cac3f1e57e8",
-      "tenantId": "71260448-f1a9-4729-b630-4882e4dc58f5"
-    },
-    {
-      "type": "endpoint",
-      "appId": "055b7097-5147-4c0f-8340-9b075b90d113",
-      "appPassword": "rmojJDL57?|vfsMNTM595[-",
-      "endpoint": "http://locahost:3978/api/messages",
-      "id": "3",
-      "name": "development"
-    },
-    {
-      "type": "endpoint",
-      "appId": "055b7097-5147-4c0f-8340-9b075b90d113",
-      "appPassword": "rmojJDL57?|vfsMNTM595[-",
-      "endpoint": "https://proxicallbot.azurewebsites.net/api/messages",
-      "id": "4",
-      "name": "production"
-    },
-    {
-      "type": "luis",
-      "appId": "fb433c90-d8af-477a-8fc9-6d7ca5813d3c",
-      "authoringKey": "f5da09b674b1485198bf38d31d4c2e36",
-      "id": "6",
-      "name": "proxicall-luis",
-      "region": "westeurope",
-      "culture":  "fr-fr",
-      "version": "0.4"
-    },
-    {
-      "type": "luis",
-      "appId": "5a520ff1-5ca3-49a0-af12-063a1d1da25a",
-      "authoringKey": "f5da09b674b1485198bf38d31d4c2e36",
-      "id": "7",
-      "name": "proxicall-luis-en",
-      "region": "westeurope",
-      "culture":  "en-us",
-      "version": "0.1"
-    }
-  ],
-  "padlock": "",
-  "version": "2.0",
-  "path": "C:\\Users\\vercr\\Documents\\GitRepos\\ProxiCall\\ProxiCall\\ProxiCall.Bot\\ProxiCall.bot",
-  "overrides": null
+    "name": "proxicallbot",
+    "description": "",
+    "services": [
+        {
+            "type": "abs",
+            "appId": "055b7097-5147-4c0f-8340-9b075b90d113",
+            "id": "2",
+            "resourceGroup": "proxicall",
+            "serviceName": "ProxiCallBot",
+            "subscriptionId": "eeae0393-3618-46f5-acb7-8cac3f1e57e8",
+            "tenantId": "71260448-f1a9-4729-b630-4882e4dc58f5"
+        },
+        {
+            "type": "endpoint",
+            "appId": "055b7097-5147-4c0f-8340-9b075b90d113",
+            "appPassword": "rmojJDL57?|vfsMNTM595[-",
+            "endpoint": "http://localhost:3978/api/messages",
+            "id": "3",
+            "name": "development"
+        },
+        {
+            "type": "endpoint",
+            "appId": "",
+            "appPassword": "",
+            "endpoint": "https://proxicallbot.azurewebsites.net/api/messages",
+            "id": "4",
+            "name": "production"
+        },
+        {
+            "type": "luis",
+            "appId": "fb433c90-d8af-477a-8fc9-6d7ca5813d3c",
+            "authoringKey": "f5da09b674b1485198bf38d31d4c2e36",
+            "id": "6",
+            "name": "proxicall-luis",
+            "region": "westeurope",
+            "culture": "fr-fr",
+            "version": "0.4"
+        },
+        {
+            "type": "luis",
+            "appId": "5a520ff1-5ca3-49a0-af12-063a1d1da25a",
+            "authoringKey": "f5da09b674b1485198bf38d31d4c2e36",
+            "id": "7",
+            "name": "proxicall-luis-en",
+            "region": "westeurope",
+            "culture": "en-us",
+            "version": "0.1"
+        }
+    ],
+    "padlock": "",
+    "version": "2.0",
+    "path": "C:\\Users\\MelissaFontesse\\Documents\\Stage2019\\GitProjet\\ProxiCall\\ProxiCall\\ProxiCall.Bot\\ProxiCall.bot",
+    "overrides": null
 }

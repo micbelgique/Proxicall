@@ -39,7 +39,7 @@ namespace ProxiCall.Bot
 
                             var app = new LuisApplication(luis.AppId, luis.AuthoringKey, luis.GetEndpoint());
                             var recognizer = new LuisRecognizer(app);
-                            this.LuisServices.Add(luis.Name, recognizer);
+                            LuisServices.Add(luis.Name, recognizer);
                             break;
                         }
                 }
