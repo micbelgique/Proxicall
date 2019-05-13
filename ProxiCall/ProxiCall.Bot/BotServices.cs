@@ -1,10 +1,12 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License
 
-using System;
 using System.Collections.Generic;
 using Microsoft.Bot.Builder.AI.Luis;
 using Microsoft.Bot.Configuration;
+using Microsoft.Extensions.Options;
+using ProxiCall.Bot.Models.AppSettings;
+using LuisApplication = Microsoft.Bot.Builder.AI.Luis.LuisApplication;
 
 namespace ProxiCall.Bot
 {
@@ -19,30 +21,21 @@ namespace ProxiCall.Bot
     //  See https://www.luis.ai/home" for more information regarding language understanding using LUIS
     public class BotServices
     {
+        public LuisConfig LuisConfig { get; set; }
+
         /// <summary>
         /// Initializes a new instance of the <see cref="BotServices"/> class.
         /// <param name="botConfiguration">A dictionary of named <see cref="BotConfiguration"/> instances for usage within the bot.</param>
         /// </summary>
-        public BotServices(BotConfiguration botConfiguration)
+        public BotServices(IOptions<LuisConfig> config)
         {
-            foreach (var service in botConfiguration.Services)
-            {
-                switch (service.Type)
-                {
-                    case ServiceTypes.Luis:
-                        {
-                            var luis = (LuisService)service;
-                            if (luis == null)
-                            {
-                                throw new InvalidOperationException("The LUIS service is not configured correctly in your '.bot' file.");
-                            }
+            LuisConfig = config.Value;
 
-                            var app = new LuisApplication(luis.AppId, luis.AuthoringKey, luis.GetEndpoint());
-                            var recognizer = new LuisRecognizer(app);
-                            LuisServices.Add(luis.Name, recognizer);
-                            break;
-                        }
-                }
+            foreach (var luisApplication in LuisConfig.LuisApplications)
+            {
+                var app = new LuisApplication(luisApplication.AppId, LuisConfig.ApiKey, LuisConfig.Hostname);
+                var recognizer = new LuisRecognizer(app);
+                LuisServices.Add(luisApplication.Name, recognizer);
             }
         }
 

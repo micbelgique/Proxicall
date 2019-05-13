@@ -108,6 +108,8 @@ namespace ProxiCall.Bot
             services.Configure<LuisConfig>(Configuration.GetSection("LuisConfig"));
             services.Configure<ServicesConfig>(Configuration.GetSection("ServicesConfig"));
 
+            services.AddSingleton<BotServices>(sp => ActivatorUtilities.CreateInstance<BotServices>(sp));
+
             services.AddBot<ProxiCallBot>(options =>
             {
                 options.CredentialProvider = new SimpleCredentialProvider(Configuration.GetSection("BotConfig")["MicrosoftAppId"], Configuration.GetSection("BotConfig")["MicrosoftAppPassword"]);

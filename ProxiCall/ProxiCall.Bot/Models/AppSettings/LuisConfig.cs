@@ -8,7 +8,10 @@ namespace ProxiCall.Bot.Models.AppSettings
         [JsonProperty("ApiKey")]
         public string ApiKey { get; set; }
 
+        [JsonProperty("Hostname")]
+        public string Hostname { get; set; }
+
         [JsonProperty("LuisApplications")]
-        public List<LuisApplication> LuisApplications { get; set; }
+        public List<LuisApplicationConfig> LuisApplications { get; set; }
     }
 }

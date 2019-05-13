@@ -6,5 +6,8 @@ namespace ProxiCall.Bot.Models.AppSettings
     {
         [JsonProperty("ProxiCallCrmHostname")]
         public string ProxiCallCrmHostname { get; set; }
+
+        [JsonProperty("AdminPhoneNumber")]
+        public string AdminPhoneNumber { get; set; }
     }
 }

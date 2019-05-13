@@ -4,20 +4,24 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using ProxiCall.Bot.Exceptions.ProxiCallCRM;
 using ProxiCall.Bot.Models;
+using ProxiCall.Bot.Models.AppSettings;
 
 namespace ProxiCall.Bot.Services.ProxiCallCRM
 {
     public class OpportunityService
     {
         private readonly HttpClient _httpClient;
+        private readonly ServicesConfig _servicesConfig;
 
-        public OpportunityService(HttpClient httpClient)
+        public OpportunityService(HttpClient httpClient, IOptions<ServicesConfig> options)
         {
+            _servicesConfig = options.Value;
             _httpClient = httpClient;
-            _httpClient.BaseAddress = new Uri(Environment.GetEnvironmentVariable("ApiHost"));  
+            _httpClient.BaseAddress = new Uri(_servicesConfig.ProxiCallCrmHostname);   
         }
 
         public async Task PostOpportunityAsync(string token, OpportunityDetailed opportunity)

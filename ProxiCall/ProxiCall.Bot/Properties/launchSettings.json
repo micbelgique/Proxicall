@@ -12,8 +12,6 @@
       "commandName": "IISExpress",
       "launchBrowser": true,
       "environmentVariables": {
-        "ApiHost": "https://proxicall-crm.azurewebsites.net",
-        "AdminPhoneNumber": "3212345",
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
     },

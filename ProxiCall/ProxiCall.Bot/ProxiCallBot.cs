@@ -11,11 +11,13 @@ using Microsoft.Bot.Builder.Dialogs;
 using Microsoft.Bot.Schema;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Newtonsoft.Json.Linq;
 using ProxiCall.Bot.Dialogs.CreateData;
 using ProxiCall.Bot.Dialogs.SearchData;
 using ProxiCall.Bot.Dialogs.Shared;
 using ProxiCall.Bot.Models;
+using ProxiCall.Bot.Models.AppSettings;
 using ProxiCall.Bot.Resources;
 using ProxiCall.Bot.Services.ProxiCallCRM;
 using ProxiCall.Library;
@@ -43,6 +45,7 @@ namespace ProxiCall.Bot
         private readonly IServiceProvider _serviceProvider;
         private readonly ILoggerFactory _loggerFactory;
         private readonly AccountService _accountService;
+        private readonly ServicesConfig _servicesConfig;
 
         public DialogSet Dialogs { get; private set; }
 
@@ -52,12 +55,14 @@ namespace ProxiCall.Bot
         /// <param name="conversationState">The managed conversation state.</param>
         /// <param name="loggerFactory">A <see cref="ILoggerFactory"/> that is hooked to the Azure App Service provider.</param>
         /// <seealso cref="https://docs.microsoft.com/en-us/aspnet/core/fundamentals/logging/?view=aspnetcore-2.1#windows-eventlog-provider"/>
-        public ProxiCallBot(BotServices services, StateAccessors accessors, IServiceProvider serviceProvider, ILoggerFactory loggerFactory)
+        public ProxiCallBot(BotServices services, StateAccessors accessors, IOptions<ServicesConfig> options, IServiceProvider serviceProvider, ILoggerFactory loggerFactory)
         {
             _accessors = accessors ?? throw new System.ArgumentNullException(nameof(accessors));
             _serviceProvider = serviceProvider;
             _loggerFactory = loggerFactory ?? throw new ArgumentNullException(nameof(loggerFactory));
             _services = services ?? throw new ArgumentNullException(nameof(services));
+
+            _servicesConfig = options.Value;
 
             _accountService = (AccountService) _serviceProvider.GetService(typeof(AccountService));
             
@@ -231,7 +236,7 @@ namespace ProxiCall.Bot
             else if (isDevelopmentEnvironment && activity.Type == ActivityTypes.ConversationUpdate && activity.MembersAdded.FirstOrDefault()?.Id == activity.Recipient.Id)
             {
                 //TODO : change current phone number to MIC phone number
-                credential = Environment.GetEnvironmentVariable("AdminPhoneNumber");
+                credential = _servicesConfig.AdminPhoneNumber;
                 var loggedUser = await _accountService.Authenticate(credential, loginMethod);
                 userState.LoggedUser = loggedUser;
                 await _accessors.LoggedUserAccessor.SetAsync(turnContext, userState,
