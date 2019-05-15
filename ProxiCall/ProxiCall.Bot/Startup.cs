@@ -2,8 +2,6 @@
 // Licensed under the MIT License.
 
 using System;
-using System.IO;
-using System.Linq;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Bot.Builder;
@@ -11,14 +9,11 @@ using Microsoft.Bot.Builder.BotFramework;
 using Microsoft.Bot.Builder.Dialogs;
 using Microsoft.Bot.Builder.Integration.AspNet.Core;
 using Microsoft.Bot.Builder.Teams.Middlewares;
-using Microsoft.Bot.Configuration;
 using Microsoft.Bot.Connector.Authentication;
 using Microsoft.Bot.Schema;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
-using Newtonsoft.Json;
 using ProxiCall.Bot.Dialogs.Shared;
 using ProxiCall.Bot.Exceptions.ProxiCallCRM;
 using ProxiCall.Bot.Models.AppSettings;
@@ -127,7 +122,7 @@ namespace ProxiCall.Bot
                     activity.Locale = CulturedBot.Culture?.Name;
                     await context.SendActivityAsync(activity);
                 };
-                
+
                 //Adding Teams middleware
                 options.Middleware.Add(
                     new TeamsMiddleware(
