@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.Bot.Connector.DirectLine;
 using Microsoft.AspNetCore.Hosting;
 using ProxiCall.Web.Services;
@@ -17,7 +16,10 @@ using ProxiCall.Web.Services.Speech;
 using Twilio.Http;
 using Newtonsoft.Json.Linq;
 using System.Globalization;
+using Microsoft.Extensions.Options;
 using ProxiCall.Library;
+using ProxiCall.Library.Services;
+using ProxiCall.Web.Models.AppSettings;
 
 namespace ProxiCall.Web.Controllers.Api
 {
@@ -25,10 +27,10 @@ namespace ProxiCall.Web.Controllers.Api
     [ApiController]
     public class VoiceController : TwilioController
     {
-        private readonly string Sid = Environment.GetEnvironmentVariable("TwilioSid");
-        private readonly string Token = Environment.GetEnvironmentVariable("TwilioToken");
+        private readonly TwilioAppConfig _twilioAppConfig;
+        private readonly DirectlineConfig _directlineConfig;
         private static BotConnector _botConnector;
-        private readonly IActionContextAccessor _actionContextAccessor;
+        private readonly TextToSpeech _textToSpeech;
         private readonly IHostingEnvironment _hostingEnvironment;
         private readonly string[] _names = 
         {
@@ -38,7 +40,7 @@ namespace ProxiCall.Web.Controllers.Api
             "David Vanni","Simon Fauconnier","Chloé Michaux","Xavier Vercruysse","Xavier Bastin","Guillaume Rigaux","Romain Blondeau","Laïla Valenti","Ryan Büttner","Pierre Mayeur","Guillaume Servais",
             "Frédéric Carbonnelle","Valentin Chevalier","Alain Musoni",
             // Companies
-            "Smart Richesse","Microsoft Innovation Center","Doctor Love","Proximus EnCo","Seeing AI",
+            "Smart Richesse","Microsoft Innovation Center","Proximus EnCo","Seeing AI",
             // Products
             "BotBot",
             "SpeakAnotherDayBot",
@@ -50,19 +52,28 @@ namespace ProxiCall.Web.Controllers.Api
 
         private readonly string _hints;
 
-        public VoiceController(IActionContextAccessor actionContextAccessor, IHostingEnvironment hostingEnvironment)
+        public VoiceController(IHostingEnvironment hostingEnvironment, IOptions<TwilioAppConfig> twilioOptions, IOptions<DirectlineConfig> directlineOptions, TextToSpeech textToSpeech)
         {
-            _actionContextAccessor = actionContextAccessor;
+            _textToSpeech = textToSpeech;
+            _twilioAppConfig = twilioOptions.Value;
+            _directlineConfig = directlineOptions.Value;
             _hostingEnvironment = hostingEnvironment;
-            TwilioClient.Init(Sid, Token);
+            
+            TwilioClient.Init(_twilioAppConfig.TwilioSid, _twilioAppConfig.TwilioToken);
+
+            _hints = StringArrayToString(_names);
+        }
+
+        private string StringArrayToString(string[] strings)
+        {
             var sb = new StringBuilder();
-            foreach (var name in _names)
+            foreach (var str in strings)
             {
-                sb.Append(name);
+                sb.Append(str);
                 sb.Append(",");
             }
             sb.Remove(sb.Length - 1, 1);
-            _hints = sb.ToString();
+            return sb.ToString();
         }
         
         //-------------------
@@ -73,9 +84,9 @@ namespace ProxiCall.Web.Controllers.Api
         {
             CallResource.Create(
                 method: HttpMethod.Get,
-                url: new Uri($"{Environment.GetEnvironmentVariable("Host")}/api/voice/receive"),
+                url: new Uri($"{_directlineConfig.Host}/api/voice/receive"),
                 to: new Twilio.Types.PhoneNumber(to),
-                from: new Twilio.Types.PhoneNumber(Environment.GetEnvironmentVariable("TwilioPhoneNumber"))
+                from: new Twilio.Types.PhoneNumber(_twilioAppConfig.TwilioPhoneNumber)
             );
             return Ok();
         }
@@ -97,7 +108,7 @@ namespace ProxiCall.Web.Controllers.Api
                 System.IO.File.Delete(file);
             }
 
-            _botConnector = new BotConnector(CallSid);
+            _botConnector = new BotConnector(_directlineConfig.DirectlineSecret, CallSid);
 
             _ = System.Threading.Tasks.Task.Run(() => _botConnector.ReceiveMessagesFromBotAsync(HandleIncomingBotMessagesAsync));
 
@@ -110,7 +121,7 @@ namespace ProxiCall.Web.Controllers.Api
             };
 
             var phoneNumber = string.Empty;
-            if (From != Environment.GetEnvironmentVariable("TwilioPhoneNumber"))
+            if (From != _twilioAppConfig.TwilioPhoneNumber)
             {
                 //User Phone Number during Inbound Call
                 phoneNumber = From.Substring(1);
@@ -157,18 +168,17 @@ namespace ProxiCall.Web.Controllers.Api
                 var localeCulture = languagesManager.CheckAndReturnAppropriateCulture(activity.Locale);
                 CultureInfo.CurrentCulture = new CultureInfo(localeCulture);
                 
-                var tts = new TextToSpeech();
                 //Using TTS to repond to the caller
                 var ttsResponse = await System.Threading.Tasks.Task.Run(() =>
-                tts.TransformTextToSpeechAsync(activity.Text, CultureInfo.CurrentCulture.Name));
+                _textToSpeech.TransformTextToSpeechAsync(activity.Text, CultureInfo.CurrentCulture.Name));
 
                 var wavGuid = Guid.NewGuid();
                 var pathToAudioDirectory = _hostingEnvironment.WebRootPath + "/audio";
                 var pathCombined = Path.Combine(pathToAudioDirectory, $"{ wavGuid }.wav");
+                var formatConverter = new FormatConvertor();
+                await formatConverter.TurnAudioStreamToFile(ttsResponse, pathCombined);
 
-                await FormatConvertor.TurnAudioStreamToFile(ttsResponse, pathCombined);
-
-                voiceResponse.Play(new Uri($"{Environment.GetEnvironmentVariable("Host")}/audio/{wavGuid}.wav"));
+                voiceResponse.Play(new Uri($"{_directlineConfig.Host}audio/{wavGuid}.wav"));
 
                 if (activity.Entities != null)
                 {
@@ -199,7 +209,7 @@ namespace ProxiCall.Web.Controllers.Api
                 voiceResponse.Gather(
                     input: new List<Gather.InputEnum> { Gather.InputEnum.Speech },
                     language: CultureInfo.CurrentCulture.Name,
-                    action: new Uri($"{Environment.GetEnvironmentVariable("Host")}/api/voice/send"),
+                    action: new Uri($"{_directlineConfig.Host}api/voice/send"),
                     method: HttpMethod.Get,
                     speechTimeout: "auto",
                     hints: _hints
@@ -212,7 +222,7 @@ namespace ProxiCall.Web.Controllers.Api
 
             CallResource.Update(
                 method: HttpMethod.Get,
-                url: new Uri($"{Environment.GetEnvironmentVariable("Host")}/xml/{xmlFileName}.xml"),
+                url: new Uri($"{_directlineConfig.Host}xml/{xmlFileName}.xml"),
                 pathSid: callSid
             );
         }
@@ -234,7 +244,7 @@ namespace ProxiCall.Web.Controllers.Api
             response.Pause(15);
 
             //DEBUG
-            response.Say("ProxiCall's got disconnect", voice: "alice", language: Say.LanguageEnum.EnUs);
+            response.Say("ProxiCall's got disconnected", voice: "alice", language: Say.LanguageEnum.EnUs);
 
             return TwiML(response);
         }

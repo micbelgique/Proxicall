@@ -16,7 +16,7 @@ namespace ProxiCall.Web.Services.Speech
             apiURIBuilder.Append(region).Append(".api.cognitive.microsoft.com/sts/v1.0/issuetoken");
 
             _subscriptionKey = subscriptionKey;
-            _token = FetchTokenAsync(apiURIBuilder.ToString(), subscriptionKey).Result;
+            _token = FetchTokenAsync(apiURIBuilder.ToString()).Result;
         }
 
         public string GetAccessToken()
@@ -24,11 +24,11 @@ namespace ProxiCall.Web.Services.Speech
             return _token;
         }
 
-        private async Task<string> FetchTokenAsync(string fetchUri, string subscriptionKey)
+        private async Task<string> FetchTokenAsync(string fetchUri)
         {
             using (var client = new HttpClient())
             {
-                client.DefaultRequestHeaders.Add("Ocp-Apim-Subscription-Key", subscriptionKey);
+                client.DefaultRequestHeaders.Add("Ocp-Apim-Subscription-Key", _subscriptionKey);
                 UriBuilder uriBuilder = new UriBuilder(fetchUri);
 
                 var result = await client.PostAsync(uriBuilder.Uri.AbsoluteUri, null);

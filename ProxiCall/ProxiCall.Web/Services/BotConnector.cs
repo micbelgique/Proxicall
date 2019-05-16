@@ -21,9 +21,9 @@ namespace ProxiCall.Web.Services
 
         public delegate Task OnReplyHandler(IList<Activity> botReplies, string callSid);
 
-        public BotConnector(string callSid)
+        public BotConnector(string directlineSecret, string callSid)
         {
-            _directLineClient = new DirectLineClient(Environment.GetEnvironmentVariable("DirectLineSecret"));
+            _directLineClient = new DirectLineClient(directlineSecret);
             var conversation = _directLineClient.Conversations.StartConversation();
             _conversationId = conversation.ConversationId;
             _streamUrl = conversation.StreamUrl;
