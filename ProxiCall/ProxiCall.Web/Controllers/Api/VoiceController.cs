@@ -20,6 +20,7 @@ using Microsoft.Extensions.Options;
 using ProxiCall.Library;
 using ProxiCall.Library.Services;
 using ProxiCall.Web.Models.AppSettings;
+using ProxiCall.Web.Services.ProxiCallCRM;
 
 namespace ProxiCall.Web.Controllers.Api
 {
@@ -31,49 +32,26 @@ namespace ProxiCall.Web.Controllers.Api
         private readonly DirectlineConfig _directlineConfig;
         private static BotConnector _botConnector;
         private readonly TextToSpeech _textToSpeech;
+        private readonly NamesService _namesService;
         private readonly IHostingEnvironment _hostingEnvironment;
-        private readonly string[] _names = 
-        {
-            // Leads
-            "Mélissa Fontesse","Arthur Grailet","Stéphanie Bémelmans","Renaud Dumont","Vivien Preser","Massimo Gentile","Thomas D'Hollander","Simon Gauthier","Laura Lieu","Tinaël Devresse",
-            "Andy Dautricourt","Julien Dendauw","Martine Meunier","Nathan Pire","Maxime Hempte","Victor Pastorani","Tobias Jetzen","Xavier Tordoir","Loris Rossi","Jessy Delhaye","Sylvain Duhant",
-            "David Vanni","Simon Fauconnier","Chloé Michaux","Xavier Vercruysse","Xavier Bastin","Guillaume Rigaux","Romain Blondeau","Laïla Valenti","Ryan Büttner","Pierre Mayeur","Guillaume Servais",
-            "Frédéric Carbonnelle","Valentin Chevalier","Alain Musoni",
-            // Companies
-            "Smart Richesse","Microsoft Innovation Center","Proximus EnCo","Seeing AI",
-            // Products
-            "BotBot",
-            "SpeakAnotherDayBot",
-            "OnceUponADreamBot",
-            "CheerlyBot",
-            "TormentorBot",
-            "SpiderBot"
-        };
 
-        private readonly string _hints;
+        private string _hints;
 
-        public VoiceController(IHostingEnvironment hostingEnvironment, IOptions<TwilioAppConfig> twilioOptions, IOptions<DirectlineConfig> directlineOptions, TextToSpeech textToSpeech)
+        public VoiceController(IHostingEnvironment hostingEnvironment, IOptions<TwilioAppConfig> twilioOptions, IOptions<DirectlineConfig> directlineOptions, TextToSpeech textToSpeech, NamesService namesService)
         {
+            _namesService = namesService;
             _textToSpeech = textToSpeech;
             _twilioAppConfig = twilioOptions.Value;
             _directlineConfig = directlineOptions.Value;
             _hostingEnvironment = hostingEnvironment;
             
             TwilioClient.Init(_twilioAppConfig.TwilioSid, _twilioAppConfig.TwilioToken);
-
-            _hints = StringArrayToString(_names);
+            Init();
         }
 
-        private string StringArrayToString(string[] strings)
+        private async void Init()
         {
-            var sb = new StringBuilder();
-            foreach (var str in strings)
-            {
-                sb.Append(str);
-                sb.Append(",");
-            }
-            sb.Remove(sb.Length - 1, 1);
-            return sb.ToString();
+            _hints = await _namesService.FetchNamesFromCrm();
         }
         
         //-------------------
@@ -108,7 +86,7 @@ namespace ProxiCall.Web.Controllers.Api
                 System.IO.File.Delete(file);
             }
 
-            _botConnector = new BotConnector(_directlineConfig.DirectlineSecret, CallSid);
+            _botConnector = new BotConnector(_directlineConfig, CallSid);
 
             _ = System.Threading.Tasks.Task.Run(() => _botConnector.ReceiveMessagesFromBotAsync(HandleIncomingBotMessagesAsync));
 

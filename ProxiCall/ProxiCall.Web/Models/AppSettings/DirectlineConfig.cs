@@ -13,5 +13,14 @@ namespace ProxiCall.Web.Models.AppSettings
 
         [JsonProperty("Host")]
         public Uri Host { get; set; }
+
+        [JsonProperty("ProxiCallCrmHostname")]
+        public Uri ProxiCallCrmHostname { get; set; }
+
+        [JsonProperty("AdminPhoneNumber")] 
+        public string AdminPhoneNumber { get; set; }
+
+        [JsonProperty("BotName")]
+        public string BotName { get; set; }
     }
 }

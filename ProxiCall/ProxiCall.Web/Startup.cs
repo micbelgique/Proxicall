@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using ProxiCall.Web.Models.AppSettings;
+using ProxiCall.Web.Services.ProxiCallCRM;
 using ProxiCall.Web.Services.Speech;
 
 namespace ProxiCall.Web
@@ -20,15 +21,13 @@ namespace ProxiCall.Web
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
-
             services.AddOptions();
-            
+            services.AddHttpClient<NamesService>();
+            services.AddHttpClient<TextToSpeech>();
+            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
             services.Configure<DirectlineConfig>(Configuration.GetSection("DirectlineConfig"));
             services.Configure<CognitiveSpeechConfig>(Configuration.GetSection("CognitiveSpeechConfig"));
             services.Configure<TwilioAppConfig>(Configuration.GetSection("TwilioAppConfig"));
-
-            services.AddHttpClient<TextToSpeech>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

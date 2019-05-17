@@ -6,6 +6,7 @@ using System.Net.WebSockets;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using ProxiCall.Web.Models.AppSettings;
 
 namespace ProxiCall.Web.Services
 {
@@ -16,12 +17,14 @@ namespace ProxiCall.Web.Services
         private readonly string _streamUrl;
         private readonly string _callSid;
         private readonly string _fromNumber;
+        private readonly DirectlineConfig _directlineConfig;
 
         public delegate Task OnReplyHandler(IList<Activity> botReplies, string callSid);
 
-        public BotConnector(string directlineSecret, string callSid)
+        public BotConnector(DirectlineConfig directlineConfig, string callSid)
         {
-            _directLineClient = new DirectLineClient(directlineSecret);
+            _directlineConfig = directlineConfig;
+            _directLineClient = new DirectLineClient(_directlineConfig.DirectlineSecret);
             var conversation = _directLineClient.Conversations.StartConversation();
             _conversationId = conversation.ConversationId;
             _streamUrl = conversation.StreamUrl;
@@ -55,7 +58,8 @@ namespace ProxiCall.Web.Services
                     var isIgnoringInput = true;
                     foreach (Activity activity in activitySet.Activities)
                     {
-                        isFromBot = activity.From.Name == "ProxiCallBot";
+                        //TODO Replace this name with the name of your bot
+                        isFromBot = activity.From.Name == _directlineConfig.BotName;
                         isIgnoringInput = activity.InputHint == InputHints.IgnoringInput;
                         if (isFromBot)
                         {
