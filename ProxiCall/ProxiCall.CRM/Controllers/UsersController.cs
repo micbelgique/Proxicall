@@ -41,7 +41,7 @@ namespace ProxiCall.CRM.Controllers
             using (var httpClient = new HttpClient())
             {
                 //Todo manage potential error (number not found, no response,...)
-                var path = $"http://proxicall.azurewebsites.net/api/voice/outbound/{user.PhoneNumber}";
+                var path = $"https://proxicall-directline-dev.azurewebsites.net/api/voice/outbound/{user.PhoneNumber}";
                 var response = await httpClient.GetAsync(path);
             }
             return View();
