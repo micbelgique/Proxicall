@@ -243,4 +243,7 @@
   <data name="NoAccessException" xml:space="preserve">
     <value>Sorry, you don't have the required access.</value>
   </data>
+  <data name="NoPointOfContactFound" xml:space="preserve">
+    <value>No one people found for this company</value>
+  </data>
 </root>

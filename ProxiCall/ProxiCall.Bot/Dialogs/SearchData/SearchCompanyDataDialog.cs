@@ -206,9 +206,21 @@ namespace ProxiCall.Bot.Dialogs.SearchData
             {
                 AddDialog(ActivatorUtilities.CreateInstance<SearchLeadDataDialog>(_serviceProvider));
                 crmState.Lead = crmState.Company.Contact;
-                if(crmState.Lead.Company==null)
+                if(crmState.Lead!= null && crmState.Lead.Company==null)
                 {
                     crmState.Lead = Lead.CloneWithCompany(crmState.Lead,crmState.Company);
+                }
+                else if (crmState.Lead == null)
+                {
+                    var activityPrompt = MessageFactory.Text(CulturedBot.NoPointOfContactFound);
+                    activityPrompt.Locale = CulturedBot.Culture?.Name;
+
+                    var promptOptions = new PromptOptions
+                    {
+                        Prompt = activityPrompt
+                    };
+                    await stepContext.PromptAsync(_retryFetchingMinimumDataFromUserPrompt,promptOptions, cancellationToken);
+                    return await stepContext.EndDialogAsync();
                 }
                 await _accessors.CRMStateAccessor.SetAsync(stepContext.Context, crmState, cancellationToken);
                 return await stepContext.ReplaceDialogAsync(nameof(SearchLeadDataDialog), cancellationToken: cancellationToken);

@@ -243,4 +243,7 @@
   <data name="NoAccessException" xml:space="preserve">
     <value>solé, vous n'avez pas les droits d'accès requis.</value>
   </data>
+  <data name="NoPointOfContactFound" xml:space="preserve">
+    <value>Il n'y a pas de personnes référencées pour cette entreprise</value>
+  </data>
 </root>
