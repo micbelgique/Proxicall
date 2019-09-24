@@ -193,7 +193,7 @@ namespace ProxiCall.Bot.Dialogs.SearchData
             //Handling when lead not found
             if (crmState.Lead == null || userState.WantsToCallButNumberNotFound)
             {
-                var retry = stepContext.Result.Equals("oui") ? true: false ;
+                var retry = stepContext.Result.ToString().ToLower().Equals(CulturedBot.Yes) ? true: false ;
                 if (retry)
                 {
                     //Restarting dialog if user decides to retry
