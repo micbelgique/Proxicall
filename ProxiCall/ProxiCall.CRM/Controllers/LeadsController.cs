@@ -110,7 +110,19 @@ namespace ProxiCall.CRM.Controllers
             {
                 try
                 {
-                    _context.Update(lead);
+                    var oldCompany = await _context.Companies.FirstOrDefaultAsync(c => c.ContactId == lead.Id);
+                    if (oldCompany != null)
+                    {
+                        oldCompany.ContactId = null;
+                        _context.Entry(oldCompany).State = EntityState.Modified;
+                    }
+                    var company = await _context.Companies.FirstOrDefaultAsync(c => c.Id == lead.CompanyId);
+                    if(company != null)
+                    {
+                        company.ContactId = lead.Id;
+                        _context.Entry(company).State = EntityState.Modified;
+                    }
+                    _context.Entry(lead).State = EntityState.Modified;
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)

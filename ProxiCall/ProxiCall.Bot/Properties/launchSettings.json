@@ -2,8 +2,12 @@
   "iisSettings": {
     "windowsAuthentication": false,
     "anonymousAuthentication": true,
+    "iis": {
+      "applicationUrl": "http://localhost/ProxiCall.Bot",
+      "sslPort": 0
+    },
     "iisExpress": {
-      "applicationUrl": "http://localhost:3978/",
+      "applicationUrl": "http://localhost:44370/",
       "sslPort": 0
     }
   },

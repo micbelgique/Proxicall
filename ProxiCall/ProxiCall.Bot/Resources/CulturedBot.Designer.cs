@@ -250,7 +250,7 @@ namespace ProxiCall.Bot.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Bienvenue sur ProxiCall {0}..
+        ///   Looks up a localized string similar to Bienvenue chez ProxiCall {0}..
         /// </summary>
         public static string Greet {
             get {

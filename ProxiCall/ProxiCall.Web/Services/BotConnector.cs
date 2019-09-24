@@ -38,7 +38,7 @@ namespace ProxiCall.Web.Services
 
 
             string botReply = String.Empty;
-            var replyBuffer = ClientWebSocket.CreateClientBuffer(1024 * 4, 1024 * 4);
+            var replyBuffer = ClientWebSocket.CreateClientBuffer(1024 * 8, 1024 * 8);
             
             var activities = new List<Activity>();
 
@@ -55,7 +55,7 @@ namespace ProxiCall.Web.Services
                     botReply = Encoding.UTF8.GetString(replyBuffer.ToArray(), 0, websocketReceivedResult.Count);
                     var activitySet = JsonConvert.DeserializeObject<ActivitySet>(botReply);
                     var isFromBot = true;
-                    var isIgnoringInput = true;
+                    var isIgnoringInput = false;
                     foreach (Activity activity in activitySet.Activities)
                     {
                         //TODO Replace this name with the name of your bot

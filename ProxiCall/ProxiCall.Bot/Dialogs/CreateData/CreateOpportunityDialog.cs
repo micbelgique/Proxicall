@@ -3,6 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Bot.Builder;
 using Microsoft.Bot.Builder.Dialogs;
+using Microsoft.Bot.Builder.Dialogs.Choices;
 using Microsoft.Bot.Schema;
 using Microsoft.Extensions.Logging;
 using ProxiCall.Bot.Dialogs.Shared;
@@ -195,7 +196,7 @@ namespace ProxiCall.Bot.Dialogs.CreateData
                 var promptOptions = new PromptOptions
                 {
                     Prompt = activityPrompt,
-                    RetryPrompt = activityRetryPrompt,
+                    RetryPrompt = activityRetryPrompt
                 };
                 return await stepContext.PromptAsync(_retryFetchingLeadFromUserPrompt, promptOptions, cancellationToken);
             }

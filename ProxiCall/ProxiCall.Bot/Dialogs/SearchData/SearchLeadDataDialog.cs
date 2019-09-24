@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Bot.Builder;
 using Microsoft.Bot.Builder.Dialogs;
+using Microsoft.Bot.Builder.Dialogs.Choices;
 using Microsoft.Bot.Schema;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Linq;
@@ -52,8 +54,8 @@ namespace ProxiCall.Bot.Dialogs.SearchData
             var culture = CulturedBot.Culture?.Name;
             AddDialog(new WaterfallDialog(_searchLeadDataWaterfall, waterfallSteps));
             AddDialog(new TextPrompt(_leadFullNamePrompt));
-            AddDialog(new ConfirmPrompt(_retryFetchingMinimumDataFromUserPrompt, defaultLocale: culture));
-            AddDialog(new ConfirmPrompt(_confirmForwardingPrompt, defaultLocale: culture));
+            AddDialog(new TextPrompt(_retryFetchingMinimumDataFromUserPrompt/*, defaultLocale: culture*/));
+            AddDialog(new TextPrompt(_confirmForwardingPrompt/*, defaultLocale: culture*/));
         }
 
         private async Task<DialogTurnResult> InitializeStateStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
@@ -191,7 +193,7 @@ namespace ProxiCall.Bot.Dialogs.SearchData
             //Handling when lead not found
             if (crmState.Lead == null || userState.WantsToCallButNumberNotFound)
             {
-                var retry = (bool)stepContext.Result;
+                var retry = stepContext.Result.Equals("oui") ? true: false ;
                 if (retry)
                 {
                     //Restarting dialog if user decides to retry
@@ -390,7 +392,7 @@ namespace ProxiCall.Bot.Dialogs.SearchData
 
             var hasNoWantedResults =
                 !(
-                    (hasCompany && wantCompany) || (hasAddress && wantAddress) ||
+                    (wantContact && hasCompany) || (hasCompany && wantCompany) || (hasAddress && wantAddress) ||
                     (hasPhone && wantPhone) || (hasEmail && wantEmail) || (hasOppornunities && wantOppornunities)
                 );
 

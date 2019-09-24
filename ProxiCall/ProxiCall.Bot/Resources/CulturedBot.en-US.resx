@@ -246,4 +246,7 @@
   <data name="NoPointOfContactFound" xml:space="preserve">
     <value>No one people found for this company</value>
   </data>
+  <data name="Culture" xml:space="preserve">
+    <value>en-EN</value>
+  </data>
 </root>

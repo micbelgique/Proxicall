@@ -97,11 +97,18 @@ namespace ProxiCall.CRM.Controllers.Api
 
             return opportunities;
         }
-
         [HttpGet("byName")]
         public async Task<ActionResult<Lead>> GetLead(string firstName, string lastName)
         {
-            var lead = await _leadDao.GetLeadByName(firstName, lastName);
+            Lead lead = null;
+            if(lastName == null)
+            {
+                lead = await _context.Leads.FirstOrDefaultAsync(x => x.FirstName == firstName || x.LastName == firstName);
+            }
+            else
+            {
+                lead = await _leadDao.GetLeadByName(firstName, lastName);
+            }
             if (lead == null)
             {
                 return NotFound();
@@ -118,9 +125,10 @@ namespace ProxiCall.CRM.Controllers.Api
             {
                 return BadRequest();
             }
-
+            var company = await _context.Companies.FirstOrDefaultAsync(c => c.Id == lead.CompanyId);
+            company.ContactId = lead.Id;
             _context.Entry(lead).State = EntityState.Modified;
-
+            _context.Entry(company).State = EntityState.Modified;
             try
             {
                 await _context.SaveChangesAsync();

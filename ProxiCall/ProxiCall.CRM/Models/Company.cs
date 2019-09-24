@@ -14,7 +14,7 @@ namespace ProxiCall.CRM.Models
         [Display(Name = "Contact")]
         [ForeignKey("Contact")]
         public string ContactId { get; set; }
-        [Display(Name = "Contact")]
+        //[Display(Name = "Contact")]
         public Lead Contact { get; set; }
 
         public override string ToString()

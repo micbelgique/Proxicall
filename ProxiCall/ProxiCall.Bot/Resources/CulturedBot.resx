@@ -178,7 +178,7 @@
     <value>{0} numéro de téléphone est le {1}</value>
   </data>
   <data name="Greet" xml:space="preserve">
-    <value>Bienvenue sur ProxiCall {0}.</value>
+    <value>Bienvenue chez ProxiCall {0}.</value>
   </data>
   <data name="InformAboutForwardingCall" xml:space="preserve">
     <value>Nous transférons votre appel.</value>
@@ -245,5 +245,8 @@
   </data>
   <data name="NoPointOfContactFound" xml:space="preserve">
     <value>Il n'y a pas de personnes référencées pour cette entreprise</value>
+  </data>
+  <data name="Culture" xml:space="preserve">
+    <value>FR-fr</value>
   </data>
 </root>
