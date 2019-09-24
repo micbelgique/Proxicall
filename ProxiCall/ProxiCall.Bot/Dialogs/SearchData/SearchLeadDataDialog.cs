@@ -439,7 +439,7 @@ namespace ProxiCall.Bot.Dialogs.SearchData
             {
                 if(userState.IsEligibleForPotentialForwarding)
                 {
-                    forward = (bool)stepContext.Result;
+                    forward = stepContext.Result.ToString().ToLower().Equals(CulturedBot.Yes) ? true : false;
                 }
                 if (!forward)
                 {
