@@ -82,15 +82,15 @@ namespace ProxiCall.Bot.Dialogs.CreateData
             AddDialog(new WaterfallDialog(_createOpportunityDataWaterfall, waterfallSteps));
             //Searching for lead
             AddDialog(new TextPrompt(_leadFullNamePrompt));
-            AddDialog(new ConfirmPrompt(_retryFetchingLeadFromUserPrompt, defaultLocale: culture));
+            AddDialog(new TextPrompt(_retryFetchingLeadFromUserPrompt/*, defaultLocale: culture*/));
             //Searching for product
             AddDialog(new TextPrompt(_productNamePrompt));
-            AddDialog(new ConfirmPrompt(_retryFetchingProductFromUserPrompt, defaultLocale: culture));
+            AddDialog(new TextPrompt(_retryFetchingProductFromUserPrompt/*, defaultLocale: culture*/));
             //Checking the closing date
             AddDialog(new TextPrompt(_closingDatePrompt));
-            AddDialog(new ConfirmPrompt(_retryFetchingClosingDateFromUserPrompt, defaultLocale: culture));
+            AddDialog(new TextPrompt(_retryFetchingClosingDateFromUserPrompt/*, defaultLocale: culture*/));
             //Checking for comment
-            AddDialog(new ConfirmPrompt(_commentPrompt, defaultLocale: culture));
+            AddDialog(new TextPrompt(_commentPrompt/*, defaultLocale: culture*/));
             AddDialog(new TextPrompt(_fetchingCommentFromUserPrompt));
         }
 
@@ -219,7 +219,7 @@ namespace ProxiCall.Bot.Dialogs.CreateData
             //Handling when lead not found
             if (crmState.Opportunity.Lead == null)
             {
-                var retry = (bool)stepContext.Result;
+                var retry = stepContext.Result.ToString().ToLower().Equals(CulturedBot.Yes) ? true : false;
                 if (retry)
                 {
                     //Restarting dialog if user decides to retry
@@ -329,7 +329,7 @@ namespace ProxiCall.Bot.Dialogs.CreateData
             //Handling when product not found
             if (crmState.Opportunity.Product == null)
             {
-                var retry = (bool)stepContext.Result;
+                var retry = stepContext.Result.ToString().ToLower().Equals(CulturedBot.Yes) ? true : false;
                 if (retry)
                 {
                     //Restarting dialog if user decides to retry
@@ -433,7 +433,7 @@ namespace ProxiCall.Bot.Dialogs.CreateData
             //Handling when date not found
             if (userState.IsEligibleForPotentialSkippingStep)
             {
-                var retry = (bool)stepContext.Result;
+                var retry = stepContext.Result.ToString().ToLower().Equals(CulturedBot.Yes) ? true : false;
                 if (retry)
                 {
                     //Restarting dialog if user decides to retry
@@ -487,7 +487,7 @@ namespace ProxiCall.Bot.Dialogs.CreateData
         {
             var userState = await _accessors.LoggedUserAccessor.GetAsync(stepContext.Context, () => new LoggedUserState(), cancellationToken);
 
-            userState.WantsToComment = (bool)stepContext.Result;
+            userState.WantsToComment = stepContext.Result.ToString().ToLower().Equals(CulturedBot.Yes) ? true : false;
             await _accessors.LoggedUserAccessor.SetAsync(stepContext.Context, userState, cancellationToken);
 
             if (userState.WantsToComment)

@@ -51,8 +51,8 @@ namespace ProxiCall.Bot.Dialogs.SearchData
             var culture = CulturedBot.Culture?.Name;
             AddDialog(new WaterfallDialog(_searchCompanyDataWaterfall, waterfallSteps));
             AddDialog(new TextPrompt(_companyNamePrompt));
-            AddDialog(new ConfirmPrompt(_retryFetchingMinimumDataFromUserPrompt, defaultLocale: culture));
-            AddDialog(new ConfirmPrompt(_confirmForwardingPrompt, defaultLocale: culture));
+            AddDialog(new TextPrompt(_retryFetchingMinimumDataFromUserPrompt/*, defaultLocale: culture*/));
+            AddDialog(new TextPrompt(_confirmForwardingPrompt/*, defaultLocale: culture*/));
         }
 
         private async Task<DialogTurnResult> InitializeStateStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
@@ -173,7 +173,7 @@ namespace ProxiCall.Bot.Dialogs.SearchData
             //Handling when company not found
             if (crmState.Company == null || string.IsNullOrEmpty(crmState.Company.Name))
             {
-                var retry = (bool)stepContext.Result;
+                var retry = stepContext.Result.ToString().ToLower().Equals(CulturedBot.Yes) ? true : false;
                 if (retry)
                 {
                     //Restarting dialog if user decides to retry

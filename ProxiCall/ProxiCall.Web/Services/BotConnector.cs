@@ -54,13 +54,11 @@ namespace ProxiCall.Web.Services
                 {
                     botReply = Encoding.UTF8.GetString(replyBuffer.ToArray(), 0, websocketReceivedResult.Count);
                     var activitySet = JsonConvert.DeserializeObject<ActivitySet>(botReply);
-                    var isFromBot = true;
-                    var isIgnoringInput = false;
                     foreach (Activity activity in activitySet.Activities)
                     {
                         //TODO Replace this name with the name of your bot
-                        isFromBot = activity.From.Name == _directlineConfig.BotName;
-                        isIgnoringInput = activity.InputHint == InputHints.IgnoringInput;
+                        var isFromBot = activity.From.Name == _directlineConfig.BotName;
+                        var isIgnoringInput = activity.InputHint == InputHints.IgnoringInput;
                         if (isFromBot)
                         {
                             activities.Add(activity);
