@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace ProxiCall.Web.Services.Speech
 {
-    class AuthentificationApi
+    public class AuthentificationApi
     {
         private readonly string _subscriptionKey;
         private readonly string _token;
