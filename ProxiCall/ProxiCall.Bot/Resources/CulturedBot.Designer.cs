@@ -322,6 +322,15 @@ namespace ProxiCall.Bot.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to non.
+        /// </summary>
+        public static string No {
+            get {
+                return ResourceManager.GetString("No", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to solé, vous n&apos;avez pas les droits d&apos;accès requis..
         /// </summary>
         public static string NoAccessException {
@@ -444,6 +453,15 @@ namespace ProxiCall.Bot.Resources {
         public static string ThisDataNotFoundInDB {
             get {
                 return ResourceManager.GetString("ThisDataNotFoundInDB", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to oui.
+        /// </summary>
+        public static string Yes {
+            get {
+                return ResourceManager.GetString("Yes", resourceCulture);
             }
         }
     }

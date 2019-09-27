@@ -55,7 +55,7 @@ namespace ProxiCall.Web.Services.Speech
                 request.Headers.Add("Connection", "Keep-Alive");
 
                 // Update your resource name
-                request.Headers.Add("User-Agent", "ProxiCallSpeech");
+                request.Headers.Add("User-Agent", "SpeechProxicallTest");
                 request.Headers.Add("X-Microsoft-OutputFormat", "riff-16khz-16bit-mono-pcm");
 
                 // Create a request
@@ -92,7 +92,7 @@ namespace ProxiCall.Web.Services.Speech
             }
             else
             {
-                return "JessaNeural";
+                return "JessaRUS";
             }
         }
     }

@@ -35,7 +35,7 @@ namespace Console_Speech
             //string uriWeather = "https://raw.githubusercontent.com/Microsoft/ProjectOxford-ClientSDK/master/Speech/SpeechToText/Windows/samples/SpeechRecognitionServiceExample/whatstheweatherlike.wav";
             //Console.WriteLine(SpeechToText.RecognizeSpeechFromUrlAsync(uriWeather, "en-US").Result);
 
-            var gender = LeadGender.AllGender.Keys.Where(k => LeadGender.AllGender[k] == LeadGender.MALE).First();
+            var gender = /*LeadGender.AllGender.Keys.Where(k => LeadGender.AllGender[k] == LeadGender.MALE).First();*/ true;
             Console.WriteLine($"Gender : {gender}");
 
             Console.WriteLine("Please press a key to continue.");

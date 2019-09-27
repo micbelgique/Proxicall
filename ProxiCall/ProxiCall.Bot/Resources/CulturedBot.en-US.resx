@@ -249,4 +249,10 @@
   <data name="Culture" xml:space="preserve">
     <value>en-EN</value>
   </data>
+  <data name="No" xml:space="preserve">
+    <value>no</value>
+  </data>
+  <data name="Yes" xml:space="preserve">
+    <value>yes</value>
+  </data>
 </root>
