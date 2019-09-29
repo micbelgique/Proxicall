@@ -1,13 +1,11 @@
 ﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Infrastructure;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using ProxiCall.Web.Models;
-using System;
+using ProxiCall.Web.Models.AppSettings;
+using ProxiCall.Web.Services.ProxiCallCRM;
+using ProxiCall.Web.Services.Speech;
 
 namespace ProxiCall.Web
 {
@@ -23,21 +21,13 @@ namespace ProxiCall.Web
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.Configure<CookiePolicyOptions>(options =>
-            {
-                // This lambda determines whether user consent for non-essential cookies is needed for a given request.
-                options.CheckConsentNeeded = context => true;
-                options.MinimumSameSitePolicy = SameSiteMode.None;
-            });
-
-
+            services.AddOptions();
+            services.AddHttpClient<NamesService>();
+            services.AddHttpClient<TextToSpeech>();
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
-
-            //var connection = Environment.GetEnvironmentVariable("AzureConnectionString");
-            var connection = "Server=tcp:proxicall.database.windows.net,1433;Initial Catalog=proxicall_db;Persist Security Info=False;User ID=proxicall_admin;Password=L1B0EDz8V1HUT24y;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;";
-            services.AddDbContext<AzureContext>(options => options.UseSqlServer(connection));
-
-            services.AddSingleton<IActionContextAccessor, ActionContextAccessor>();
+            services.Configure<DirectlineConfig>(Configuration.GetSection("DirectlineConfig"));
+            services.Configure<CognitiveSpeechConfig>(Configuration.GetSection("CognitiveSpeechConfig"));
+            services.Configure<TwilioAppConfig>(Configuration.GetSection("TwilioAppConfig"));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -49,21 +39,12 @@ namespace ProxiCall.Web
             }
             else
             {
-                app.UseExceptionHandler("/Home/Error");
-                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
 
             app.UseHttpsRedirection();
+            app.UseMvc();
             app.UseStaticFiles();
-            app.UseCookiePolicy();
-
-            app.UseMvc(routes =>
-            {
-                routes.MapRoute(
-                    name: "default",
-                    template: "{controller=Home}/{action=Index}/{id?}");
-            });
         }
     }
 }

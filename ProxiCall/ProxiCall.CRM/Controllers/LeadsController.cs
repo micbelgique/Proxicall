@@ -1,11 +1,13 @@
-﻿using System.Linq;
+﻿using System.Collections;
+using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using ProxiCall.CRM.Areas.Identity.Data;
 using ProxiCall.CRM.Models;
-using Proxicall.CRM.Models;
-using Microsoft.AspNetCore.Authorization;
+using ProxiCall.Library.Dictionnaries.Lead;
 
 namespace ProxiCall.CRM.Controllers
 {
@@ -22,7 +24,7 @@ namespace ProxiCall.CRM.Controllers
         // GET: Leads
         public async Task<IActionResult> Index()
         {
-            var proxicallCRMContext = _context.Lead.Include(l => l.Company);
+            var proxicallCRMContext = _context.Leads.Include(l => l.Company);
             return View(await proxicallCRMContext.ToListAsync());
         }
 
@@ -34,7 +36,7 @@ namespace ProxiCall.CRM.Controllers
                 return NotFound();
             }
 
-            var lead = await _context.Lead
+            var lead = await _context.Leads
                 .Include(l => l.Company)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (lead == null)
@@ -48,7 +50,9 @@ namespace ProxiCall.CRM.Controllers
         // GET: Leads/Create
         public IActionResult Create()
         {
-            ViewData["CompanyId"] = new SelectList(_context.Company, "Id", "Name");
+            ViewData["CompanyId"] = new SelectList(_context.Companies, "Id", "Name");
+            var leadGender = new LeadGender();
+            ViewData["GenderName"] = new SelectList((IEnumerable)leadGender.AllGender, "Key", "Value");
             return View();
         }
 
@@ -57,7 +61,7 @@ namespace ProxiCall.CRM.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,FirstName,LastName,PhoneNumber,Email,Address,CompanyId")] Lead lead)
+        public async Task<IActionResult> Create([Bind("Id,FirstName,LastName,PhoneNumber,Email,Address,CompanyId,Gender")] Lead lead)
         {
             if (ModelState.IsValid)
             {
@@ -65,7 +69,9 @@ namespace ProxiCall.CRM.Controllers
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["CompanyId"] = new SelectList(_context.Company, "Id", "Name", lead.CompanyId);
+            ViewData["CompanyId"] = new SelectList(_context.Companies, "Id", "Name", lead.CompanyId);
+            var leadGender = new LeadGender();
+            ViewData["GenderName"] = new SelectList((IEnumerable)leadGender.AllGender, "Key", "Value");
             return View(lead);
         }
 
@@ -77,12 +83,14 @@ namespace ProxiCall.CRM.Controllers
                 return NotFound();
             }
 
-            var lead = await _context.Lead.FindAsync(id);
+            var lead = await _context.Leads.FindAsync(id);
             if (lead == null)
             {
                 return NotFound();
             }
-            ViewData["CompanyId"] = new SelectList(_context.Company, "Id", "Name", lead.CompanyId);
+            ViewData["CompanyId"] = new SelectList(_context.Companies, "Id", "Name", lead.CompanyId);
+            var leadGender = new LeadGender();
+            ViewData["GenderName"] = new SelectList((IEnumerable)leadGender.AllGender, "Key", "Value");
             return View(lead);
         }
 
@@ -91,7 +99,7 @@ namespace ProxiCall.CRM.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(string id, [Bind("Id,FirstName,LastName,PhoneNumber,Email,Address,CompanyId")] Lead lead)
+        public async Task<IActionResult> Edit(string id, [Bind("Id,FirstName,LastName,PhoneNumber,Email,Address,CompanyId,Gender")] Lead lead)
         {
             if (id != lead.Id)
             {
@@ -102,7 +110,19 @@ namespace ProxiCall.CRM.Controllers
             {
                 try
                 {
-                    _context.Update(lead);
+                    var oldCompany = await _context.Companies.FirstOrDefaultAsync(c => c.ContactId == lead.Id);
+                    if (oldCompany != null)
+                    {
+                        oldCompany.ContactId = null;
+                        _context.Entry(oldCompany).State = EntityState.Modified;
+                    }
+                    var company = await _context.Companies.FirstOrDefaultAsync(c => c.Id == lead.CompanyId);
+                    if(company != null)
+                    {
+                        company.ContactId = lead.Id;
+                        _context.Entry(company).State = EntityState.Modified;
+                    }
+                    _context.Entry(lead).State = EntityState.Modified;
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
@@ -118,7 +138,9 @@ namespace ProxiCall.CRM.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["CompanyId"] = new SelectList(_context.Company, "Id", "Name", lead.CompanyId);
+            ViewData["CompanyId"] = new SelectList(_context.Companies, "Id", "Name", lead.CompanyId);
+            var leadGender = new LeadGender();
+            ViewData["GenderName"] = new SelectList((IEnumerable)leadGender.AllGender, "Key", "Value");
             return View(lead);
         }
 
@@ -130,7 +152,7 @@ namespace ProxiCall.CRM.Controllers
                 return NotFound();
             }
 
-            var lead = await _context.Lead
+            var lead = await _context.Leads
                 .Include(l => l.Company)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (lead == null)
@@ -146,15 +168,15 @@ namespace ProxiCall.CRM.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(string id)
         {
-            var lead = await _context.Lead.FindAsync(id);
-            _context.Lead.Remove(lead);
+            var lead = await _context.Leads.FindAsync(id);
+            _context.Leads.Remove(lead);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
         private bool LeadExists(string id)
         {
-            return _context.Lead.Any(e => e.Id == id);
+            return _context.Leads.Any(e => e.Id == id);
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿@page
+@using ProxiCall.CRM.Areas.Identity.Pages.Account.Manage
 @model IndexModel
 @{
     ViewData["Title"] = "Profile";
@@ -32,9 +33,18 @@
                 <span asp-validation-for="Input.Email" class="text-danger"></span>
             </div>
             <div class="form-group">
+                <label asp-for="Input.Alias"></label>
+                <input asp-for="Input.Alias" class="form-control" />
+                <span asp-validation-for="Input.Alias" class="text-danger"></span>
+            </div>
+            <div class="form-group">
                 <label asp-for="Input.PhoneNumber"></label>
                 <input asp-for="Input.PhoneNumber" class="form-control" />
                 <span asp-validation-for="Input.PhoneNumber" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Input.Language"></label>
+                <select class="form-control" asp-for="Input.Language" asp-items="Model.Options"></select>
             </div>
             <button id="update-profile-button" type="submit" class="btn btn-primary">Save</button>
         </form>

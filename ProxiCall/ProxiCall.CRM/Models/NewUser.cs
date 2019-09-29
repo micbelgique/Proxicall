@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.ComponentModel.DataAnnotations;
 
-namespace Proxicall.CRM.Models
+namespace ProxiCall.CRM.Models
 {
     public class NewUser
     {
@@ -14,18 +10,18 @@ namespace Proxicall.CRM.Models
         public string Email { get; set; }
 
         [Required]
-        [StringLength(100, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = 6)]
-        [DataType(DataType.Password)]
-        [Display(Name = "Password")]
-        public string Password { get; set; }
+        [Display(Name = "Alias")]
+        public string Alias { get; set; }
 
-        [DataType(DataType.Password)]
-        [Display(Name = "Confirm password")]
-        [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
-        public string ConfirmPassword { get; set; }
+        [Required]
+        [Display(Name = "Phone number")]
+        public string PhoneNumber { get; set; }
 
         [Required]
         [Display(Name = "Administrator")]
         public bool IsAdmin { get; set; } = false;
+
+        [Display(Name = "Language of choice")]
+        public string Language { get; set; }
     }
 }

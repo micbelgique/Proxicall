@@ -1,11 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
-namespace Proxicall.CRM.Areas.Identity.Pages.Account
+namespace ProxiCall.CRM.Areas.Identity.Pages.Account
 {
     [AllowAnonymous]
     public class LockoutModel : PageModel

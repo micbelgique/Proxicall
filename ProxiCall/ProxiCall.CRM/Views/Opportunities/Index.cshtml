@@ -1,4 +1,4 @@
-﻿@model IEnumerable<Proxicall.CRM.Models.Opportunity>
+﻿@model IEnumerable<ProxiCall.CRM.Models.Opportunity>
 
 @{
     ViewData["Title"] = "Index";
@@ -44,7 +44,7 @@
 @foreach (var item in Model) {
         <tr>
             <td>
-                @Html.DisplayFor(modelItem => item.Owner.Email)
+                @Html.DisplayFor(modelItem => item.Owner.UserName)
             </td>
             <td>
                 @Html.DisplayFor(modelItem => item.Lead.FullName)
@@ -62,10 +62,10 @@
                 @Html.DisplayFor(modelItem => item.Comments)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.Status)
+                @Html.DisplayFor(modelItem => item.StatusName)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.Confidence)
+                @Html.DisplayFor(modelItem => item.ConfidenceName)
             </td>
             <td>
                 <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |

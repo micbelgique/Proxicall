@@ -1,25 +1,26 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
 using System.Text.Encodings.Web;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using ProxiCall.CRM.Models;
+using ProxiCall.Library;
 
-namespace Proxicall.CRM.Areas.Identity.Pages.Account.Manage
+namespace ProxiCall.CRM.Areas.Identity.Pages.Account.Manage
 {
     public partial class IndexModel : PageModel
     {
-        private readonly UserManager<IdentityUser> _userManager;
-        private readonly SignInManager<IdentityUser> _signInManager;
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly IEmailSender _emailSender;
 
         public IndexModel(
-            UserManager<IdentityUser> userManager,
-            SignInManager<IdentityUser> signInManager,
+            UserManager<ApplicationUser> userManager,
+            SignInManager<ApplicationUser> signInManager,
             IEmailSender emailSender)
         {
             _userManager = userManager;
@@ -46,7 +47,20 @@ namespace Proxicall.CRM.Areas.Identity.Pages.Account.Manage
             [Phone]
             [Display(Name = "Phone number")]
             public string PhoneNumber { get; set; }
+            
+            [Display(Name = "Language Of Choice")]
+            [DataType(DataType.Text)]
+            public string Language { get; set; }
+            
+            [DataType(DataType.Text)]
+            public string Alias { get; set; }
         }
+
+        public SelectList Options { get; set; }
+
+        [BindProperty(SupportsGet = true)]
+        public string SelectedValue { get; set; }
+
 
         public async Task<IActionResult> OnGetAsync()
         {
@@ -59,16 +73,25 @@ namespace Proxicall.CRM.Areas.Identity.Pages.Account.Manage
             var userName = await _userManager.GetUserNameAsync(user);
             var email = await _userManager.GetEmailAsync(user);
             var phoneNumber = await _userManager.GetPhoneNumberAsync(user);
+            var language = user.Language;
+            var alias = user.Alias;
 
             Username = userName;
 
             Input = new InputModel
             {
                 Email = email,
-                PhoneNumber = phoneNumber
+                PhoneNumber = phoneNumber,
+                Language = language,
+                Alias = alias
             };
 
             IsEmailConfirmed = await _userManager.IsEmailConfirmedAsync(user);
+
+            var languagesManager = new LanguagesManager();
+            SelectedValue = Input.Language;
+            Options = new SelectList(languagesManager.AllowedLanguagesOfChoice, "Key", "Value", Input.Language);
+            var test = Options;
 
             return Page();
         }
@@ -108,6 +131,20 @@ namespace Proxicall.CRM.Areas.Identity.Pages.Account.Manage
                 }
             }
 
+            var language = Input.Language;
+            if (language != user.Language)
+            {
+                user.Language = language;
+                await _userManager.UpdateAsync(user);
+            }
+
+            var alias = Input.Alias;
+            if (alias != user.Alias)
+            {
+                user.Alias = alias;
+                await _userManager.UpdateAsync(user);
+            }
+
             await _signInManager.RefreshSignInAsync(user);
             StatusMessage = "Your profile has been updated";
             return RedirectToPage();
@@ -133,7 +170,7 @@ namespace Proxicall.CRM.Areas.Identity.Pages.Account.Manage
             var callbackUrl = Url.Page(
                 "/Account/ConfirmEmail",
                 pageHandler: null,
-                values: new { userId = userId, code = code },
+                values: new { userId, code },
                 protocol: Request.Scheme);
             await _emailSender.SendEmailAsync(
                 email,

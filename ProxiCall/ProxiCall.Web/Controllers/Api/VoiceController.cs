@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Infrastructure;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Bot.Connector.DirectLine;
 using Microsoft.AspNetCore.Hosting;
 using ProxiCall.Web.Services;
@@ -14,6 +13,14 @@ using Twilio.TwiML.Voice;
 using Twilio;
 using Twilio.Rest.Api.V2010.Account;
 using ProxiCall.Web.Services.Speech;
+using Twilio.Http;
+using Newtonsoft.Json.Linq;
+using System.Globalization;
+using Microsoft.Extensions.Options;
+using ProxiCall.Library;
+using ProxiCall.Library.Services;
+using ProxiCall.Web.Models.AppSettings;
+using ProxiCall.Web.Services.ProxiCallCRM;
 
 namespace ProxiCall.Web.Controllers.Api
 {
@@ -21,26 +28,101 @@ namespace ProxiCall.Web.Controllers.Api
     [ApiController]
     public class VoiceController : TwilioController
     {
-        private readonly string Sid = Environment.GetEnvironmentVariable("TwilioSid");
-        private readonly string Token = Environment.GetEnvironmentVariable("TwilioToken");
+        private readonly TwilioAppConfig _twilioAppConfig;
+        private readonly DirectlineConfig _directlineConfig;
         private static BotConnector _botConnector;
-        private readonly IActionContextAccessor _actionContextAccessor;
+        private readonly TextToSpeech _textToSpeech;
+        private readonly NamesService _namesService;
         private readonly IHostingEnvironment _hostingEnvironment;
 
-        public VoiceController(IActionContextAccessor actionContextAccessor, IHostingEnvironment hostingEnvironment)
+        private string _hints;
+
+        public VoiceController(IHostingEnvironment hostingEnvironment, IOptions<TwilioAppConfig> twilioOptions, IOptions<DirectlineConfig> directlineOptions, TextToSpeech textToSpeech, NamesService namesService)
         {
-            _actionContextAccessor = actionContextAccessor;
+            _namesService = namesService;
+            _textToSpeech = textToSpeech;
+            _twilioAppConfig = twilioOptions.Value;
+            _directlineConfig = directlineOptions.Value;
             _hostingEnvironment = hostingEnvironment;
-            TwilioClient.Init(Sid, Token);
+            
+            TwilioClient.Init(_twilioAppConfig.TwilioSid, _twilioAppConfig.TwilioToken);
+            Init();
         }
 
-        [HttpGet("receive")]
-        public IActionResult ReceiveCall([FromQuery] string CallSid)
+        private async void Init()
         {
-            _botConnector = new BotConnector(CallSid);
-            
-            System.Threading.Tasks.Task.Run(() => _botConnector.ReceiveMessagesFromBotAsync(HandleIncomingBotMessagesAsync));
-            
+            _hints = await _namesService.FetchNamesFromCrm();
+        }
+        
+        //-------------------
+        //---OUTBOUND CALL---
+        //-------------------
+        [HttpGet("outbound/{to}")]
+        public IActionResult OutboundCall(string to)
+        {
+            CallResource.Create(
+                method: HttpMethod.Get,
+                url: new Uri($"{_directlineConfig.Host}/api/voice/receive"),
+                to: new Twilio.Types.PhoneNumber(to),
+                from: new Twilio.Types.PhoneNumber(_twilioAppConfig.TwilioPhoneNumber)
+            );
+            return Ok();
+        }
+
+        //------------
+        //---SHARED---
+        //------------
+        [HttpGet("receive")]
+        public async Task<IActionResult> ReceiveCall([FromQuery] string CallSid, [FromQuery] string From, [FromQuery] string To)
+        {
+            var audioToDelete = Directory.GetFiles(_hostingEnvironment.WebRootPath + "/audio");
+            foreach (var file in audioToDelete)
+            {
+                System.IO.File.Delete(file);
+            }
+            var xmlToDelete = Directory.GetFiles(_hostingEnvironment.WebRootPath + "/xml");
+            foreach (var file in xmlToDelete)
+            {
+                System.IO.File.Delete(file);
+            }
+
+            _botConnector = new BotConnector(_directlineConfig, CallSid);
+
+            _ = System.Threading.Tasks.Task.Run(() => _botConnector.ReceiveMessagesFromBotAsync(HandleIncomingBotMessagesAsync));
+
+            var activity = new Activity
+            {
+                From = new ChannelAccount("TwilioUserId", "TwilioUser"),
+                Type = ActivityTypes.Message,
+                Text = string.Empty,
+                Entities = new List<Entity>()
+            };
+
+            var phoneNumber = string.Empty;
+            if (From != _twilioAppConfig.TwilioPhoneNumber)
+            {
+                //User Phone Number during Inbound Call
+                phoneNumber = From.Substring(1);
+            }
+            else
+            {
+                //User Phone Number during Outbound Call
+                phoneNumber = To.Substring(1);
+            }
+
+            var entity = new Entity
+            {
+                Properties = new JObject
+                {
+                    {
+                        "firstmessage", JToken.Parse(phoneNumber)
+                    }
+                }
+            };
+            activity.Entities.Add(entity);
+
+            await _botConnector.SendMessageToBotAsync(activity);
+
             //Preventing the call from hanging up (/receive needs to return a TwiML)
             var response = new VoiceResponse();
             response.Say("", voice: "alice", language: Say.LanguageEnum.FrFr);
@@ -55,34 +137,48 @@ namespace ProxiCall.Web.Controllers.Api
             var says = new StringBuilder();
             var forwardingNumber = string.Empty;
             var forward = false;
-
-            var filesToDelete = Directory.GetFiles(_hostingEnvironment.WebRootPath + "/audio");
-            foreach (var file in filesToDelete)
-            {
-                System.IO.File.Delete(file);
-            }
+            var error = false;
+            var errorMessage = string.Empty;
 
             foreach (var activity in botReplies)
             {
+                var languagesManager = new LanguagesManager();
+                var localeCulture = languagesManager.CheckAndReturnAppropriateCulture(activity.Locale);
+                CultureInfo.CurrentCulture = new CultureInfo(localeCulture);
+                
+                //Using TTS to repond to the caller
                 var ttsResponse = await System.Threading.Tasks.Task.Run(() =>
-                TextToSpeech.TransformTextToSpeechAsync(activity.Text, "fr-FR"));
+                _textToSpeech.TransformTextToSpeechAsync(activity.Text, CultureInfo.CurrentCulture.Name));
 
                 var wavGuid = Guid.NewGuid();
                 var pathToAudioDirectory = _hostingEnvironment.WebRootPath + "/audio";
                 var pathCombined = Path.Combine(pathToAudioDirectory, $"{ wavGuid }.wav");
+                var formatConverter = new FormatConvertor();
+                await formatConverter.TurnAudioStreamToFile(ttsResponse, pathCombined);
 
-                await FormatConvertor.TurnAudioStreamToFile(ttsResponse, pathCombined);
+                voiceResponse.Play(new Uri($"{_directlineConfig.Host}audio/{wavGuid}.wav"));
 
-                voiceResponse.Play(new Uri($"{Environment.GetEnvironmentVariable("Host")}/audio/{wavGuid}.wav"));
-
-                foreach (var entity in activity.Entities)
+                if (activity.Entities != null)
                 {
-                    forward = entity.Properties.TryGetValue("forward", out var jtoken);
-                    forwardingNumber = forward ? jtoken.ToString() : string.Empty;
+                    foreach (var entity in activity.Entities)
+                    {
+                        forward = entity.Properties.TryGetValue("forward", out var numberJToken);
+                        forwardingNumber = forward ? numberJToken.ToString() : string.Empty;
+
+                        error = entity.Properties.TryGetValue("error", out var errorMessageJToken);
+                        if (error)
+                        {
+                            break;
+                        }
+                    }
                 }
             }
-            
-            if(forward)
+
+            if (error)
+            {
+                voiceResponse.Hangup();
+            }
+            else if(forward)
             {
                 voiceResponse.Dial(number: forwardingNumber);
             }
@@ -90,10 +186,11 @@ namespace ProxiCall.Web.Controllers.Api
             {
                 voiceResponse.Gather(
                     input: new List<Gather.InputEnum> { Gather.InputEnum.Speech },
-                    language: Gather.LanguageEnum.FrFr,
-                    action: new Uri($"{Environment.GetEnvironmentVariable("Host")}/api/voice/send"),
-                    method: Twilio.Http.HttpMethod.Get,
-                    speechTimeout: "auto"
+                    language: CultureInfo.CurrentCulture.Name,
+                    action: new Uri($"{_directlineConfig.Host}api/voice/send"),
+                    method: HttpMethod.Get,
+                    speechTimeout: "auto",
+                    hints: _hints
                 );
             }
 
@@ -102,8 +199,8 @@ namespace ProxiCall.Web.Controllers.Api
             System.IO.File.WriteAllText($"{pathToXMLDirectory}/{xmlFileName}.xml", voiceResponse.ToString());
 
             CallResource.Update(
-                method: Twilio.Http.HttpMethod.Get,
-                url: new Uri($"{Environment.GetEnvironmentVariable("Host")}/xml/{xmlFileName}.xml"),
+                method: HttpMethod.Get,
+                url: new Uri($"{_directlineConfig.Host}xml/{xmlFileName}.xml"),
                 pathSid: callSid
             );
         }
@@ -111,16 +208,10 @@ namespace ProxiCall.Web.Controllers.Api
         [HttpGet("send")]
         public async Task<IActionResult> SendUserMessageToBot([FromQuery] string SpeechResult, [FromQuery] double Confidence, [FromQuery] string CallSid)
         {
-            var filesToDelete = Directory.GetFiles(_hostingEnvironment.WebRootPath + "/xml");
-            foreach (var file in filesToDelete)
-            {
-                System.IO.File.Delete(file);
-            }
-
             var activityToSend = new Activity
             {
                 From = new ChannelAccount("TwilioUserId", "TwilioUser"),
-                Type = "message",
+                Type = ActivityTypes.Message,
                 Text = SpeechResult
             };
             
@@ -128,12 +219,10 @@ namespace ProxiCall.Web.Controllers.Api
 
             //Preventing the call from hanging up
             var response = new VoiceResponse();
-            response.Pause(31);
+            response.Pause(15);
 
             //DEBUG
-            response.Say("Le", voice: "alice", language : Say.LanguageEnum.FrFr);
-            response.Say("bot");
-            response.Say("ne répond pas.", voice: "alice", language: Say.LanguageEnum.FrFr);
+            response.Say("ProxiCall's got disconnected", voice: "alice", language: Say.LanguageEnum.EnUs);
 
             return TwiML(response);
         }

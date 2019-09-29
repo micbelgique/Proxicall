@@ -1,34 +1,33 @@
-﻿using Microsoft.AspNetCore.Identity.UI.Services;
+﻿using System.Threading.Tasks;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.Extensions.Configuration;
 using SendGrid;
 using SendGrid.Helpers.Mail;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
-namespace Proxicall.CRM.Services
+namespace ProxiCall.CRM.Services
 {
     public class EmailSender : IEmailSender
     {
         public readonly IConfiguration Configuration;
+        private readonly SendGridClient _client;
 
         public EmailSender(IConfiguration configuration)
         {
             Configuration = configuration;
+            _client = new SendGridClient(Configuration.GetSection("Sendgrid")["ApiKey"]);
         }
 
         public async Task SendEmailAsync(string email, string subject, string message)
         {
-            var apiKey = Configuration.GetSection("Sendgrid")["ApiKey"];
-            var client = new SendGridClient(apiKey);
-            var from = new EmailAddress(email, "Example User");
-            subject = "Sending with SendGrid is Fun";
-            var to = new EmailAddress("test@example.com", "Example User");
+            var from = new EmailAddress(
+                email: Configuration.GetSection("Sendgrid")["FromEmail"], 
+                name: Configuration.GetSection("Sendgrid")["FromName"]
+            );
+            var to = new EmailAddress(email);
             var plainTextContent = message;
-            var htmlContent = "<strong>and easy to do anywhere, even with C#</strong>";
+            var htmlContent = message;
             var msg = MailHelper.CreateSingleEmail(from, to, subject, plainTextContent, htmlContent);
-            var response = await client.SendEmailAsync(msg);
+            var response = await _client.SendEmailAsync(msg);
         }
     }
 }

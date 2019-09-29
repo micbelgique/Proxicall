@@ -1,20 +1,23 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿using System;
+using System.IdentityModel.Tokens.Jwt;
+using System.Text;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.HttpsPolicy;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Proxicall.CRM.Models;
-using System;
-using System.Threading.Tasks;
-using Proxicall.CRM.Areas.Identity.Data;
-using Microsoft.AspNetCore.Identity.UI.Services;
-using Proxicall.CRM.Services;
+using Microsoft.IdentityModel.Logging;
+using Microsoft.IdentityModel.Tokens;
+using ProxiCall.CRM.Areas.Identity.Data;
+using ProxiCall.CRM.DAO;
+using ProxiCall.CRM.Models;
+using ProxiCall.CRM.Services;
 
-namespace Proxicall.CRM
+namespace ProxiCall.CRM
 {
     public class Startup
     {
@@ -39,20 +42,44 @@ namespace Proxicall.CRM
                     options.UseSqlServer(
                         Configuration.GetConnectionString("ProxicallCRMContextConnection")));
 
-            services.AddIdentity<IdentityUser, IdentityRole>()
+            services.AddIdentity<ApplicationUser, IdentityRole>()
                 .AddEntityFrameworkStores<ProxicallCRMContext>()
                 .AddDefaultTokenProviders();
             
+            // ===== Add Jwt Authentication and Microsoft Account Authentication ========
+            JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear(); // => remove default claims
+            services
+                .AddAuthentication()
+                .AddMicrosoftAccount(microsoftOptions =>
+                {
+                    microsoftOptions.ClientId = Configuration.GetSection("MicrosoftAccount")["ApplicationId"];
+                    microsoftOptions.ClientSecret = Configuration.GetSection("MicrosoftAccount")["Password"];
+                })
+                .AddJwtBearer(cfg =>
+                {
+                    cfg.RequireHttpsMetadata = false;
+                    cfg.SaveToken = true;
+                    cfg.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        ValidIssuer = Configuration.GetSection("AppSettings")["JwtIssuer"],
+                        ValidAudience = Configuration.GetSection("AppSettings")["JwtIssuer"],
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration.GetSection("AppSettings")["JwtKey"])),
+                        ClockSkew = TimeSpan.Zero // remove delay of token when expire
+                    };
+                });
+
             services.AddScoped<IRolesInitializer, RolesInitializer>();
 
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1)
+            services.AddMvc()
+                .SetCompatibilityVersion(CompatibilityVersion.Version_2_1)
                 .AddRazorPagesOptions(options =>
                 {
                     options.AllowAreas = true;
                     options.Conventions.AuthorizeAreaFolder("Identity", "/Account/Manage");
                     options.Conventions.AuthorizeAreaPage("Identity", "/Account/Logout");
-                }
-            );
+                })
+                .AddJsonOptions(options => options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore)
+            ;
 
             services.ConfigureApplicationCookie(options =>
             {
@@ -62,6 +89,10 @@ namespace Proxicall.CRM
             });
 
             services.AddSingleton<IEmailSender, EmailSender>();
+            
+            services.AddTransient<LeadDAO>();
+            services.AddTransient<ProductDAO>();
+            services.AddTransient<CompanyDAO>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -91,6 +122,7 @@ namespace Proxicall.CRM
             });
 
             rolesInitializer.Initialize();
+            IdentityModelEventSource.ShowPII = true;
         }
     }
 }

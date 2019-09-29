@@ -1,0 +1,45 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <UserSecretsId>c14654e0-bec8-465f-9d9e-6e99b0d0e1c8</UserSecretsId>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <Optimize>false</Optimize>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore" Version="2.1.7" />
+    <PackageReference Include="Microsoft.AspNetCore.All" Version="2.1.9" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc" Version="2.2.0" />
+    <PackageReference Include="Microsoft.Bot.Builder" Version="4.2.0" />
+    <PackageReference Include="Microsoft.Bot.Builder.AI.Luis" Version="4.2.0" />
+    <PackageReference Include="Microsoft.Bot.Builder.Dialogs" Version="4.2.0" />
+    <PackageReference Include="Microsoft.Bot.Builder.Integration.AspNet.Core" Version="4.2.0" />
+    <PackageReference Include="Microsoft.Bot.Builder.Teams" Version="4.0.0-beta1" />
+    <PackageReference Include="Microsoft.Bot.Configuration" Version="4.2.0" />
+    <PackageReference Include="Microsoft.Bot.Connector" Version="4.2.0" />
+    <PackageReference Include="Microsoft.Bot.Schema" Version="4.2.2" />
+    <PackageReference Include="Microsoft.Extensions.Logging.AzureAppServices" Version="2.1.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ProxiCall.Library\ProxiCall.Library.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Resources\CulturedBot.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>CulturedBot.resx</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="Resources\CulturedBot.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>CulturedBot.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+</Project>

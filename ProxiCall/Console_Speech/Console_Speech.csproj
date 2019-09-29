@@ -12,7 +12,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Google.Cloud.Speech.V1" Version="1.1.0" />
     <PackageReference Include="Microsoft.CognitiveServices.Speech" Version="1.2.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ProxiCall.Library\ProxiCall.Library.csproj" />
   </ItemGroup>
 
 </Project>

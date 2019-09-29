@@ -1,30 +1,33 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using Proxicall.CRM.Models;
-using Proxicall.CRM.Models.Enumeration.Opportunity;
+using ProxiCall.CRM.Areas.Identity.Data;
+using ProxiCall.CRM.Models;
+using ProxiCall.Library.Enumeration.Opportunity;
 
-namespace Proxicall.CRM.Controllers
+namespace ProxiCall.CRM.Controllers
 {
     [Authorize(Roles = "Admin, User")]
     public class OpportunitiesController : Controller
     {
         private readonly ProxicallCRMContext _context;
+        private readonly UserManager<ApplicationUser> _userManager;
 
-        public OpportunitiesController(ProxicallCRMContext context)
+        public OpportunitiesController(ProxicallCRMContext context, UserManager<ApplicationUser> userManager)
         {
             _context = context;
+            _userManager = userManager;
         }
 
         // GET: Opportunities
         public async Task<IActionResult> Index()
         {
-            var proxicallCRMContext = _context.Opportunity.Include(o => o.Lead).Include(o => o.Owner).Include(o => o.Product);
+            var proxicallCRMContext = _context.Opportunities.Include(o => o.Lead).Include(o => o.Owner).Include(o => o.Product);
             return View(await proxicallCRMContext.ToListAsync());
         }
 
@@ -36,7 +39,7 @@ namespace Proxicall.CRM.Controllers
                 return NotFound();
             }
 
-            var opportunity = await _context.Opportunity
+            var opportunity = await _context.Opportunities
                 .Include(o => o.Lead)
                 .Include(o => o.Owner)
                 .Include(o => o.Product)
@@ -52,12 +55,10 @@ namespace Proxicall.CRM.Controllers
         // GET: Opportunities/Create
         public IActionResult Create()
         {
-
-            ViewData["LeadId"] = new SelectList(_context.Lead, "Id", "FullName");
-            ViewData["OwnerId"] = new SelectList(_context.Users, "Id", "Email");
-            ViewData["ProductId"] = new SelectList(_context.Product, "Id", "Title");
-            ViewData["Status"] = new SelectList(Status.AllStatusDisplay);
-            ViewData["Confidences"] = new SelectList(Confidence.AllConfidenceDisplay);
+            ViewData["LeadId"] = new SelectList(_context.Leads, "Id", "FullName");
+            ViewData["ProductId"] = new SelectList(_context.Products, "Id", "Title");
+            ViewData["Confidence"] = new SelectList((IEnumerable)OpportunityConfidence.AllConfidenceDisplay, "Key", "Value");
+            ViewData["Status"] = new SelectList((IEnumerable)OpportunityStatus.AllStatusDisplay, "Key", "Value");
             return View();
         }
 
@@ -74,12 +75,10 @@ namespace Proxicall.CRM.Controllers
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["LeadId"] = new SelectList(_context.Lead, "Id", "FullName", opportunity.LeadId);
-            ViewData["OwnerId"] = new SelectList(_context.Users, "Id", "Email", opportunity.OwnerId);
-            ViewData["ProductId"] = new SelectList(_context.Product, "Id", "Title", opportunity.ProductId); 
-
-            ViewData["Status"] = new SelectList(Status.AllStatusDisplay, opportunity.Status);
-            ViewData["Confidences"] = new SelectList(Confidence.AllConfidenceDisplay, opportunity.Confidence);
+            ViewData["LeadId"] = new SelectList(_context.Leads, "Id", "FullName", opportunity.LeadId);
+            ViewData["ProductId"] = new SelectList(_context.Products, "Id", "Title", opportunity.ProductId);
+            ViewData["Confidence"] = new SelectList((IEnumerable)OpportunityConfidence.AllConfidenceDisplay, "Key", "Value", opportunity.Confidence);
+            ViewData["Status"] = new SelectList((IEnumerable)OpportunityStatus.AllStatusDisplay, "Key", "Value", opportunity.Status);
             return View(opportunity);
         }
 
@@ -91,17 +90,16 @@ namespace Proxicall.CRM.Controllers
                 return NotFound();
             }
 
-            var opportunity = await _context.Opportunity.FindAsync(id);
+            var opportunity = await _context.Opportunities.FindAsync(id);
             if (opportunity == null)
             {
                 return NotFound();
             }
-            ViewData["LeadId"] = new SelectList(_context.Lead, "Id", "FullName", opportunity.LeadId);
-            ViewData["OwnerId"] = new SelectList(_context.Users, "Id", "Email", opportunity.OwnerId);
-            ViewData["ProductId"] = new SelectList(_context.Product, "Id", "Title", opportunity.ProductId);
-
-            ViewData["Status"] = new SelectList(Status.AllStatusDisplay, opportunity.Status);
-            ViewData["Confidences"] = new SelectList(Confidence.AllConfidenceDisplay, opportunity.Confidence);
+            ViewData["LeadId"] = new SelectList(_context.Leads, "Id", "FullName", opportunity.LeadId);
+            ViewData["OwnerId"] = new SelectList(_context.Users, "Id", "UserName", opportunity.OwnerId);
+            ViewData["ProductId"] = new SelectList(_context.Products, "Id", "Title", opportunity.ProductId);
+            ViewData["Confidence"] = new SelectList(OpportunityConfidence.AllConfidenceDisplay, "Key", "Value", opportunity.Confidence);
+            ViewData["Status"] = new SelectList(OpportunityStatus.AllStatusDisplay, "Key", "Value", opportunity.Status);
             return View(opportunity);
         }
 
@@ -137,12 +135,11 @@ namespace Proxicall.CRM.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["LeadId"] = new SelectList(_context.Lead, "Id", "FullName", opportunity.LeadId);
-            ViewData["OwnerId"] = new SelectList(_context.Users, "Id", "Email", opportunity.OwnerId);
-            ViewData["ProductId"] = new SelectList(_context.Product, "Id", "Title", opportunity.ProductId);
-
-            ViewData["Status"] = new SelectList(Status.AllStatusDisplay, opportunity.Status);
-            ViewData["Confidences"] = new SelectList(Confidence.AllConfidenceDisplay, opportunity.Confidence);
+            ViewData["LeadId"] = new SelectList(_context.Leads, "Id", "FullName", opportunity.LeadId);
+            ViewData["OwnerId"] = new SelectList(_context.Users, "Id", "UserName", opportunity.OwnerId);
+            ViewData["ProductId"] = new SelectList(_context.Products, "Id", "Title", opportunity.ProductId);
+            ViewData["Confidence"] = new SelectList(OpportunityConfidence.AllConfidenceDisplay, "Key", "Value", opportunity.Confidence);
+            ViewData["Status"] = new SelectList(OpportunityStatus.AllStatusDisplay, "Key", "Value", opportunity.Status);
             return View(opportunity);
         }
 
@@ -154,7 +151,7 @@ namespace Proxicall.CRM.Controllers
                 return NotFound();
             }
 
-            var opportunity = await _context.Opportunity
+            var opportunity = await _context.Opportunities
                 .Include(o => o.Lead)
                 .Include(o => o.Owner)
                 .Include(o => o.Product)
@@ -172,15 +169,15 @@ namespace Proxicall.CRM.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(string id)
         {
-            var opportunity = await _context.Opportunity.FindAsync(id);
-            _context.Opportunity.Remove(opportunity);
+            var opportunity = await _context.Opportunities.FindAsync(id);
+            _context.Opportunities.Remove(opportunity);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
         private bool OpportunityExists(string id)
         {
-            return _context.Opportunity.Any(e => e.Id == id);
+            return _context.Opportunities.Any(e => e.Id == id);
         }
     }
 }
