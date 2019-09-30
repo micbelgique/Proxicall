@@ -37,6 +37,7 @@ The UserSettings section represents the default admin account of the CRM.
 ![web app user settings view](https://github.com/micbelgique/ProxiCall/blob/master/pictures/webappusersettings.png)
 
 Next, execute the Update-Database command in the Package Manager Console.
+Don't forget to put your web app in https only inside TLS/SSL Settings.
 You can now publish the project on Azure.
 
 ## ProxiCall Bot
