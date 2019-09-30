@@ -1,0 +1,2008 @@
+{
+  "luis_schema_version": "4.0.0",
+  "versionId": "0.2",
+  "name": "ProxiCall-En-Dev",
+  "desc": "",
+  "culture": "en-us",
+  "tokenizerVersion": "1.0.0",
+  "intents": [
+    {
+      "name": "CreateOpportunity"
+    },
+    {
+      "name": "MakeACall"
+    },
+    {
+      "name": "None"
+    },
+    {
+      "name": "SearchCompanyData"
+    },
+    {
+      "name": "SearchLeadData"
+    }
+  ],
+  "entities": [
+    {
+      "name": "dataSearched",
+      "children": [
+        "searchopportunities",
+        "searchemail",
+        "searchcontactname",
+        "searchaddress",
+        "searchphone",
+        "searchnumberopportunities",
+        "searchcompany",
+        "searchcontact"
+      ],
+      "roles": []
+    },
+    {
+      "name": "givenData",
+      "children": [
+        "leadfullname",
+        "productTitle"
+      ],
+      "roles": []
+    }
+  ],
+  "composites": [],
+  "closedLists": [
+    {
+      "name": "companyName",
+      "subLists": [
+        {
+          "canonicalForm": "Proximus Enco",
+          "list": []
+        },
+        {
+          "canonicalForm": "Microsoft Innovation Center",
+          "list": [
+            "MIC",
+            "Microsoft Innovation Centers",
+            "microsoft innovation centre"
+          ]
+        },
+        {
+          "canonicalForm": "Doctor Love",
+          "list": []
+        },
+        {
+          "canonicalForm": "Smart Richesse",
+          "list": []
+        },
+        {
+          "canonicalForm": "Seeing AI",
+          "list": []
+        }
+      ],
+      "roles": []
+    },
+    {
+      "name": "confidenceOpportunity",
+      "subLists": [
+        {
+          "canonicalForm": "potential",
+          "list": [
+            "maybe",
+            "possibility",
+            "probable",
+            "chance",
+            "slim chance"
+          ]
+        },
+        {
+          "canonicalForm": "certain",
+          "list": [
+            "certitude",
+            "highly probable",
+            "high probability",
+            "high chance",
+            "strong chance",
+            "it's for sure"
+          ]
+        },
+        {
+          "canonicalForm": "uncertain",
+          "list": [
+            "uncertaine",
+            "not sure",
+            "doubtful",
+            "doubt it",
+            "not certain",
+            "unlikely",
+            "very slim chance",
+            "nothing is for sure",
+            "nothing is certain",
+            "nothing's for sure",
+            "nothing's certain",
+            "nothing sure",
+            "nothing for sure",
+            "nothing certain",
+            "nothing for certain"
+          ]
+        }
+      ],
+      "roles": []
+    }
+  ],
+  "patternAnyEntities": [
+    {
+      "name": "personNameP",
+      "roles": [
+        "firstname",
+        "lastname"
+      ],
+      "explicitList": []
+    }
+  ],
+  "regex_entities": [],
+  "prebuiltEntities": [
+    {
+      "name": "datetimeV2",
+      "roles": []
+    },
+    {
+      "name": "email",
+      "roles": []
+    }
+  ],
+  "model_features": [],
+  "regex_features": [],
+  "patterns": [],
+  "utterances": [
+    {
+      "text": "add a new opportunity for nathan pire but nothing for sure and the product is botbot",
+      "intent": "CreateOpportunity",
+      "entities": [
+        {
+          "entity": "givenData::leadfullname",
+          "startPos": 26,
+          "endPos": 36
+        },
+        {
+          "entity": "givenData::productTitle",
+          "startPos": 78,
+          "endPos": 83
+        }
+      ]
+    },
+    {
+      "text": "add an opportunity that's certain my client loris rossi",
+      "intent": "CreateOpportunity",
+      "entities": [
+        {
+          "entity": "givenData::leadfullname",
+          "startPos": 44,
+          "endPos": 54
+        }
+      ]
+    },
+    {
+      "text": "blah blah",
+      "intent": "None",
+      "entities": []
+    },
+    {
+      "text": "call nathan pire please",
+      "intent": "MakeACall",
+      "entities": [
+        {
+          "entity": "givenData::leadfullname",
+          "startPos": 5,
+          "endPos": 15
+        }
+      ]
+    },
+    {
+      "text": "call someone",
+      "intent": "MakeACall",
+      "entities": []
+    },
+    {
+      "text": "call someone please",
+      "intent": "MakeACall",
+      "entities": []
+    },
+    {
+      "text": "call stéphanie demonaco",
+      "intent": "MakeACall",
+      "entities": [
+        {
+          "entity": "givenData::leadfullname",
+          "startPos": 5,
+          "endPos": 22
+        }
+      ]
+    },
+    {
+      "text": "create a new opportunity for the product onceuponadreambot",
+      "intent": "CreateOpportunity",
+      "entities": [
+        {
+          "entity": "givenData::productTitle",
+          "startPos": 41,
+          "endPos": 57
+        }
+      ]
+    },
+    {
+      "text": "create a new opportunity with the lead being nathan pire and the product being tormentorbot",
+      "intent": "CreateOpportunity",
+      "entities": [
+        {
+          "entity": "givenData::leadfullname",
+          "startPos": 45,
+          "endPos": 55
+        },
+        {
+          "entity": "givenData::productTitle",
+          "startPos": 79,
+          "endPos": 90
+        }
+      ]
+    },
+    {
+      "text": "create a potential opportunity with marc lavoine for the product botbot",
+      "intent": "CreateOpportunity",
+      "entities": [
+        {
+          "entity": "givenData::leadfullname",
+          "startPos": 36,
+          "endPos": 47
+        },
+        {
+          "entity": "givenData::productTitle",
+          "startPos": 65,
+          "endPos": 70
+        }
+      ]
+    },
+    {
+      "text": "create an opportunity",
+      "intent": "CreateOpportunity",
+      "entities": []
+    },
+    {
+      "text": "create an opportunity for the cheerlybot product",
+      "intent": "CreateOpportunity",
+      "entities": [
+        {
+          "entity": "givenData::productTitle",
+          "startPos": 30,
+          "endPos": 39
+        }
+      ]
+    },
+    {
+      "text": "create an opportunity with frédéric carbonnelle about the product botbot",
+      "intent": "CreateOpportunity",
+      "entities": [
+        {
+          "entity": "givenData::leadfullname",
+          "startPos": 27,
+          "endPos": 46
+        },
+        {
+          "entity": "givenData::productTitle",
+          "startPos": 66,
+          "endPos": 71
+        }
+      ]
+    },
+    {
+      "text": "create an opportunity.",
+      "intent": "CreateOpportunity",
+      "entities": []
+    },
+    {
+      "text": "dial jeremy smith's phone number",
+      "intent": "MakeACall",
+      "entities": [
+        {
+          "entity": "givenData::leadfullname",
+          "startPos": 5,
+          "endPos": 16
+        },
+        {
+          "entity": "dataSearched::searchphone",
+          "startPos": 20,
+          "endPos": 31
+        }
+      ]
+    },
+    {
+      "text": "do i have any opportunity with jules bordet",
+      "intent": "SearchLeadData",
+      "entities": [
+        {
+          "entity": "dataSearched::searchopportunities",
+          "startPos": 14,
+          "endPos": 24
+        },
+        {
+          "entity": "givenData::leadfullname",
+          "startPos": 31,
+          "endPos": 42
+        }
+      ]
+    },
+    {
+      "text": "do make a call now to hubert jones",
+      "intent": "MakeACall",
+      "entities": [
+        {
+          "entity": "givenData::leadfullname",
+          "startPos": 22,
+          "endPos": 33
+        }
+      ]
+    },
+    {
+      "text": "for which company does éléanore roosevelt work?",
+      "intent": "SearchLeadData",
+      "entities": [
+        {
+          "entity": "dataSearched::searchcompany",
+          "startPos": 10,
+          "endPos": 16
+        },
+        {
+          "entity": "givenData::leadfullname",
+          "startPos": 23,
+          "endPos": 40
+        }
+      ]
+    },
+    {
+      "text": "for which company does maxime hempte work",
+      "intent": "SearchLeadData",
+      "entities": [
+        {
+          "entity": "dataSearched::searchcompany",
+          "startPos": 10,
+          "endPos": 16
+        },
+        {
+          "entity": "givenData::leadfullname",
+          "startPos": 23,
+          "endPos": 35
+        }
+      ]
+    },
+    {
+      "text": "for which company works henri joncques and what's his phone number and email address",
+      "intent": "SearchLeadData",
+      "entities": [
+        {
+          "entity": "dataSearched::searchcompany",
+          "startPos": 10,
+          "endPos": 16
+        },
+        {
+          "entity": "givenData::leadfullname",
+          "startPos": 24,
+          "endPos": 37
+        },
+        {
+          "entity": "dataSearched::searchphone",
+          "startPos": 54,
+          "endPos": 65
+        },
+        {
+          "entity": "dataSearched::searchemail",
+          "startPos": 71,
+          "endPos": 83
+        }
+      ]
+    },
+    {
+      "text": "give me ariana grande's address",
+      "intent": "SearchLeadData",
+      "entities": [
+        {
+          "entity": "givenData::leadfullname",
+          "startPos": 8,
+          "endPos": 20
+        },
+        {
+          "entity": "dataSearched::searchaddress",
+          "startPos": 24,
+          "endPos": 30
+        }
+      ]
+    },
+    {
+      "text": "give me informations about nathan pire",
+      "intent": "SearchLeadData",
+      "entities": [
+        {
+          "entity": "givenData::leadfullname",
+          "startPos": 27,
+          "endPos": 37
+        }
+      ]
+    },
+    {
+      "text": "give me informaton on my contact at proximus enco",
+      "intent": "SearchCompanyData",
+      "entities": [
+        {
+          "entity": "dataSearched::searchcontact",
+          "startPos": 25,
+          "endPos": 31
+        }
+      ]
+    },
+    {
+      "text": "give me mélissa fontesse's number",
+      "intent": "SearchLeadData",
+      "entities": [
+        {
+          "entity": "givenData::leadfullname",
+          "startPos": 8,
+          "endPos": 23
+        },
+        {
+          "entity": "dataSearched::searchphone",
+          "startPos": 27,
+          "endPos": 32
+        }
+      ]
+    },
+    {
+      "text": "give me my opportunities with frédéric carbonnelle",
+      "intent": "SearchLeadData",
+      "entities": [
+        {
+          "entity": "dataSearched::searchopportunities",
+          "startPos": 11,
+          "endPos": 23
+        },
+        {
+          "entity": "givenData::leadfullname",
+          "startPos": 30,
+          "endPos": 49
+        }
+      ]
+    },
+    {
+      "text": "give me my opportunities with nahtan pire",
+      "intent": "SearchLeadData",
+      "entities": [
+        {
+          "entity": "dataSearched::searchopportunities",
+          "startPos": 11,
+          "endPos": 23
+        },
+        {
+          "entity": "givenData::leadfullname",
+          "startPos": 30,
+          "endPos": 40
+        }
+      ]
+    },
+    {
+      "text": "give me my opportunities with nathon pire",
+      "intent": "SearchLeadData",
+      "entities": [
+        {
+          "entity": "dataSearched::searchopportunities",
+          "startPos": 11,
+          "endPos": 23
+        },
+        {
+          "entity": "givenData::leadfullname",
+          "startPos": 30,
+          "endPos": 40
+        }
+      ]
+    },
+    {
+      "text": "give me the company of john cena.",
+      "intent": "SearchLeadData",
+      "entities": [
+        {
+          "entity": "dataSearched::searchcompany",
+          "startPos": 12,
+          "endPos": 18
+        },
+        {
+          "entity": "givenData::leadfullname",
+          "startPos": 23,
+          "endPos": 31
+        }
+      ]
+    },
+    {
+      "text": "give me the contact in microsoft innovation centre",
+      "intent": "SearchCompanyData",
+      "entities": [
+        {
+          "entity": "dataSearched::searchcontact",
+          "startPos": 12,
+          "endPos": 18
+        }
+      ]
+    },
+    {
+      "text": "give me the contact of mic",
+      "intent": "SearchCompanyData",
+      "entities": [
+        {
+          "entity": "dataSearched::searchcontact",
+          "startPos": 12,
+          "endPos": 18
+        }
+      ]
+    },
+    {
+      "text": "give me the contact of microsoft innovation centre",
+      "intent": "SearchCompanyData",
+      "entities": [
+        {
+          "entity": "dataSearched::searchcontact",
+          "startPos": 12,
+          "endPos": 18
+        }
+      ]
+    },
+    {
+      "text": "give me the contact of proximus enco",
+      "intent": "SearchCompanyData",
+      "entities": [
+        {
+          "entity": "dataSearched::searchcontact",
+          "startPos": 12,
+          "endPos": 18
+        }
+      ]
+    },
+    {
+      "text": "give me the list of opportunities i have with jean jacques",
+      "intent": "SearchLeadData",
+      "entities": [
+        {
+          "entity": "dataSearched::searchopportunities",
+          "startPos": 20,
+          "endPos": 32
+        },
+        {
+          "entity": "givenData::leadfullname",
+          "startPos": 46,
+          "endPos": 57
+        }
+      ]
+    },
+    {
+      "text": "give me the list of opportunities i have with yannick patrick",
+      "intent": "SearchLeadData",
+      "entities": [
+        {
+          "entity": "dataSearched::searchopportunities",
+          "startPos": 20,
+          "endPos": 32
+        },
+        {
+          "entity": "givenData::leadfullname",
+          "startPos": 46,
+          "endPos": 60
+        }
+      ]
+    },
+    {
+      "text": "give me the number of john smiths",
+      "intent": "SearchLeadData",
+      "entities": [
+        {
+          "entity": "dataSearched::searchphone",
+          "startPos": 12,
+          "endPos": 17
+        },
+        {
+          "entity": "givenData::leadfullname",
+          "startPos": 22,
+          "endPos": 32
+        }
+      ]
+    },
+    {
+      "text": "give me the number of nathan pire",
+      "intent": "SearchLeadData",
+      "entities": [
+        {
+          "entity": "dataSearched::searchphone",
+          "startPos": 12,
+          "endPos": 17
+        },
+        {
+          "entity": "givenData::leadfullname",
+          "startPos": 22,
+          "endPos": 32
+        }
+      ]
+    },
+    {
+      "text": "give me the number of nathan pire.",
+      "intent": "SearchLeadData",
+      "entities": [
+        {
+          "entity": "dataSearched::searchphone",
+          "startPos": 12,
+          "endPos": 17
+        },
+        {
+          "entity": "givenData::leadfullname",
+          "startPos": 22,
+          "endPos": 32
+        }
+      ]
+    },
+    {
+      "text": "give me the number of nova scotia.",
+      "intent": "SearchLeadData",
+      "entities": [
+        {
+          "entity": "dataSearched::searchphone",
+          "startPos": 12,
+          "endPos": 17
+        },
+        {
+          "entity": "givenData::leadfullname",
+          "startPos": 22,
+          "endPos": 32
+        }
+      ]
+    },
+    {
+      "text": "give me the number of opportunities i have with luc skywalker",
+      "intent": "SearchLeadData",
+      "entities": [
+        {
+          "entity": "dataSearched::searchnumberopportunities",
+          "startPos": 12,
+          "endPos": 34
+        },
+        {
+          "entity": "givenData::leadfullname",
+          "startPos": 48,
+          "endPos": 60
+        }
+      ]
+    },
+    {
+      "text": "give me the number of opportunities that i have with jean venderstickenlen",
+      "intent": "SearchLeadData",
+      "entities": [
+        {
+          "entity": "dataSearched::searchnumberopportunities",
+          "startPos": 12,
+          "endPos": 34
+        },
+        {
+          "entity": "givenData::leadfullname",
+          "startPos": 53,
+          "endPos": 73
+        }
+      ]
+    },
+    {
+      "text": "give me the number of opportunities that i have with the mic",
+      "intent": "SearchCompanyData",
+      "entities": [
+        {
+          "entity": "dataSearched::searchnumberopportunities",
+          "startPos": 12,
+          "endPos": 34
+        }
+      ]
+    },
+    {
+      "text": "give me the number of someone",
+      "intent": "SearchLeadData",
+      "entities": [
+        {
+          "entity": "dataSearched::searchphone",
+          "startPos": 12,
+          "endPos": 17
+        }
+      ]
+    },
+    {
+      "text": "give me the number of someone.",
+      "intent": "SearchLeadData",
+      "entities": [
+        {
+          "entity": "dataSearched::searchphone",
+          "startPos": 12,
+          "endPos": 17
+        }
+      ]
+    },
+    {
+      "text": "give me the number of thomas durando.",
+      "intent": "SearchLeadData",
+      "entities": [
+        {
+          "entity": "dataSearched::searchphone",
+          "startPos": 12,
+          "endPos": 17
+        },
+        {
+          "entity": "givenData::leadfullname",
+          "startPos": 22,
+          "endPos": 35
+        }
+      ]
+    },
+    {
+      "text": "give me the phone number of nathan pire",
+      "intent": "SearchLeadData",
+      "entities": [
+        {
+          "entity": "dataSearched::searchphone",
+          "startPos": 12,
+          "endPos": 23
+        },
+        {
+          "entity": "givenData::leadfullname",
+          "startPos": 28,
+          "endPos": 38
+        }
+      ]
+    },
+    {
+      "text": "give my opportunities with mélissa fontesse",
+      "intent": "SearchLeadData",
+      "entities": [
+        {
+          "entity": "dataSearched::searchopportunities",
+          "startPos": 8,
+          "endPos": 20
+        },
+        {
+          "entity": "givenData::leadfullname",
+          "startPos": 27,
+          "endPos": 42
+        }
+      ]
+    },
+    {
+      "text": "give philip jacques phone number",
+      "intent": "SearchLeadData",
+      "entities": [
+        {
+          "entity": "givenData::leadfullname",
+          "startPos": 5,
+          "endPos": 18
+        },
+        {
+          "entity": "dataSearched::searchphone",
+          "startPos": 20,
+          "endPos": 31
+        }
+      ]
+    },
+    {
+      "text": "goodmorning",
+      "intent": "None",
+      "entities": []
+    },
+    {
+      "text": "hello",
+      "intent": "None",
+      "entities": []
+    },
+    {
+      "text": "how many opportunities do i have with sansa lilith",
+      "intent": "SearchLeadData",
+      "entities": [
+        {
+          "entity": "dataSearched::searchnumberopportunities",
+          "startPos": 0,
+          "endPos": 21
+        },
+        {
+          "entity": "givenData::leadfullname",
+          "startPos": 38,
+          "endPos": 49
+        }
+      ]
+    },
+    {
+      "text": "i don't know",
+      "intent": "None",
+      "entities": []
+    },
+    {
+      "text": "i have a new opportunity for the botbot product",
+      "intent": "CreateOpportunity",
+      "entities": [
+        {
+          "entity": "givenData::productTitle",
+          "startPos": 33,
+          "endPos": 38
+        }
+      ]
+    },
+    {
+      "text": "i have a new opportunity to add",
+      "intent": "CreateOpportunity",
+      "entities": []
+    },
+    {
+      "text": "i need information on my contact at the mic",
+      "intent": "SearchCompanyData",
+      "entities": [
+        {
+          "entity": "dataSearched::searchcontact",
+          "startPos": 25,
+          "endPos": 31
+        }
+      ]
+    },
+    {
+      "text": "i need informations on someone",
+      "intent": "SearchLeadData",
+      "entities": []
+    },
+    {
+      "text": "i need nathan pire phone number",
+      "intent": "SearchLeadData",
+      "entities": [
+        {
+          "entity": "givenData::leadfullname",
+          "startPos": 7,
+          "endPos": 17
+        },
+        {
+          "entity": "dataSearched::searchphone",
+          "startPos": 19,
+          "endPos": 30
+        }
+      ]
+    },
+    {
+      "text": "i need nathan pire's phone number",
+      "intent": "SearchLeadData",
+      "entities": [
+        {
+          "entity": "givenData::leadfullname",
+          "startPos": 7,
+          "endPos": 17
+        },
+        {
+          "entity": "dataSearched::searchphone",
+          "startPos": 21,
+          "endPos": 32
+        }
+      ]
+    },
+    {
+      "text": "i need to record a new opportunity",
+      "intent": "CreateOpportunity",
+      "entities": []
+    },
+    {
+      "text": "i wanna have lucille vanbeneden's home address and email",
+      "intent": "SearchLeadData",
+      "entities": [
+        {
+          "entity": "givenData::leadfullname",
+          "startPos": 13,
+          "endPos": 30
+        },
+        {
+          "entity": "dataSearched::searchaddress",
+          "startPos": 34,
+          "endPos": 45
+        },
+        {
+          "entity": "dataSearched::searchemail",
+          "startPos": 51,
+          "endPos": 55
+        }
+      ]
+    },
+    {
+      "text": "i want data on julia robert",
+      "intent": "SearchLeadData",
+      "entities": [
+        {
+          "entity": "givenData::leadfullname",
+          "startPos": 15,
+          "endPos": 26
+        }
+      ]
+    },
+    {
+      "text": "i want data on my contact at the mic",
+      "intent": "SearchCompanyData",
+      "entities": [
+        {
+          "entity": "dataSearched::searchcontact",
+          "startPos": 18,
+          "endPos": 24
+        }
+      ]
+    },
+    {
+      "text": "i want info about maxime hempte",
+      "intent": "SearchLeadData",
+      "entities": [
+        {
+          "entity": "givenData::leadfullname",
+          "startPos": 18,
+          "endPos": 30
+        }
+      ]
+    },
+    {
+      "text": "i want info on maxime hempte",
+      "intent": "SearchLeadData",
+      "entities": [
+        {
+          "entity": "givenData::leadfullname",
+          "startPos": 15,
+          "endPos": 27
+        }
+      ]
+    },
+    {
+      "text": "i want info on my contact at smart richesse",
+      "intent": "SearchCompanyData",
+      "entities": [
+        {
+          "entity": "dataSearched::searchcontact",
+          "startPos": 18,
+          "endPos": 24
+        }
+      ]
+    },
+    {
+      "text": "i want information about jean luc",
+      "intent": "SearchLeadData",
+      "entities": [
+        {
+          "entity": "givenData::leadfullname",
+          "startPos": 25,
+          "endPos": 32
+        }
+      ]
+    },
+    {
+      "text": "i want information about nathan pire",
+      "intent": "SearchLeadData",
+      "entities": [
+        {
+          "entity": "givenData::leadfullname",
+          "startPos": 25,
+          "endPos": 35
+        }
+      ]
+    },
+    {
+      "text": "i want information about someone",
+      "intent": "SearchLeadData",
+      "entities": []
+    },
+    {
+      "text": "i want information about the person of reference in the mic",
+      "intent": "SearchCompanyData",
+      "entities": [
+        {
+          "entity": "dataSearched::searchcontact",
+          "startPos": 29,
+          "endPos": 47
+        }
+      ]
+    },
+    {
+      "text": "i want information on melissa compass",
+      "intent": "SearchLeadData",
+      "entities": [
+        {
+          "entity": "givenData::leadfullname",
+          "startPos": 22,
+          "endPos": 36
+        }
+      ]
+    },
+    {
+      "text": "i want information on melissa compass.",
+      "intent": "SearchLeadData",
+      "entities": [
+        {
+          "entity": "givenData::leadfullname",
+          "startPos": 22,
+          "endPos": 36
+        }
+      ]
+    },
+    {
+      "text": "i want information on melissa fontesse",
+      "intent": "SearchLeadData",
+      "entities": [
+        {
+          "entity": "givenData::leadfullname",
+          "startPos": 22,
+          "endPos": 37
+        }
+      ]
+    },
+    {
+      "text": "i want informations about nathan pire",
+      "intent": "SearchLeadData",
+      "entities": [
+        {
+          "entity": "givenData::leadfullname",
+          "startPos": 26,
+          "endPos": 36
+        }
+      ]
+    },
+    {
+      "text": "i want maxime hempte's phone number and home address",
+      "intent": "SearchLeadData",
+      "entities": [
+        {
+          "entity": "givenData::leadfullname",
+          "startPos": 7,
+          "endPos": 19
+        },
+        {
+          "entity": "dataSearched::searchphone",
+          "startPos": 23,
+          "endPos": 34
+        },
+        {
+          "entity": "dataSearched::searchaddress",
+          "startPos": 40,
+          "endPos": 51
+        }
+      ]
+    },
+    {
+      "text": "i want melanie dupond's address",
+      "intent": "SearchLeadData",
+      "entities": [
+        {
+          "entity": "givenData::leadfullname",
+          "startPos": 7,
+          "endPos": 20
+        },
+        {
+          "entity": "dataSearched::searchaddress",
+          "startPos": 24,
+          "endPos": 30
+        }
+      ]
+    },
+    {
+      "text": "i want my contact's phone number",
+      "intent": "SearchCompanyData",
+      "entities": [
+        {
+          "entity": "dataSearched::searchcontact",
+          "startPos": 10,
+          "endPos": 16
+        },
+        {
+          "entity": "dataSearched::searchphone",
+          "startPos": 20,
+          "endPos": 31
+        }
+      ]
+    },
+    {
+      "text": "i want my opportunities with the mic",
+      "intent": "SearchCompanyData",
+      "entities": [
+        {
+          "entity": "dataSearched::searchopportunities",
+          "startPos": 10,
+          "endPos": 22
+        }
+      ]
+    },
+    {
+      "text": "i want nathan pire address",
+      "intent": "SearchLeadData",
+      "entities": [
+        {
+          "entity": "givenData::leadfullname",
+          "startPos": 7,
+          "endPos": 17
+        },
+        {
+          "entity": "dataSearched::searchaddress",
+          "startPos": 19,
+          "endPos": 25
+        }
+      ]
+    },
+    {
+      "text": "i want nathan pire address and phone number",
+      "intent": "SearchLeadData",
+      "entities": [
+        {
+          "entity": "givenData::leadfullname",
+          "startPos": 7,
+          "endPos": 17
+        },
+        {
+          "entity": "dataSearched::searchaddress",
+          "startPos": 19,
+          "endPos": 25
+        },
+        {
+          "entity": "dataSearched::searchphone",
+          "startPos": 31,
+          "endPos": 42
+        }
+      ]
+    },
+    {
+      "text": "i want nathan pire's phone number",
+      "intent": "SearchLeadData",
+      "entities": [
+        {
+          "entity": "givenData::leadfullname",
+          "startPos": 7,
+          "endPos": 17
+        },
+        {
+          "entity": "dataSearched::searchphone",
+          "startPos": 21,
+          "endPos": 32
+        }
+      ]
+    },
+    {
+      "text": "i want sofiane ferrero's home address",
+      "intent": "SearchLeadData",
+      "entities": [
+        {
+          "entity": "givenData::leadfullname",
+          "startPos": 7,
+          "endPos": 21
+        },
+        {
+          "entity": "dataSearched::searchaddress",
+          "startPos": 25,
+          "endPos": 36
+        }
+      ]
+    },
+    {
+      "text": "i want someone phone number",
+      "intent": "SearchLeadData",
+      "entities": [
+        {
+          "entity": "dataSearched::searchphone",
+          "startPos": 15,
+          "endPos": 26
+        }
+      ]
+    },
+    {
+      "text": "i want someone's phone number",
+      "intent": "SearchLeadData",
+      "entities": [
+        {
+          "entity": "dataSearched::searchphone",
+          "startPos": 17,
+          "endPos": 28
+        }
+      ]
+    },
+    {
+      "text": "i want the address and email addres of gestrude lancelot",
+      "intent": "SearchLeadData",
+      "entities": [
+        {
+          "entity": "dataSearched::searchaddress",
+          "startPos": 11,
+          "endPos": 17
+        },
+        {
+          "entity": "dataSearched::searchemail",
+          "startPos": 23,
+          "endPos": 34
+        },
+        {
+          "entity": "givenData::leadfullname",
+          "startPos": 39,
+          "endPos": 55
+        }
+      ]
+    },
+    {
+      "text": "i want the home address and email addres of gestrude lancelot",
+      "intent": "SearchLeadData",
+      "entities": [
+        {
+          "entity": "dataSearched::searchaddress",
+          "startPos": 11,
+          "endPos": 22
+        },
+        {
+          "entity": "dataSearched::searchemail",
+          "startPos": 28,
+          "endPos": 39
+        },
+        {
+          "entity": "givenData::leadfullname",
+          "startPos": 44,
+          "endPos": 60
+        }
+      ]
+    },
+    {
+      "text": "i want the list of opportunities associated with proximus enco",
+      "intent": "SearchCompanyData",
+      "entities": [
+        {
+          "entity": "dataSearched::searchopportunities",
+          "startPos": 19,
+          "endPos": 31
+        },
+        {
+          "entity": "givenData::leadfullname",
+          "startPos": 49,
+          "endPos": 61
+        }
+      ]
+    },
+    {
+      "text": "i want the list of opportunities related to melissandre redwoman",
+      "intent": "SearchLeadData",
+      "entities": [
+        {
+          "entity": "dataSearched::searchopportunities",
+          "startPos": 19,
+          "endPos": 31
+        },
+        {
+          "entity": "givenData::leadfullname",
+          "startPos": 44,
+          "endPos": 63
+        }
+      ]
+    },
+    {
+      "text": "i want the number of nathan pire",
+      "intent": "SearchLeadData",
+      "entities": [
+        {
+          "entity": "dataSearched::searchphone",
+          "startPos": 11,
+          "endPos": 16
+        },
+        {
+          "entity": "givenData::leadfullname",
+          "startPos": 21,
+          "endPos": 31
+        }
+      ]
+    },
+    {
+      "text": "i want the number of opportunities associated with nathan pire",
+      "intent": "SearchLeadData",
+      "entities": [
+        {
+          "entity": "dataSearched::searchopportunities",
+          "startPos": 11,
+          "endPos": 33
+        },
+        {
+          "entity": "givenData::leadfullname",
+          "startPos": 51,
+          "endPos": 61
+        }
+      ]
+    },
+    {
+      "text": "i want the opportunities i have with hululu tagada",
+      "intent": "SearchLeadData",
+      "entities": [
+        {
+          "entity": "dataSearched::searchopportunities",
+          "startPos": 11,
+          "endPos": 23
+        },
+        {
+          "entity": "givenData::leadfullname",
+          "startPos": 37,
+          "endPos": 49
+        }
+      ]
+    },
+    {
+      "text": "i want the phone number and address of nathan pure",
+      "intent": "SearchLeadData",
+      "entities": [
+        {
+          "entity": "dataSearched::searchphone",
+          "startPos": 11,
+          "endPos": 22
+        },
+        {
+          "entity": "dataSearched::searchaddress",
+          "startPos": 28,
+          "endPos": 34
+        },
+        {
+          "entity": "givenData::leadfullname",
+          "startPos": 39,
+          "endPos": 49
+        }
+      ]
+    },
+    {
+      "text": "i want to create a new opportunity and the lead is maxime hempte",
+      "intent": "CreateOpportunity",
+      "entities": [
+        {
+          "entity": "givenData::leadfullname",
+          "startPos": 51,
+          "endPos": 63
+        }
+      ]
+    },
+    {
+      "text": "i want to create a uncertain opportunity with nathan pire for the botbot product on march 3th",
+      "intent": "CreateOpportunity",
+      "entities": [
+        {
+          "entity": "givenData::leadfullname",
+          "startPos": 46,
+          "endPos": 56
+        },
+        {
+          "entity": "givenData::productTitle",
+          "startPos": 66,
+          "endPos": 71
+        }
+      ]
+    },
+    {
+      "text": "i want to create an opportunity",
+      "intent": "CreateOpportunity",
+      "entities": []
+    },
+    {
+      "text": "i want to create an opportunity with jean claude",
+      "intent": "CreateOpportunity",
+      "entities": [
+        {
+          "entity": "givenData::leadfullname",
+          "startPos": 37,
+          "endPos": 47
+        }
+      ]
+    },
+    {
+      "text": "i want to create an opportunity with jules cesar for the botbot product on may 6th",
+      "intent": "CreateOpportunity",
+      "entities": [
+        {
+          "entity": "givenData::leadfullname",
+          "startPos": 37,
+          "endPos": 47
+        },
+        {
+          "entity": "givenData::productTitle",
+          "startPos": 57,
+          "endPos": 62
+        }
+      ]
+    },
+    {
+      "text": "i want to create an opportunity with nathan pire for the botbot product on march 3th",
+      "intent": "CreateOpportunity",
+      "entities": [
+        {
+          "entity": "givenData::leadfullname",
+          "startPos": 37,
+          "endPos": 47
+        },
+        {
+          "entity": "givenData::productTitle",
+          "startPos": 57,
+          "endPos": 62
+        }
+      ]
+    },
+    {
+      "text": "i want to have nathan pire phone number",
+      "intent": "SearchLeadData",
+      "entities": [
+        {
+          "entity": "givenData::leadfullname",
+          "startPos": 15,
+          "endPos": 25
+        },
+        {
+          "entity": "dataSearched::searchphone",
+          "startPos": 27,
+          "endPos": 38
+        }
+      ]
+    },
+    {
+      "text": "i want to make a call",
+      "intent": "MakeACall",
+      "entities": []
+    },
+    {
+      "text": "i want to register a potential opportunity with fanny lange",
+      "intent": "CreateOpportunity",
+      "entities": [
+        {
+          "entity": "givenData::leadfullname",
+          "startPos": 48,
+          "endPos": 58
+        }
+      ]
+    },
+    {
+      "text": "i want you to call martin servais",
+      "intent": "MakeACall",
+      "entities": [
+        {
+          "entity": "givenData::leadfullname",
+          "startPos": 19,
+          "endPos": 32
+        }
+      ]
+    },
+    {
+      "text": "i want you to give me my contact's email address and home address",
+      "intent": "SearchCompanyData",
+      "entities": [
+        {
+          "entity": "dataSearched::searchcontact",
+          "startPos": 25,
+          "endPos": 31
+        },
+        {
+          "entity": "dataSearched::searchemail",
+          "startPos": 35,
+          "endPos": 47
+        },
+        {
+          "entity": "dataSearched::searchaddress",
+          "startPos": 53,
+          "endPos": 64
+        }
+      ]
+    },
+    {
+      "text": "i wish to know the opportunities i've created with nathan pire",
+      "intent": "SearchLeadData",
+      "entities": [
+        {
+          "entity": "dataSearched::searchopportunities",
+          "startPos": 19,
+          "endPos": 31
+        },
+        {
+          "entity": "givenData::leadfullname",
+          "startPos": 51,
+          "endPos": 61
+        }
+      ]
+    },
+    {
+      "text": "i wish to know what company does elektra assassin work for",
+      "intent": "SearchLeadData",
+      "entities": [
+        {
+          "entity": "dataSearched::searchcompany",
+          "startPos": 20,
+          "endPos": 26
+        },
+        {
+          "entity": "givenData::leadfullname",
+          "startPos": 33,
+          "endPos": 48
+        }
+      ]
+    },
+    {
+      "text": "i would like jimmy neutron's telephone number, email and address",
+      "intent": "SearchLeadData",
+      "entities": [
+        {
+          "entity": "givenData::leadfullname",
+          "startPos": 13,
+          "endPos": 25
+        },
+        {
+          "entity": "dataSearched::searchphone",
+          "startPos": 29,
+          "endPos": 44
+        },
+        {
+          "entity": "dataSearched::searchemail",
+          "startPos": 47,
+          "endPos": 51
+        },
+        {
+          "entity": "dataSearched::searchaddress",
+          "startPos": 57,
+          "endPos": 63
+        }
+      ]
+    },
+    {
+      "text": "i would like the address and email of my contact at the mic",
+      "intent": "SearchCompanyData",
+      "entities": [
+        {
+          "entity": "dataSearched::searchaddress",
+          "startPos": 17,
+          "endPos": 23
+        },
+        {
+          "entity": "dataSearched::searchemail",
+          "startPos": 29,
+          "endPos": 33
+        },
+        {
+          "entity": "dataSearched::searchcontact",
+          "startPos": 41,
+          "endPos": 47
+        }
+      ]
+    },
+    {
+      "text": "i would like the opportunities associated with hubert kiki",
+      "intent": "SearchLeadData",
+      "entities": [
+        {
+          "entity": "dataSearched::searchopportunities",
+          "startPos": 17,
+          "endPos": 29
+        },
+        {
+          "entity": "givenData::leadfullname",
+          "startPos": 47,
+          "endPos": 57
+        }
+      ]
+    },
+    {
+      "text": "i would like to call stefanie morine",
+      "intent": "MakeACall",
+      "entities": [
+        {
+          "entity": "givenData::leadfullname",
+          "startPos": 21,
+          "endPos": 35
+        }
+      ]
+    },
+    {
+      "text": "i would like to create a new opportunity for the onceuponadreambot product",
+      "intent": "CreateOpportunity",
+      "entities": [
+        {
+          "entity": "givenData::productTitle",
+          "startPos": 49,
+          "endPos": 65
+        }
+      ]
+    },
+    {
+      "text": "i would like to have to list of opportunities with gus serola",
+      "intent": "SearchLeadData",
+      "entities": [
+        {
+          "entity": "dataSearched::searchopportunities",
+          "startPos": 32,
+          "endPos": 44
+        },
+        {
+          "entity": "givenData::leadfullname",
+          "startPos": 51,
+          "endPos": 60
+        }
+      ]
+    },
+    {
+      "text": "i would like to know my contact at the mic's address and phone number",
+      "intent": "SearchCompanyData",
+      "entities": [
+        {
+          "entity": "dataSearched::searchcontact",
+          "startPos": 24,
+          "endPos": 30
+        },
+        {
+          "entity": "dataSearched::searchaddress",
+          "startPos": 45,
+          "endPos": 51
+        },
+        {
+          "entity": "dataSearched::searchphone",
+          "startPos": 57,
+          "endPos": 68
+        }
+      ]
+    },
+    {
+      "text": "i would like you to call rémy sansami please",
+      "intent": "MakeACall",
+      "entities": [
+        {
+          "entity": "givenData::leadfullname",
+          "startPos": 25,
+          "endPos": 36
+        }
+      ]
+    },
+    {
+      "text": "i would like you to help me record a new opportunity with cassandra verboden for the botbot product the 7th of june",
+      "intent": "CreateOpportunity",
+      "entities": [
+        {
+          "entity": "givenData::leadfullname",
+          "startPos": 58,
+          "endPos": 75
+        },
+        {
+          "entity": "givenData::productTitle",
+          "startPos": 85,
+          "endPos": 90
+        }
+      ]
+    },
+    {
+      "text": "i would love for you to give me the phone number and address of guillaume lambert please",
+      "intent": "SearchLeadData",
+      "entities": [
+        {
+          "entity": "dataSearched::searchphone",
+          "startPos": 36,
+          "endPos": 47
+        },
+        {
+          "entity": "dataSearched::searchaddress",
+          "startPos": 53,
+          "endPos": 59
+        },
+        {
+          "entity": "givenData::leadfullname",
+          "startPos": 64,
+          "endPos": 80
+        }
+      ]
+    },
+    {
+      "text": "i'm having a new opportunity with tulle sébastien and the product to register is botbot",
+      "intent": "CreateOpportunity",
+      "entities": [
+        {
+          "entity": "givenData::leadfullname",
+          "startPos": 34,
+          "endPos": 48
+        },
+        {
+          "entity": "givenData::productTitle",
+          "startPos": 81,
+          "endPos": 86
+        }
+      ]
+    },
+    {
+      "text": "make a new opportunity for 9th may with galileo marc",
+      "intent": "CreateOpportunity",
+      "entities": [
+        {
+          "entity": "givenData::leadfullname",
+          "startPos": 40,
+          "endPos": 51
+        }
+      ]
+    },
+    {
+      "text": "make a new opportunity for the lead nathan pire",
+      "intent": "CreateOpportunity",
+      "entities": [
+        {
+          "entity": "givenData::leadfullname",
+          "startPos": 36,
+          "endPos": 46
+        }
+      ]
+    },
+    {
+      "text": "please call gilbert jones if it's ok with you",
+      "intent": "MakeACall",
+      "entities": [
+        {
+          "entity": "givenData::leadfullname",
+          "startPos": 12,
+          "endPos": 24
+        }
+      ]
+    },
+    {
+      "text": "please call someone for me please",
+      "intent": "MakeACall",
+      "entities": []
+    },
+    {
+      "text": "please create a new opportunity for the product botbot",
+      "intent": "CreateOpportunity",
+      "entities": [
+        {
+          "entity": "givenData::productTitle",
+          "startPos": 48,
+          "endPos": 53
+        }
+      ]
+    },
+    {
+      "text": "record a new opportunity for the tormentorbot product on june the 6th with sebastien manche",
+      "intent": "CreateOpportunity",
+      "entities": [
+        {
+          "entity": "givenData::productTitle",
+          "startPos": 33,
+          "endPos": 44
+        },
+        {
+          "entity": "givenData::leadfullname",
+          "startPos": 75,
+          "endPos": 90
+        }
+      ]
+    },
+    {
+      "text": "record an opportunity",
+      "intent": "CreateOpportunity",
+      "entities": []
+    },
+    {
+      "text": "show me the phone number and email of my contact at the mic",
+      "intent": "SearchCompanyData",
+      "entities": [
+        {
+          "entity": "dataSearched::searchphone",
+          "startPos": 12,
+          "endPos": 23
+        },
+        {
+          "entity": "dataSearched::searchemail",
+          "startPos": 29,
+          "endPos": 33
+        },
+        {
+          "entity": "dataSearched::searchcontact",
+          "startPos": 41,
+          "endPos": 47
+        }
+      ]
+    },
+    {
+      "text": "test",
+      "intent": "None",
+      "entities": []
+    },
+    {
+      "text": "what are my opportunities with yann dimitrov",
+      "intent": "SearchLeadData",
+      "entities": [
+        {
+          "entity": "dataSearched::searchopportunities",
+          "startPos": 12,
+          "endPos": 24
+        },
+        {
+          "entity": "givenData::leadfullname",
+          "startPos": 31,
+          "endPos": 43
+        }
+      ]
+    },
+    {
+      "text": "what are the opportunities i have with lilith paquerette",
+      "intent": "SearchLeadData",
+      "entities": [
+        {
+          "entity": "dataSearched::searchopportunities",
+          "startPos": 13,
+          "endPos": 25
+        },
+        {
+          "entity": "givenData::leadfullname",
+          "startPos": 39,
+          "endPos": 55
+        }
+      ]
+    },
+    {
+      "text": "what's lily james' phone number, address and email please",
+      "intent": "SearchLeadData",
+      "entities": [
+        {
+          "entity": "givenData::leadfullname",
+          "startPos": 7,
+          "endPos": 16
+        },
+        {
+          "entity": "dataSearched::searchphone",
+          "startPos": 19,
+          "endPos": 30
+        },
+        {
+          "entity": "dataSearched::searchaddress",
+          "startPos": 33,
+          "endPos": 39
+        },
+        {
+          "entity": "dataSearched::searchemail",
+          "startPos": 45,
+          "endPos": 49
+        }
+      ]
+    },
+    {
+      "text": "what's the amount of opportunities i have with jean claude",
+      "intent": "SearchLeadData",
+      "entities": [
+        {
+          "entity": "dataSearched::searchnumberopportunities",
+          "startPos": 11,
+          "endPos": 33
+        },
+        {
+          "entity": "givenData::leadfullname",
+          "startPos": 47,
+          "endPos": 57
+        }
+      ]
+    },
+    {
+      "text": "what's the company of maxence dupond?",
+      "intent": "SearchLeadData",
+      "entities": [
+        {
+          "entity": "dataSearched::searchcompany",
+          "startPos": 11,
+          "endPos": 17
+        },
+        {
+          "entity": "givenData::leadfullname",
+          "startPos": 22,
+          "endPos": 35
+        }
+      ]
+    },
+    {
+      "text": "what's the name of my contact at the mic",
+      "intent": "SearchCompanyData",
+      "entities": [
+        {
+          "entity": "dataSearched::searchcontactname",
+          "startPos": 11,
+          "endPos": 14
+        },
+        {
+          "entity": "dataSearched::searchcontact",
+          "startPos": 22,
+          "endPos": 28
+        }
+      ]
+    },
+    {
+      "text": "what's the telephone number, email and home address of my person of reference at smart richesse",
+      "intent": "SearchCompanyData",
+      "entities": [
+        {
+          "entity": "dataSearched::searchphone",
+          "startPos": 11,
+          "endPos": 26
+        },
+        {
+          "entity": "dataSearched::searchemail",
+          "startPos": 29,
+          "endPos": 33
+        },
+        {
+          "entity": "dataSearched::searchaddress",
+          "startPos": 39,
+          "endPos": 50
+        },
+        {
+          "entity": "dataSearched::searchcontact",
+          "startPos": 58,
+          "endPos": 76
+        }
+      ]
+    },
+    {
+      "text": "where does arya stark work?",
+      "intent": "SearchLeadData",
+      "entities": [
+        {
+          "entity": "dataSearched::searchcompany",
+          "startPos": 0,
+          "endPos": 4
+        },
+        {
+          "entity": "givenData::leadfullname",
+          "startPos": 11,
+          "endPos": 20
+        }
+      ]
+    },
+    {
+      "text": "where does john smith work?",
+      "intent": "SearchLeadData",
+      "entities": [
+        {
+          "entity": "dataSearched::searchcompany",
+          "startPos": 0,
+          "endPos": 4
+        },
+        {
+          "entity": "givenData::leadfullname",
+          "startPos": 11,
+          "endPos": 20
+        }
+      ]
+    },
+    {
+      "text": "where i am",
+      "intent": "None",
+      "entities": []
+    },
+    {
+      "text": "where is my mind",
+      "intent": "None",
+      "entities": []
+    },
+    {
+      "text": "which company does suzette gilbert work for and what's here email address",
+      "intent": "SearchLeadData",
+      "entities": [
+        {
+          "entity": "dataSearched::searchcompany",
+          "startPos": 6,
+          "endPos": 12
+        },
+        {
+          "entity": "givenData::leadfullname",
+          "startPos": 19,
+          "endPos": 33
+        },
+        {
+          "entity": "dataSearched::searchemail",
+          "startPos": 60,
+          "endPos": 72
+        }
+      ]
+    },
+    {
+      "text": "which is the company of john smith?",
+      "intent": "SearchLeadData",
+      "entities": [
+        {
+          "entity": "dataSearched::searchcompany",
+          "startPos": 13,
+          "endPos": 19
+        },
+        {
+          "entity": "givenData::leadfullname",
+          "startPos": 24,
+          "endPos": 33
+        }
+      ]
+    }
+  ],
+  "settings": []
+}
